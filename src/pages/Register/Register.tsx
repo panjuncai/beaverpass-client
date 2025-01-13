@@ -1,35 +1,37 @@
 import { useState, useEffect } from "react";
-import {
-  Input,
-  Radio,
-  Button,
-  Space,
-  Form,
-  Toast,
-} from "antd-mobile";
+import { Input, Button, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { registerUser } from "@/services/userService";
-import './register.css'
+import { RegisterRequest, User } from "@/types/user";
 
-interface State{
+interface State {
   email: string;
   password: string;
   confirmPassword: string;
   error: string;
   redirectToLogin: boolean;
 }
-const Register: React.FC = () => {
-  const [error, setError] = useState<string | null>(null);
 
+const styles: { innerContainer: React.CSSProperties } = {
+  innerContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100vh",
+  },
+};
+
+const Register: React.FC = () => {
   const [state, setState] = useState<State>({
     email: "",
     password: "",
     confirmPassword: "",
-    error:"",
+    error: "",
     redirectToLogin: false,
   });
 
-  const handleChange = (name:string, value:string|boolean) => {
+  const handleChange = (name: string, value: string | boolean) => {
     setState((prevState) => ({ ...prevState, [name]: value }));
   };
 
@@ -37,8 +39,37 @@ const Register: React.FC = () => {
     //setState({ redirectToLogin: true });
   };
   const register = async () => {
-    //await dispatch(registerUser(state));
-    // console.log(`result is :${result}`);
+    if (state.password !== state.confirmPassword) {
+      Toast.show({ icon: "fail", content: "Passwords do not match!" });
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
+      Toast.show({ icon: "fail", content: "Invalid email format" });
+      return;
+    }
+
+    const data: RegisterRequest = {
+      email: state.email,
+      password: state.password,
+      confirmPassword: state.confirmPassword,
+    };
+
+    try {
+      Toast.show({ icon: "loading" });
+      await registerUser(data);
+      Toast.show({ icon: "success", content: 'Register Successfully!' });
+      // setState((prevState)=>({
+      //   ...prevState,
+      //   email: "",
+      //   password: "",
+      //   confirmPassword: "",
+      //   error: "",
+      //   redirectToLogin: false,
+      // }));
+    } catch (e) {
+      Toast.show({ icon: "fail", content: e + "" });
+    }
   };
 
   const footer = (
@@ -59,14 +90,22 @@ const Register: React.FC = () => {
   );
 
   return (
-   <div className='container2'>
+    <div style={styles.innerContainer}>
       <Logo />
       <Space align="center">
         <Form layout="horizontal" footer={footer}>
           <Form.Item
             label="Email"
-            name="email" 
-            rules={[{ required: true, message: "Email is required" }]}
+            name="email"
+            rules={[
+              { required: true, message: "Email is required" },
+              { type: "string", min: 6, message: "Must has 6 characters" },
+              {
+                type: "email",
+                warningOnly: true,
+                message: "Email format incorrect",
+              },
+            ]}
           >
             <Input
               placeholder="Please input email"
@@ -88,17 +127,19 @@ const Register: React.FC = () => {
           <Form.Item
             label="Confirm Password"
             name="confirmPassword"
-            rules={[{ required: true, message: "Confirm password is required" }]}
+            rules={[
+              { required: true, message: "Confirm password is required" },
+            ]}
           >
             <Input
               placeholder="Please confirm password"
               type="password"
-              onChange={(val) => handleChange("password2", val)}
+              onChange={(val) => handleChange("confirmPassword", val)}
             />
           </Form.Item>
         </Form>
       </Space>
-    </div> 
+    </div>
   );
 };
 

@@ -1,8 +1,9 @@
-import { usePageTitle } from "./hooks/usePageTitle";
+import { SpinLoading } from "antd-mobile";
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { routes } from "@/routes";
 import { RouteConfig } from "@/types/routes";
+import CenteredLoading from "./components/CenterLoading";
 
 const App: React.FC = () => {
   const renderRoutes = (routes: RouteConfig[]) =>
@@ -11,9 +12,7 @@ const App: React.FC = () => {
         key={route.path}
         path={route.path}
         element={
-          <Suspense fallback={<div>Loading...</div>}>
-            {route.element}
-          </Suspense>
+          <Suspense fallback={<CenteredLoading />}>{route.element}</Suspense>
         }
       >
         {route.children && renderRoutes(route.children)}

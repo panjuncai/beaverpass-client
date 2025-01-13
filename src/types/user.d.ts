@@ -1,6 +1,7 @@
 export interface User {
-  id: string;
-  username: string;
+  _id:string;
+  email: string;
+  isVerified:boolean;
 }
 
 export interface RegisterRequest {

@@ -1,8 +1,14 @@
-import axios from "axios";
-import { RegisterRequest,User } from "@/types/user";
+import { RegisterRequest, User } from "@/types/user";
+import apiClient from "@/utils/api";
 
-const API_URI=import.meta.env.VITE_API_URI;
-export const registerUser=async (data:RegisterRequest):Promise<User>=>{
-    const response =await axios.post(`${API_URI}/users/register`,data);
-    return response.data;
-}
+
+export const registerUser = async (
+  data: RegisterRequest
+): Promise<User> => {
+  try {
+    const user:User = await apiClient.post(`/users/register`, data);
+    return user;
+  } catch (e) {
+    throw e;
+  }
+};
