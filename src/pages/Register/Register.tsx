@@ -1,50 +1,104 @@
-import { validateEmail, validatePassword } from "@/utils/validation";
-import { useState } from "react";
-import FormInput from "@/components/FormInput/FormInput";
+import { useState, useEffect } from "react";
+import {
+  Input,
+  Radio,
+  Button,
+  Space,
+  Form,
+  Toast,
+} from "antd-mobile";
+import Logo from "@/components/Logo/Logo";
 import { registerUser } from "@/services/userService";
+import './register.css'
 
+interface State{
+  email: string;
+  password: string;
+  confirmPassword: string;
+  error: string;
+  redirectToLogin: boolean;
+}
 const Register: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const handleRegister = async () => {
-    if (!validateEmail(email)) {
-      setError("Invalid email");
-      return;
-    }
-    if (!validatePassword(password)) {
-      setError("password must be atmost 20 characters long");
-      return;
-    }
-    setError(null);
-    try {
-      const response = await registerUser({ email, password, confirmPassword });
-      console.log("Registratiion successful:", response);
-    } catch (e) {
-      setError("Failed to register user");
-    }
+
+  const [state, setState] = useState<State>({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    error:"",
+    redirectToLogin: false,
+  });
+
+  const handleChange = (name:string, value:string|boolean) => {
+    setState((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const toLogin = () => {
+    //setState({ redirectToLogin: true });
+  };
+  const register = async () => {
+    //await dispatch(registerUser(state));
+    // console.log(`result is :${result}`);
+  };
+
+  const footer = (
+    <Space direction="vertical" block>
+      <Button
+        block
+        type="submit"
+        color="primary"
+        size="large"
+        onClick={register}
+      >
+        Sign Up
+      </Button>
+      <Button block color="default" size="large" onClick={toLogin}>
+        Sign In
+      </Button>
+    </Space>
+  );
+
   return (
-    <div>
-      <h1>Register</h1>
-      <FormInput label="Email" type="email" value={email} onChange={setEmail} />
-      <FormInput
-        label="Password"
-        type="password"
-        value={password}
-        onChange={setPassword}
-      />
-      <FormInput
-        label="confirmPassword"
-        type="password"
-        value={confirmPassword}
-        onChange={setConfirmPassword}
-      />
-      {error && <p>{error}</p>}
-      <button onClick={handleRegister}>Register</button>
-    </div>
+   <div className='container2'>
+      <Logo />
+      <Space align="center">
+        <Form layout="horizontal" footer={footer}>
+          <Form.Item
+            label="Email"
+            name="email" 
+            rules={[{ required: true, message: "Email is required" }]}
+          >
+            <Input
+              placeholder="Please input email"
+              autoComplete="false"
+              onChange={(val) => handleChange("email", val)}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: "Password is required" }]}
+          >
+            <Input
+              placeholder="Please input password"
+              type="password"
+              onChange={(val) => handleChange("password", val)}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Confirm Password"
+            name="confirmPassword"
+            rules={[{ required: true, message: "Confirm password is required" }]}
+          >
+            <Input
+              placeholder="Please confirm password"
+              type="password"
+              onChange={(val) => handleChange("password2", val)}
+            />
+          </Form.Item>
+        </Form>
+      </Space>
+    </div> 
   );
 };
 

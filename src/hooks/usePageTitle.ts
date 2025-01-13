@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom"
 
 
-export const usePageTitle=()=>{
+export const usePageTitle=():void=>{
     const location=useLocation();
     useEffect(()=>{
         const match=routes.find((route)=>new RegExp(`^${route.path}$`).test(location.pathname))

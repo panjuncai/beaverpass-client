@@ -5,7 +5,6 @@ import { routes } from "@/routes";
 import { RouteConfig } from "@/types/routes";
 
 const App: React.FC = () => {
-  // usePageTitle()
   const renderRoutes = (routes: RouteConfig[]) =>
     routes.map((route) => (
       <Route

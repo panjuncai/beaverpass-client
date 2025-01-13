@@ -10,11 +10,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/x": "^1.0.4",
     "@reduxjs/toolkit": "^2.5.0",
+    "antd": "^5.23.0",
+    "antd-mobile": "^5.38.1",
+    "antd-mobile-icons": "^0.3.0",
     "axios": "^1.7.9",
+    "dayjs": "^1.11.13",
+    "js-cookie": "^3.0.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.1.1"
+    "react-router-dom": "^7.1.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
