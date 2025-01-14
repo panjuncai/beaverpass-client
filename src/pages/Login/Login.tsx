@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input, Button, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
-import { registerUser } from "@/services/userService";
-import { RegisterRequest } from "@/types/user";
+import { loginUser } from "@/services/userService";
+import { LoginRequest } from "@/types/user";
 import { useNavigate } from "react-router-dom";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface State {
   email: string;
   password: string;
-  confirmPassword: string;
   error: string;
 }
 
@@ -23,12 +22,11 @@ const styles: { innerContainer: React.CSSProperties } = {
   },
 };
 
-const Register: React.FC = () => {
+const Login: React.FC = () => {
   usePageTitle()
   const [state, setState] = useState<State>({
     email: "",
     password: "",
-    confirmPassword: "",
     error: "",
   });
 
@@ -38,40 +36,31 @@ const Register: React.FC = () => {
     setState((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleLogin= () => {
-    navigate("/login",{replace:true});
-  };
-  const handleRegister = async () => {
-    if (state.password !== state.confirmPassword) {
-      Toast.show({ icon: "fail", content: "Passwords do not match!" });
-      return;
-    }
-
+  const handleLogin = async () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
       Toast.show({ icon: "fail", content: "Invalid email format" });
       return;
     }
-
-    const data: RegisterRequest = {
+    const data: LoginRequest = {
       email: state.email,
       password: state.password,
-      confirmPassword: state.confirmPassword,
     };
-
     try {
       Toast.show({ icon: "loading" });
-      await registerUser(data);
-      Toast.show({ icon: "success"});
+      await loginUser(data);
+      Toast.show({ icon: "success" });
       setState({
         email: "",
         password: "",
-        confirmPassword: "",
         error: "",
       });
-      navigate('/')
+      navigate("/");
     } catch (e) {
       Toast.show({ icon: "fail", content: e + "" });
     }
+  };
+  const handleRegister = async () => {
+    navigate("/register", { replace: true });
   };
 
   const footer = (
@@ -81,12 +70,12 @@ const Register: React.FC = () => {
         type="submit"
         color="primary"
         size="large"
-        onClick={handleRegister}
+        onClick={handleLogin}
       >
-        Sign Up
-      </Button>
-      <Button block color="default" size="large" onClick={handleLogin}>
         Sign In
+      </Button>
+      <Button block color="default" size="large" onClick={handleRegister}>
+        Sign Up
       </Button>
     </Space>
   );
@@ -126,23 +115,10 @@ const Register: React.FC = () => {
               onChange={(val) => handleChange("password", val)}
             />
           </Form.Item>
-          <Form.Item
-            label="Confirm Password"
-            name="confirmPassword"
-            rules={[
-              { required: true, message: "Confirm password is required" },
-            ]}
-          >
-            <Input
-              placeholder="Please confirm password"
-              type="password"
-              onChange={(val) => handleChange("confirmPassword", val)}
-            />
-          </Form.Item>
         </Form>
       </Space>
     </div>
   );
 };
 
-export default Register;
+export default Login;

@@ -5,8 +5,10 @@ import React from "react";
 
 // 页面组件懒加载
 const Register=lazy(()=>import("@/pages/Register/Register"))
+const Login=lazy(()=>import("@/pages/Login/Login"))
 const NotFound = lazy(() => import("@/components/NotFound/NotFound"));
 const Order = lazy(() => import("@/pages/Order/Order"));
+const Main=lazy(()=>import("@/pages/Main/Main"))
 
 export const routes: RouteConfig[] = [
   {
@@ -18,9 +20,19 @@ export const routes: RouteConfig[] = [
     meta: { requiresAuth: true, title: "Order" },
   },
   {
+    path: "/",
+    element: React.createElement(Main),
+    meta: { requiresAuth: false, title: "Main" },
+  },
+  {
     path: "/register",
     element: React.createElement(Register),
     meta: { requiresAuth: false, title: "register" },
+  },
+  {
+    path: "/login",
+    element: React.createElement(Login),
+    meta: { requiresAuth: false, title: "login" },
   },
   {
     path: "*",
