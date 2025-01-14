@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Input, Button, Space, Form, Toast } from "antd-mobile";
+import { Input, Button, Space, Form, Toast, NavBar } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { registerUser } from "@/services/userService";
 import { RegisterRequest } from "@/types/user";
@@ -24,7 +24,7 @@ const styles: { innerContainer: React.CSSProperties } = {
 };
 
 const Register: React.FC = () => {
-  usePageTitle()
+  usePageTitle();
   const [state, setState] = useState<State>({
     email: "",
     password: "",
@@ -38,8 +38,12 @@ const Register: React.FC = () => {
     setState((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleLogin= () => {
-    navigate("/login",{replace:true});
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
+  const handleBack = () => {
+    navigate(-1);
   };
   const handleRegister = async () => {
     if (state.password !== state.confirmPassword) {
@@ -61,14 +65,18 @@ const Register: React.FC = () => {
     try {
       Toast.show({ icon: "loading" });
       await registerUser(data);
-      Toast.show({ icon: "success"});
+      Toast.show({
+        icon: "success",
+        content: "Please verify your email",
+        duration: 2000,
+      });
       setState({
         email: "",
         password: "",
         confirmPassword: "",
         error: "",
       });
-      navigate('/')
+      navigate("/");
     } catch (e) {
       Toast.show({ icon: "fail", content: e + "" });
     }
@@ -92,56 +100,61 @@ const Register: React.FC = () => {
   );
 
   return (
-    <div style={styles.innerContainer}>
-      <Logo />
-      <Space align="center">
-        <Form layout="horizontal" footer={footer}>
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Email is required" },
-              { type: "string", min: 6, message: "Must has 6 characters" },
-              {
-                type: "email",
-                warningOnly: true,
-                message: "Email format incorrect",
-              },
-            ]}
-          >
-            <Input
-              placeholder="Please input email"
-              autoComplete="false"
-              onChange={(val) => handleChange("email", val)}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Password is required" }]}
-          >
-            <Input
-              placeholder="Please input password"
-              type="password"
-              onChange={(val) => handleChange("password", val)}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Confirm Password"
-            name="confirmPassword"
-            rules={[
-              { required: true, message: "Confirm password is required" },
-            ]}
-          >
-            <Input
-              placeholder="Please confirm password"
-              type="password"
-              onChange={(val) => handleChange("confirmPassword", val)}
-            />
-          </Form.Item>
-        </Form>
-      </Space>
-    </div>
+    <>
+      <NavBar back="" backIcon={true} onBack={handleBack}>
+        Register
+      </NavBar>
+      <div style={styles.innerContainer}>
+        <Logo />
+        <Space align="center" className="body">
+          <Form layout="horizontal" footer={footer}>
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                { required: true, message: "Email is required" },
+                { type: "string", min: 6, message: "Must has 6 characters" },
+                {
+                  type: "email",
+                  warningOnly: true,
+                  message: "Email format incorrect",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Please input email"
+                autoComplete="false"
+                onChange={(val) => handleChange("email", val)}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[{ required: true, message: "Password is required" }]}
+            >
+              <Input
+                placeholder="Please input password"
+                type="password"
+                onChange={(val) => handleChange("password", val)}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Confirm Password"
+              name="confirmPassword"
+              rules={[
+                { required: true, message: "Confirm password is required" },
+              ]}
+            >
+              <Input
+                placeholder="Please confirm password"
+                type="password"
+                onChange={(val) => handleChange("confirmPassword", val)}
+              />
+            </Form.Item>
+          </Form>
+        </Space>
+      </div>
+    </>
   );
 };
 

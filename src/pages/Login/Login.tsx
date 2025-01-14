@@ -60,7 +60,7 @@ const Login: React.FC = () => {
     }
   };
   const handleRegister = async () => {
-    navigate("/register", { replace: true });
+    navigate("/register");
   };
 
   const footer = (
