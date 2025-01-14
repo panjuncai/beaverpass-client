@@ -78,7 +78,7 @@ const Register: React.FC = () => {
       });
       navigate("/");
     } catch (e) {
-      Toast.show({ icon: "fail", content: e + "" });
+      Toast.show({ icon: "fail", content: e + "" ,duration:4000});
     }
   };
 

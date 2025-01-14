@@ -23,7 +23,7 @@ const styles: { innerContainer: React.CSSProperties } = {
 };
 
 const Login: React.FC = () => {
-  usePageTitle()
+  usePageTitle();
   const [state, setState] = useState<State>({
     email: "",
     password: "",
