@@ -3,8 +3,7 @@ import { Input, Button, Space, Form, Toast, NavBar } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { registerUser } from "@/services/userService";
 import { RegisterRequest } from "@/types/user";
-import { replace, useNavigate } from "react-router-dom";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import {useNavigate } from "react-router-dom";
 
 interface State {
   email: string;
@@ -24,7 +23,6 @@ const styles: { innerContainer: React.CSSProperties } = {
 };
 
 const Register: React.FC = () => {
-  usePageTitle();
   const [state, setState] = useState<State>({
     email: "",
     password: "",
@@ -104,8 +102,9 @@ const Register: React.FC = () => {
       <NavBar back="" backIcon={true} onBack={handleBack}>
         Register
       </NavBar>
+      <div className="body">
       <div style={styles.innerContainer}>
-        <Space align="center" className="body" direction="vertical">
+        <Space align="center" direction="vertical">
           <Logo height={80} width={300}/>
           <Form layout="horizontal" footer={footer}>
             <Form.Item
@@ -153,7 +152,7 @@ const Register: React.FC = () => {
             </Form.Item>
           </Form>
         </Space>
-      </div>
+      </div></div>
     </>
   );
 };

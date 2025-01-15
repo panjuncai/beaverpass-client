@@ -4,7 +4,6 @@ import Logo from "@/components/Logo/Logo";
 import { loginUser } from "@/services/userService";
 import { LoginRequest } from "@/types/user";
 import { useNavigate } from "react-router-dom";
-import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface State {
   email: string;
@@ -23,7 +22,6 @@ const styles: { innerContainer: React.CSSProperties } = {
 };
 
 const Login: React.FC = () => {
-  usePageTitle();
   const [state, setState] = useState<State>({
     email: "",
     password: "",
