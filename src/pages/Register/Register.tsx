@@ -106,7 +106,7 @@ const Register: React.FC = () => {
       </NavBar>
       <div style={styles.innerContainer}>
         <Space align="center" className="body" direction="vertical">
-          <Logo />
+          <Logo height={80} width={300}/>
           <Form layout="horizontal" footer={footer}>
             <Form.Item
               label="Email"

@@ -82,7 +82,7 @@ const Login: React.FC = () => {
 
   return (
     <div style={styles.innerContainer}>
-      <Logo />
+      <Logo height={80} width={300}/>
       <Space align="center">
         <Form layout="horizontal" footer={footer}>
           <Form.Item

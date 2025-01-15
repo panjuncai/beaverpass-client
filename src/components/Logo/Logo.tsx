@@ -1,9 +1,9 @@
 import logo from './logo.jpg'
 
-const Logo:React.FC=()=>{
+const Logo:React.FC<{height:number,width:number}>=({height,width})=>{
     return(
         <div>
-            <img src={logo} alt="Logo" />
+            <img src={logo} height={height} width={width} alt="Logo" />
         </div>
     )
 }
