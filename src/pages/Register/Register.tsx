@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input, Button, Space, Form, Toast, NavBar } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { registerUser } from "@/services/userService";
 import { RegisterRequest } from "@/types/user";
-import { useNavigate } from "react-router-dom";
+import { replace, useNavigate } from "react-router-dom";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface State {
@@ -76,7 +76,7 @@ const Register: React.FC = () => {
         confirmPassword: "",
         error: "",
       });
-      navigate("/");
+      navigate("/login",{replace:true});
     } catch (e) {
       Toast.show({ icon: "fail", content: e + "" ,duration:4000});
     }
@@ -105,8 +105,8 @@ const Register: React.FC = () => {
         Register
       </NavBar>
       <div style={styles.innerContainer}>
-        <Logo />
-        <Space align="center" className="body">
+        <Space align="center" className="body" direction="vertical">
+          <Logo />
           <Form layout="horizontal" footer={footer}>
             <Form.Item
               label="Email"

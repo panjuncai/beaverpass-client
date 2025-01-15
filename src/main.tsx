@@ -6,7 +6,5 @@ import '@/assets/styles/main.css'
 Toast.config({ duration: 1000 });
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
     <App />
-  </StrictMode>,
 )

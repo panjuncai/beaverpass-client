@@ -1,6 +1,5 @@
 import apiClient from "@/utils/api";
 import { Toast } from "antd-mobile";
-import { log } from "console";
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 
@@ -9,12 +8,10 @@ const VerifyEmail: React.FC = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  // 获取 token 参数
+  // get token
   const token = searchParams.get("token");
 
   useEffect(() => {
-    console.log(`Come verify page`);
-    
     const verifyEmail = async () => {
       if (!token) {
         setMessage("Invalid verification link.");
@@ -22,24 +19,26 @@ const VerifyEmail: React.FC = () => {
       }
 
       try {
-        await apiClient.get(
-          `/users/verify?token=${token}`
-        );
+        await apiClient.get(`/users/verify?token=${token}`);
         Toast.show({
           icon: "success",
-          content: "Verified Successfully!",
-          duration: 3000,
+          content: "Verify Successfully!",
+          duration: 2000,
         });
-        setMessage("Verified Successfully!")
-        navigate("/login");
+        setMessage("Verified Successfully!");
+        const timerId = setTimeout(() => {
+          navigate("/login", { replace: true });
+        }, 2000);
+
+        return () => clearTimeout(timerId);
       } catch (e) {
         Toast.show({ icon: "fail", content: e + "" });
-        setMessage(e+"")
+        setMessage(e + "");
       }
     };
 
     verifyEmail();
-  }, [token, navigate]);
+  }, []);
 
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
