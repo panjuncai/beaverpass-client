@@ -18,3 +18,12 @@ export const loginUser = async (data: LoginRequest): Promise<User> => {
     throw e;
   }
 };
+
+export const getUser = async (): Promise<User> => {
+  try {
+    const user: User = await apiClient.get(`/users/user`);
+    return user;
+  } catch (e) {
+    throw e;
+  }
+};
