@@ -1,5 +1,10 @@
+import { useState } from 'react';
 
-const useAuth=():boolean=>{
-    return true;
-}
-export default useAuth;
+export const useAuth = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    const login = () => setIsAuthenticated(true);
+    const logout = () => setIsAuthenticated(false);
+
+    return { isAuthenticated, login, logout };
+};

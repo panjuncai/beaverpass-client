@@ -4,6 +4,7 @@ import Logo from "@/components/Logo/Logo";
 import { loginUser } from "@/services/userService";
 import { LoginRequest } from "@/types/user";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 interface State {
   email: string;
@@ -29,6 +30,7 @@ const Login: React.FC = () => {
   });
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (name: string, value: string | boolean) => {
     setState((prevState) => ({ ...prevState, [name]: value }));
@@ -45,7 +47,10 @@ const Login: React.FC = () => {
     };
     try {
       Toast.show({ icon: "loading" });
+      // server login auth
       await loginUser(data);
+      // local login auth
+      login();
       Toast.show({ icon: "success" });
       setState({
         email: "",
@@ -80,7 +85,7 @@ const Login: React.FC = () => {
 
   return (
     <div style={styles.innerContainer}>
-      <Logo height={80} width={300}/>
+      <Logo height={80} width={300} />
       <Space align="center">
         <Form layout="horizontal" footer={footer}>
           <Form.Item

@@ -49,10 +49,7 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: "order",
-        element: React.createElement(PrivateRoute, {
-          element: React.createElement(Order),
-          isAuthenticated: true,
-        }),
+        element: React.createElement(Order),
         meta: { requiresAuth: true, title: "Order" },
       },
     ],

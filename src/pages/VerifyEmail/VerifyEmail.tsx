@@ -1,4 +1,4 @@
-import apiClient from "@/utils/api";
+import apiClient from "@/api/api";
 import { Toast } from "antd-mobile";
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
