@@ -3,6 +3,7 @@ const API_URI=import.meta.env.VITE_API_URI;
 const apiClient = axios.create({
   baseURL: API_URI, // 替换为实际后端 URL
   timeout: 5000, // 请求超时时间
+  withCredentials:true
 });
 
 // 请求拦截器
