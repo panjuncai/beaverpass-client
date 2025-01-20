@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Input, Button, Space, Form, Toast } from "antd-mobile";
+import { Input, Button, Space, Form, Toast, NavBar } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { loginUser } from "@/services/userService";
 import { LoginRequest } from "@/types/user";
@@ -62,6 +62,9 @@ const Login: React.FC = () => {
       Toast.show({ icon: "fail", content: e + "" });
     }
   };
+  const handleBack = () => {
+    navigate(-1);
+  };
   const handleRegister = async () => {
     navigate("/register");
   };
@@ -84,43 +87,50 @@ const Login: React.FC = () => {
   );
 
   return (
-    <div style={styles.innerContainer}>
-      <Logo height={80} width={300} />
-      <Space align="center">
-        <Form layout="horizontal" footer={footer}>
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Email is required" },
-              { type: "string", min: 6, message: "Must has 6 characters" },
-              {
-                type: "email",
-                warningOnly: true,
-                message: "Email format incorrect",
-              },
-            ]}
-          >
-            <Input
-              placeholder="Please input email"
-              autoComplete="false"
-              onChange={(val) => handleChange("email", val)}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Password is required" }]}
-          >
-            <Input
-              placeholder="Please input password"
-              type="password"
-              onChange={(val) => handleChange("password", val)}
-            />
-          </Form.Item>
-        </Form>
-      </Space>
-    </div>
+    <>
+      {/* <NavBar back="" backIcon={true} onBack={handleBack}>
+        Login
+      </NavBar>
+      <div className="body"> */}
+        <div style={styles.innerContainer}>
+          <Logo height={80} width={300} />
+          <Space align="center">
+            <Form layout="horizontal" footer={footer}>
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  { required: true, message: "Email is required" },
+                  { type: "string", min: 6, message: "Must has 6 characters" },
+                  {
+                    type: "email",
+                    warningOnly: true,
+                    message: "Email format incorrect",
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Please input email"
+                  autoComplete="false"
+                  onChange={(val) => handleChange("email", val)}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Password"
+                name="password"
+                rules={[{ required: true, message: "Password is required" }]}
+              >
+                <Input
+                  placeholder="Please input password"
+                  type="password"
+                  onChange={(val) => handleChange("password", val)}
+                />
+              </Form.Item>
+            </Form>
+          </Space>
+        </div>
+      {/* </div> */}
+    </>
   );
 };
 

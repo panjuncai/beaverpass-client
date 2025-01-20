@@ -99,10 +99,10 @@ const Register: React.FC = () => {
 
   return (
     <>
-      <NavBar back="" backIcon={true} onBack={handleBack}>
+      {/* <NavBar back="" backIcon={true} onBack={handleBack}>
         Register
       </NavBar>
-      <div className="body">
+      <div className="body"> */}
       <div style={styles.innerContainer}>
         <Space align="center" direction="vertical">
           <Logo height={80} width={300}/>
@@ -152,7 +152,8 @@ const Register: React.FC = () => {
             </Form.Item>
           </Form>
         </Space>
-      </div></div>
+      </div>
+      {/* </div> */}
     </>
   );
 };
