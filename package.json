@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "rm -f dist.tar.gz && tsc -b && vite build && tar -czvf dist.tar.gz dist&& rm -fr dist",
     "lint": "eslint .",
     "preview": "vite preview"
   },

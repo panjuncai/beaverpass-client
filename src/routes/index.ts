@@ -1,6 +1,5 @@
 import { lazy } from "react";
 import { RouteConfig } from "@/types/routes";
-import { PrivateRoute } from "@/components/PrivateRoute";
 import { Navigate } from "react-router-dom";
 import React from "react";
 

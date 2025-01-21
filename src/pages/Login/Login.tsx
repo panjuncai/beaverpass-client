@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Input, Button, Space, Form, Toast, NavBar } from "antd-mobile";
+import { Input, Button, Space, Form, Toast} from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { loginUser } from "@/services/userService";
 import { LoginRequest } from "@/types/user";
@@ -62,9 +62,9 @@ const Login: React.FC = () => {
       Toast.show({ icon: "fail", content: e + "" });
     }
   };
-  const handleBack = () => {
-    navigate(-1);
-  };
+  // const handleBack = () => {
+  //   navigate(-1);
+  // };
   const handleRegister = async () => {
     navigate("/register");
   };

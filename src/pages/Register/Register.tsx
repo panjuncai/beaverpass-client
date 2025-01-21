@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Input, Button, Space, Form, Toast, NavBar } from "antd-mobile";
+import { Input, Button, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { registerUser } from "@/services/userService";
 import { RegisterRequest } from "@/types/user";
@@ -40,9 +40,9 @@ const Register: React.FC = () => {
     navigate("/login");
   };
 
-  const handleBack = () => {
-    navigate(-1);
-  };
+  // const handleBack = () => {
+  //   navigate(-1);
+  // };
   const handleRegister = async () => {
     if (state.password !== state.confirmPassword) {
       Toast.show({ icon: "fail", content: "Passwords do not match!" });
