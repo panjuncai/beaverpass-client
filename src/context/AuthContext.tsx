@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { loginUser, getUser } from "@/services/userService";
+import { loginUser, logoutUser, getUser } from "@/services/userService";
 import { LoginRequest, User } from "@/types/user";
 
 interface AuthContextType {
@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const handleLogout = async () => {
     try {
       setLoading(true);
-      // await logoutRequest();
+      await logoutUser();
     } catch (e) {
       console.error("Logout error:", e);
       throw e;

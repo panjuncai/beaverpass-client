@@ -5,7 +5,7 @@ import { useNavigate} from "react-router-dom";
 
 const Test:React.FC=()=>{
     const navigate=useNavigate();
-    const {user}=useAuth()
+    const {user,logout}=useAuth()
     const handleUser=async ()=>{
         await getUser();
     }
@@ -13,7 +13,7 @@ const Test:React.FC=()=>{
         <>
         <Button onClick={()=>navigate('/register')}>Sign up</Button> 
         <Button onClick={()=>navigate('/login')}>Sign in</Button> 
-        <Button onClick={()=>navigate('/logout')}>Sign out</Button> 
+        <Button onClick={()=>logout()}>Sign out</Button> 
         <Button onClick={handleUser}>Get User</Button> 
         <div style={{display:'flex',gap:'5px',flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
             <h3>User Info</h3>

@@ -19,6 +19,14 @@ export const loginUser = async (data: LoginRequest): Promise<User> => {
   }
 };
 
+export const logoutUser = async (): Promise<void> => {
+  try {
+    await apiClient.post(`/users/logout`);
+  } catch (e) {
+    throw e;
+  }
+};
+
 export const getUser = async (): Promise<User> => {
   try {
     const user: User = await apiClient.get(`/users/user`);
