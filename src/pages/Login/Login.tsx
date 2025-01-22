@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Input, Button, Space, Form, Toast} from "antd-mobile";
+import { Input, Button, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
-import { loginUser } from "@/services/userService";
 import { LoginRequest } from "@/types/user";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 interface State {
@@ -23,6 +22,7 @@ const styles: { innerContainer: React.CSSProperties } = {
 };
 
 const Login: React.FC = () => {
+  const { login, isAuthenticated } = useAuth();
   const [state, setState] = useState<State>({
     email: "",
     password: "",
@@ -30,7 +30,6 @@ const Login: React.FC = () => {
   });
 
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleChange = (name: string, value: string | boolean) => {
     setState((prevState) => ({ ...prevState, [name]: value }));
@@ -47,17 +46,13 @@ const Login: React.FC = () => {
     };
     try {
       Toast.show({ icon: "loading" });
-      // server login auth
-      await loginUser(data);
-      // local login auth
-      login();
+      login(data);
       Toast.show({ icon: "success" });
       setState({
         email: "",
         password: "",
         error: "",
       });
-      navigate("/");
     } catch (e) {
       Toast.show({ icon: "fail", content: e + "" });
     }
@@ -86,49 +81,56 @@ const Login: React.FC = () => {
     </Space>
   );
 
+  // if (loading) {
+  //   return <div>加载中...</div>;
+  // }
+  if (isAuthenticated) {
+    return <Navigate to="/" />
+  }
+
   return (
     <>
       {/* <NavBar back="" backIcon={true} onBack={handleBack}>
         Login
       </NavBar>
       <div className="body"> */}
-        <div style={styles.innerContainer}>
-          <Logo height={80} width={300} />
-          <Space align="center">
-            <Form layout="horizontal" footer={footer}>
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  { required: true, message: "Email is required" },
-                  { type: "string", min: 6, message: "Must has 6 characters" },
-                  {
-                    type: "email",
-                    warningOnly: true,
-                    message: "Email format incorrect",
-                  },
-                ]}
-              >
-                <Input
-                  placeholder="Please input email"
-                  autoComplete="false"
-                  onChange={(val) => handleChange("email", val)}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[{ required: true, message: "Password is required" }]}
-              >
-                <Input
-                  placeholder="Please input password"
-                  type="password"
-                  onChange={(val) => handleChange("password", val)}
-                />
-              </Form.Item>
-            </Form>
-          </Space>
-        </div>
+      <div style={styles.innerContainer}>
+        <Logo height={80} width={300} />
+        <Space align="center">
+          <Form layout="horizontal" footer={footer}>
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                { required: true, message: "Email is required" },
+                { type: "string", min: 6, message: "Must has 6 characters" },
+                {
+                  type: "email",
+                  warningOnly: true,
+                  message: "Email format incorrect",
+                },
+              ]}
+            >
+              <Input
+                placeholder="Please input email"
+                autoComplete="false"
+                onChange={(val) => handleChange("email", val)}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[{ required: true, message: "Password is required" }]}
+            >
+              <Input
+                placeholder="Please input password"
+                type="password"
+                onChange={(val) => handleChange("password", val)}
+              />
+            </Form.Item>
+          </Form>
+        </Space>
+      </div>
       {/* </div> */}
     </>
   );

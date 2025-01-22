@@ -9,18 +9,18 @@ const VerifyEmail = lazy(() => import("@/pages/VerifyEmail/VerifyEmail"));
 const Login = lazy(() => import("@/pages/Login/Login"));
 const NotFound = lazy(() => import("@/components/NotFound/NotFound"));
 const Order = lazy(() => import("@/pages/Order/Order"));
-const Search = lazy(() => import("@/pages/Search/Search"));
+const Test= lazy(() => import("@/pages/Test/Test"));
 const AppLayout = lazy(() => import("@/layouts/AppLayout"));
 
 export const routes: RouteConfig[] = [
   {
     path: "/",
-    element: React.createElement(Navigate,{to:"/search",replace:true})
+    element: React.createElement(Navigate,{to:"/test",replace:true})
   },
   {
-    path: "/search",
-    element: React.createElement(Search),
-    meta: { requiresAuth: false, title: "Search" },
+    path: "/test",
+    element: React.createElement(Test),
+    meta: { requiresAuth: false, title: "Test" },
   },
   {
     path: "/register",

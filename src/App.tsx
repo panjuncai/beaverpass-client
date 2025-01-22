@@ -4,6 +4,7 @@ import { routes } from "@/routes";
 import { RouteConfig } from "@/types/routes";
 import CenteredLoading from "@/components/CenterLoading";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthProvider } from "@/context/AuthContext";
 
 const App: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -33,9 +34,11 @@ const App: React.FC = () => {
     });
 
   return (
-    <BrowserRouter>
-      <Routes>{renderRoutes(routes)}</Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>{renderRoutes(routes)}</Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 };
 
