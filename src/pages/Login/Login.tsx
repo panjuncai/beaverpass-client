@@ -46,15 +46,15 @@ const Login: React.FC = () => {
     };
     try {
       Toast.show({ icon: "loading" });
-      login(data);
+      await login(data);
       Toast.show({ icon: "success" });
-      setState({
-        email: "",
-        password: "",
-        error: "",
-      });
+      // setState({
+      //   email: "",
+      //   password: "",
+      //   error: "",
+      // });
     } catch (e) {
-      Toast.show({ icon: "fail", content: e + "" });
+      console.log(`Login failed:${e}`)
     }
   };
   // const handleBack = () => {

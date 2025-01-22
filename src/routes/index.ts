@@ -15,7 +15,8 @@ const AppLayout = lazy(() => import("@/layouts/AppLayout"));
 export const routes: RouteConfig[] = [
   {
     path: "/",
-    element: React.createElement(Navigate,{to:"/test",replace:true})
+    element: React.createElement(Navigate,{to:"/test",replace:true}),
+    meta: { requiresAuth: false, title: "Home" },
   },
   {
     path: "/test",

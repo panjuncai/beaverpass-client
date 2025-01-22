@@ -1,3 +1,4 @@
+import { Toast } from 'antd-mobile';
 import axios from 'axios';
 const API_URI=import.meta.env.VITE_API_URI;
 const apiClient = axios.create({
@@ -22,12 +23,14 @@ apiClient.interceptors.response.use(
   (response) => {
     const { code, msg, data } = response.data;
     if (code !== 0) {
+      Toast.show({ icon: 'fail', content: msg });
       // 手动抛出业务错误
       return Promise.reject(new Error(msg || 'Unknown Error'));
     }
     return data;
   },
   (error) => {
+    Toast.show({ icon: 'fail', content: error.response?.data?.msg || 'Network Error' });
     // 捕获 HTTP 错误
     return Promise.reject(error.response?.data?.msg || 'Network Error');
   }

@@ -1,6 +1,9 @@
 import React, { createContext, useState, useEffect } from "react";
 import { loginUser, logoutUser, getUser } from "@/services/userService";
 import { LoginRequest, User } from "@/types/user";
+import { useLocation } from "react-router-dom";
+import { routes } from "@/routes";
+import { RouteConfig } from "@/types/routes";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -30,10 +33,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+
+  const extractPublicPaths = (routes: RouteConfig[]): string[] => {
+    const result: string[] = [];
+
+    const traverse = (routes: RouteConfig[],parentPath="") => {
+      for (const route of routes) {
+        const fullPath = `${parentPath}${route.path ? route.path : ""}`.replace(/\/+/g, "/");
+        // 如果 meta.requiresAuth === false，添加 path
+        if (route.meta?.requiresAuth === false && route.path) {
+          result.push(fullPath);
+        }
+
+        // 如果有子路由，递归处理
+        if (route.children && route.children.length > 0) {
+          traverse(route.children,`${fullPath}/`);
+        }
+      }
+    };
+
+    traverse(routes);
+    return result;
+  };
 
   useEffect(() => {
     const initAuth = async () => {
       try {
+        const publicRoutes = extractPublicPaths(routes);
+        if (publicRoutes.includes(location.pathname)) {
+          setLoading(false);
+          return;
+        }
         const user: User = await getUser();
         setUser(user);
         setIsAuthenticated(true);
@@ -48,21 +79,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initAuth();
   }, []);
 
-  const handleLogin = async (data: LoginRequest) => {
+  const handleLogin = async (data: LoginRequest): Promise<void> => {
     try {
       setLoading(true);
       const user = await loginUser(data);
       setUser(user);
       setIsAuthenticated(true);
     } catch (e) {
-      console.error("Login error:", e);
       throw e;
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async (): Promise<void> => {
     try {
       setLoading(true);
       await logoutUser();
