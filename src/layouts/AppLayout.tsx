@@ -5,6 +5,7 @@ import {
   MessageOutline,
   ReceivePaymentOutline,
   SearchOutline,
+  SmileOutline,
 } from "antd-mobile-icons";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
@@ -20,6 +21,7 @@ const Bottom = () => {
   };
 
   const tabs = [
+    { key: "/test", title: <Title msg="Test" />, icon: <SmileOutline /> },
     { key: "/search", title: <Title msg="Search" />, icon: <SearchOutline /> },
     {
       key: "/messages",

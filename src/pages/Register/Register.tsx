@@ -68,15 +68,8 @@ const Register: React.FC = () => {
         content: "Please verify your email",
         duration: 2000,
       });
-      setState({
-        email: "",
-        password: "",
-        confirmPassword: "",
-        error: "",
-      });
       navigate("/login",{replace:true});
     } catch (e) {
-      Toast.show({ icon: "fail", content: e + "" ,duration:4000});
     }
   };
 

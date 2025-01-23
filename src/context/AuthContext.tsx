@@ -4,9 +4,11 @@ import { LoginRequest, User } from "@/types/user";
 import { useLocation } from "react-router-dom";
 import { routes } from "@/routes";
 import { RouteConfig } from "@/types/routes";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  setRedirectPath: (path: string) => void;
   user: User | null;
   loading: boolean;
   login: (data: LoginRequest) => Promise<void>;
@@ -15,6 +17,7 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
+  setRedirectPath: () => {},
   user: null,
   loading: false,
   login: async () => {},
@@ -31,16 +34,21 @@ export const AuthContext = createContext<AuthContextType>({
 type AuthProviderProps = React.PropsWithChildren<{}>;
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const extractPublicPaths = (routes: RouteConfig[]): string[] => {
     const result: string[] = [];
 
-    const traverse = (routes: RouteConfig[],parentPath="") => {
+    const traverse = (routes: RouteConfig[], parentPath = "") => {
       for (const route of routes) {
-        const fullPath = `${parentPath}${route.path ? route.path : ""}`.replace(/\/+/g, "/");
+        const fullPath = `${parentPath}${route.path ? route.path : ""}`.replace(
+          /\/+/g,
+          "/"
+        );
         // 如果 meta.requiresAuth === false，添加 path
         if (route.meta?.requiresAuth === false && route.path) {
           result.push(fullPath);
@@ -48,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         // 如果有子路由，递归处理
         if (route.children && route.children.length > 0) {
-          traverse(route.children,`${fullPath}/`);
+          traverse(route.children, `${fullPath}/`);
         }
       }
     };
@@ -85,6 +93,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const user = await loginUser(data);
       setUser(user);
       setIsAuthenticated(true);
+      if (redirectPath) {
+        navigate(redirectPath);
+        setRedirectPath(null);
+      }
     } catch (e) {
       throw e;
     } finally {
@@ -108,6 +120,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     isAuthenticated,
+    setRedirectPath,
     user,
     loading,
     login: handleLogin,

@@ -9,6 +9,11 @@ const VerifyEmail = lazy(() => import("@/pages/VerifyEmail/VerifyEmail"));
 const Login = lazy(() => import("@/pages/Login/Login"));
 const NotFound = lazy(() => import("@/components/NotFound/NotFound"));
 const Order = lazy(() => import("@/pages/Order/Order"));
+const Post= lazy(() => import("@/pages/Post/Post"));
+const Search= lazy(() => import("@/pages/Search/Search"));
+const Messages= lazy(() => import("@/pages/Messages/Messages"));
+const Listings= lazy(() => import("@/pages/Listings/Listings"));
+const Favourites= lazy(() => import("@/pages/Favourites/Favourites"));
 const Test= lazy(() => import("@/pages/Test/Test"));
 const AppLayout = lazy(() => import("@/layouts/AppLayout"));
 
@@ -17,11 +22,6 @@ export const routes: RouteConfig[] = [
     path: "/",
     element: React.createElement(Navigate,{to:"/test",replace:true}),
     meta: { requiresAuth: false, title: "Home" },
-  },
-  {
-    path: "/test",
-    element: React.createElement(Test),
-    meta: { requiresAuth: false, title: "Test" },
   },
   {
     path: "/register",
@@ -51,6 +51,72 @@ export const routes: RouteConfig[] = [
         path: "order",
         element: React.createElement(Order),
         meta: { requiresAuth: true, title: "Order" },
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: React.createElement(AppLayout),
+    children: [
+      {
+        path: "test",
+        element: React.createElement(Test),
+        meta: { requiresAuth: false, title: "Test" },
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: React.createElement(AppLayout),
+    children: [
+      {
+        path: "search",
+        element: React.createElement(Search),
+        meta: { requiresAuth:false, title: "Search" },
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: React.createElement(AppLayout),
+    children: [
+      {
+        path: "post",
+        element: React.createElement(Post),
+        meta: { requiresAuth: true, title: "Post" },
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: React.createElement(AppLayout),
+    children: [
+      {
+        path: "messages",
+        element: React.createElement(Messages),
+        meta: { requiresAuth: true, title: "Messages" },
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: React.createElement(AppLayout),
+    children: [
+      {
+        path: "listings",
+        element: React.createElement(Listings),
+        meta: { requiresAuth: true, title: "Listings" },
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: React.createElement(AppLayout),
+    children: [
+      {
+        path: "favourites",
+        element: React.createElement(Favourites),
+        meta: { requiresAuth: true, title: "favourites" },
       },
     ],
   },

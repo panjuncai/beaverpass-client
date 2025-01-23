@@ -17,5 +17,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
+    hmr: { protocol: "ws" },
+    watch: { usePolling: true, interval: 100 },
   },
 });
