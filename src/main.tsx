@@ -4,13 +4,14 @@ import App from "./App.tsx";
 import { Toast } from "antd-mobile";
 import "@/assets/styles/main.css";
 import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "@/context/AuthContext.tsx";
+import { Provider } from "react-redux";
+import {store} from "./store";
 Toast.config({ duration: 1000 });
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
-    <AuthProvider>
+    <Provider store={store}>
       <App />
-    </AuthProvider>
+    </Provider>
   </BrowserRouter>
 );

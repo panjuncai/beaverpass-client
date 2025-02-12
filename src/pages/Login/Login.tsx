@@ -22,7 +22,7 @@ const styles: { innerContainer: React.CSSProperties } = {
 };
 
 const Login: React.FC = () => {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated,redirectPath } = useAuth();
   const [state, setState] = useState<State>({
     email: "",
     password: "",
@@ -53,6 +53,7 @@ const Login: React.FC = () => {
       //   password: "",
       //   error: "",
       // });
+      navigate(redirectPath||'/');
     } catch (e) {
       console.log(`Login failed:${e}`)
     }
