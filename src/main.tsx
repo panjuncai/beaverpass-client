@@ -5,13 +5,16 @@ import { Toast } from "antd-mobile";
 import "@/assets/styles/main.css";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
-import {store} from "./store";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "./store";
 Toast.config({ duration: 1000 });
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <Provider store={store}>
-      <App />
+      <PersistGate loading={<div>Main Loading...</div>} persistor={persistor}>
+        <App />
+      </PersistGate>
     </Provider>
   </BrowserRouter>
 );

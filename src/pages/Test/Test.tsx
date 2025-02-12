@@ -1,5 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { getUser } from "@/services/userService";
+import { getAllCategories } from "@/services/categoryService";
 import { Button } from "antd-mobile";
 import { useNavigate} from "react-router-dom";
 
@@ -9,6 +10,9 @@ const Test:React.FC=()=>{
     const handleUser=async ()=>{
         await getUser();
     }
+    const handleCategory=async ()=>{
+        await getAllCategories();
+    }
     return (
         <>
         <Button onClick={()=>navigate('/register')}>Sign up</Button> 
@@ -16,7 +20,8 @@ const Test:React.FC=()=>{
         <Button onClick={()=>logout()}>Sign out</Button> 
         <Button onClick={()=>navigate('/post')}>Post</Button> 
         <Button onClick={()=>navigate('/order')}>Order</Button> 
-        <Button onClick={handleUser}>Get User</Button> 
+        <Button onClick={handleUser}>Get User</Button>
+        <Button onClick={handleCategory}>Get Categories</Button>
         <div style={{display:'flex',gap:'5px',flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
             <h3>User Info</h3>
             <ul>
