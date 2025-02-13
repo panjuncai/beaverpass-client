@@ -11,8 +11,9 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 // import { transformToImmutable } from 'redux-persist-transform-immutable';
-import authReducer from "./slices/authSlice";
+import authReducer from "./authSlice";
 import { categoryApi } from "@/services/categoryApi";
+import { productApi } from "@/services/productApi";
 
 // 定义持久化配置
 const persistConfig = {
@@ -26,6 +27,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
   auth: authReducer,
   [categoryApi.reducerPath]: categoryApi.reducer,
+  [productApi.reducerPath]: productApi.reducer,
 });
 
 // 创建持久化的 reducer
@@ -38,7 +40,7 @@ export const store = configureStore({
         // 忽略 redux-persist 相关的 action
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(categoryApi.middleware),
+    }).concat(categoryApi.middleware,productApi.middleware),
 });
 
 // 创建持久化的 store 对象

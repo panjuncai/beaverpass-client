@@ -9,10 +9,16 @@ export interface AxiosBaseQueryArgs {
   params?: AxiosRequestConfig['params'];
 }
 
+export interface AxiosBaseQueryError {
+  status?: number;
+  data: any;
+}
+
+
 export const axiosBaseQuery =
   (
     { baseUrl }: { baseUrl: string } = { baseUrl: '' }
-  ): BaseQueryFn<AxiosBaseQueryArgs, unknown, unknown> =>
+  ): BaseQueryFn<AxiosBaseQueryArgs, unknown, AxiosBaseQueryError> =>
   async ({ url, method, data, params }) => {
     try {
       const result = await apiClient({

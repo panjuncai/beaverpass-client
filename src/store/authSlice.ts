@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { loginUser, logoutUser, getUser } from '@/services/userService';
 import { LoginRequest, User } from '@/types/user';
-import { persistor } from '..';
 
 interface AuthState {
   isAuthenticated: boolean;
