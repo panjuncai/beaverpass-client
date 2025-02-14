@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ... */
+
+@layer base {
+  :root {
+    --primary: #b45309;
+    --primary-foreground: #ffffff;
+    --radius: 0.5rem;
+  }
+}

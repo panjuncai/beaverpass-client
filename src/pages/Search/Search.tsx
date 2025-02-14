@@ -1,5 +1,6 @@
 import { AxiosBaseQueryError } from "@/api/axiosBaseQuery";
 import { useGetProductsQuery } from "@/services/productApi";
+import { Space, Grid,Card } from 'antd-mobile'
 
 const Search: React.FC = () => {
   const { data: products, error, isLoading } = useGetProductsQuery();
@@ -26,6 +27,16 @@ const Search: React.FC = () => {
           <li key={i._id}>{i.title}</li>
         ))}
       </ul>
+      <Space direction='vertical'>
+      <Grid columns={2} gap={8}>
+      {products?.map((i) => (
+          <Grid.Item>
+            
+          </Grid.Item>
+          ))}
+        </Grid>
+      
+      </Space>
     </div>
   );
 };
