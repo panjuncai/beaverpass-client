@@ -8,28 +8,33 @@ const apiClient = axios.create({
 });
 
 // 请求拦截器
-// apiClient.interceptors.request.use(
-//   (config) => {
-//     // 可在此添加请求头（如 Token）
-//     return config;
-//   },
-//   (error) => {
-//     return Promise.reject(error);
-//   }
-// );
+apiClient.interceptors.request.use(
+  (config) => {
+    // 可在此添加请求头（如 Token）
+    console.log(`Axios Request:${JSON.stringify(config)}`)
+    return config;
+  },
+  (error) => {
+    console.log(`Axios Request Error:${JSON.stringify(error)}`)
+    return Promise.reject(error);
+  }
+);
 
 // 响应拦截器
 apiClient.interceptors.response.use(
   (response) => {
+    console.log(`Axios Response:${JSON.stringify(response)}`)
     const { code, msg, data } = response.data;
     if (code !== 0) {
       Toast.show({ icon: 'fail', content: msg,duration:4000 });
+      console.log(`Error: ${msg}`);
       // 手动抛出业务错误
       return Promise.reject(new Error(msg || 'Unknown Error'));
     }
     return data;
   },
   (error) => {
+    console.log(`Axios Response Error:${JSON.stringify(error)}`)
     Toast.show({ icon: 'fail', content: error.response?.data?.msg || 'Network Error' ,duration:4000});
     // 捕获 HTTP 错误
     return Promise.reject(error.response?.data?.msg || 'Network Error');

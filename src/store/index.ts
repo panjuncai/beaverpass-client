@@ -20,7 +20,7 @@ import { productApi } from "@/services/productApi";
 const persistConfig = {
   key: "root",
   storage, // 如果不希望全部持久化，可以设置 whitelist（只持久化部分 reducer）或 blacklist（排除部分 reducer）
-//   whitelist: ["auth"], // 只持久化 auth reducer
+  whitelist: ["auth"], // 只持久化 auth reducer
   //transforms: [transformToImmutable], // 处理不可变数据（如 Immutable.js）
 };
 

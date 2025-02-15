@@ -12,7 +12,7 @@ const Order = lazy(() => import("@/pages/Order/Order"));
 const Post= lazy(() => import("@/pages/Post/Post"));
 const Search= lazy(() => import("@/pages/Search/Search"));
 const Messages= lazy(() => import("@/pages/Messages/Messages"));
-const Listings= lazy(() => import("@/pages/Listings/Listings"));
+const Deals= lazy(() => import("@/pages/Deals/Deals"));
 const Favourites= lazy(() => import("@/pages/Favourites/Favourites"));
 const Test= lazy(() => import("@/pages/Test/Test"));
 const AppLayout = lazy(() => import("@/layouts/AppLayout"));
@@ -103,9 +103,9 @@ export const routes: RouteConfig[] = [
     element: React.createElement(AppLayout),
     children: [
       {
-        path: "listings",
-        element: React.createElement(Listings),
-        meta: { requiresAuth: true, title: "Listings" },
+        path: "deals",
+        element: React.createElement(Deals),
+        meta: { requiresAuth: true, title: "Deals" },
       },
     ],
   },
