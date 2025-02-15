@@ -1,10 +1,6 @@
-  // import {SpinLoading } from 'antd-mobile'
-
 const Order: React.FC = () => {
-  // usePageTitle();
   return <>
-  Order
-  </>;
-};
-
+  Order 
+  </>
+}
 export default Order;

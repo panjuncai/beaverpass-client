@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { type RootState, type AppDispatch, persistor } from '@/store';
-import { login, logout, setRedirectPath } from '@/store/authSlice';
+import { login, logout, setRedirectPath } from '@/store/slices/authSlice';
 import type { LoginRequest } from '@/types/user';
 
 /**

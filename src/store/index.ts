@@ -11,7 +11,8 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 // import { transformToImmutable } from 'redux-persist-transform-immutable';
-import authReducer from "./authSlice";
+import authReducer from "./slices/authSlice";
+import toastReducer from './slices/toastSlice';
 import { categoryApi } from "@/services/categoryApi";
 import { productApi } from "@/services/productApi";
 
@@ -26,6 +27,7 @@ const persistConfig = {
 // 合并所有的 reducers
 const rootReducer = combineReducers({
   auth: authReducer,
+  toast:toastReducer,
   [categoryApi.reducerPath]: categoryApi.reducer,
   [productApi.reducerPath]: productApi.reducer,
 });
