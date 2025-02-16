@@ -7,12 +7,14 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store";
 import { useEffect, useState } from "react";
 import { Product } from "@/types/product";
+import { useNavigate } from "react-router-dom";
 
 const Search: React.FC = () => {
   const { data: products, isLoading, error } = useGetProductsQuery();
   const [search, setSearch] = useState<string>("");
   const [filteredProducts, setFilteredProducts] = useState<Product[]|undefined>([]);
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   // 添加类型检查函数
   function isAxiosError(error: any): error is AxiosBaseQueryError {
@@ -25,12 +27,7 @@ const Search: React.FC = () => {
       setFilteredProducts(products);
     }
   },[search,products]);
-  //只在组件挂载时显示一次测试 toast
-  useEffect(() => {
-    dispatch(
-      showToast({ message: "Loading Success", type: "success", duration: 1000 })
-    );
-  }, [dispatch]);
+
 
   useEffect(() => {
     if (error) {
@@ -64,8 +61,9 @@ const Search: React.FC = () => {
       {isLoading ? (
         <CenteredLoading />
       ) : (
+        // 搜索框
         <div className="container grid grid-cols-1 gap-0 p-4">
-          <label className="input input-bordered flex items-center gap-2 ml-4 mr-4">
+          <label className="input input-bordered input-lg flex items-center gap-2 ml-4 mr-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 16 16"
@@ -80,10 +78,11 @@ const Search: React.FC = () => {
             </svg>
             <input type="text" className="grow" placeholder="Search" onChange={handleSearch}/>
           </label>
-          <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-3 lg:grid-cols-4">
+          {/* 商品列表 */}
+          <div className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-4">
             {filteredProducts?.map((product, index) => (
-              <div key={product._id} className="card bg-base-100 shadow-xl">
-                <figure>
+              <div key={product._id} className="card bg-base-100 shadow-md">
+                <figure onClick={()=>{navigate(`/products/${product._id}`)}}>
                   <img
                     className="h-44 w-full"
                     src={product.images?.[0]}

@@ -9,12 +9,13 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "./store";
 import { ToastInfo } from "@/components/ToastInfo/ToastInfo.tsx";
+import CenteredLoading from "./components/CenterLoading.tsx";
 Toast.config({ duration: 1000 });
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <Provider store={store}>
-      <PersistGate loading={<div>Main Loading...</div>} persistor={persistor}>
+      <PersistGate loading={<CenteredLoading />} persistor={persistor}>
         <App />
         <ToastInfo />
       </PersistGate>

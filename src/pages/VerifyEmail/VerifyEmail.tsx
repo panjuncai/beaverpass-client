@@ -19,7 +19,7 @@ const VerifyEmail: React.FC = () => {
       }
 
       try {
-        await apiClient.get(`/users/verify?token=${token}`);
+        await apiClient.get(`/auth/verify?token=${token}`);
         Toast.show({
           icon: "success",
           content: "Verify Successfully!",

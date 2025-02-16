@@ -10,7 +10,7 @@ import type { LoginRequest } from '@/types/user';
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
   // 从 Redux store 中获取 auth 状态
-  const { isAuthenticated, user, loading, redirectPath } = useSelector(
+  const { isAuthenticated,loginUser,isLoading, redirectPath } = useSelector(
     (state: RootState) => state.auth
   );
 
@@ -33,8 +33,8 @@ export const useAuth = () => {
 
   return {
     isAuthenticated,
-    user,
-    loading,
+    loginUser,
+    isLoading,
     redirectPath,
     login: loginHandler,
     logout: logoutHandler,
