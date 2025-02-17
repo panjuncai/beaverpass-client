@@ -4,7 +4,6 @@ import StarRating from "@/components/StarRating/StarRating";
 import { useGetProductQuery } from "@/services/productApi";
 import { useGetUserQuery } from "@/services/userApi";
 
-
 interface ProductDetailProps {
   productId: string;
 }
@@ -23,10 +22,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
       {isLoadingProduct || isLoadingSeller ? (
         <CenteredLoading />
       ) : (
-        <>
+        <div className="relative">
           {/* 页头返回 */}
           <CustomNavBar title={product?.title ? product?.title : "Detail"} />
-          <div className="pl-4 pr-4">
+          <div className="pl-4 pr-4 pb-24">
             {/* 跑马灯 */}
             <div className="carousel w-full h-60 rounded-xl">
               {product?.images?.map((i, index) => (
@@ -108,14 +107,105 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
                   <div className="flex items-center gap-2">
                     <StarRating rating={4} />
                     <span className="text-lg">4.0</span>
-                    </div>
+                  </div>
                   <button className="btn btn-primary btn-sm">Chat</button>
                 </div>
               </div>
             </div>
             {/* 关于商品 */}
+            <div className="mt-4 flex flex-col">
+              <span className="font-medium text-xl">About this item</span>
+              <span className="text-sm text-gray-400">Dimensions:</span>
+              <span className="text-lg">
+                Table 81.3 cm x 40.6 cm x 71.1 cm.
+              </span>
+              <span className="text-md text-gray-400">
+                Click to view the damage images below:
+              </span>
+              <a
+                href="#"
+                className="text-lg underline underline-offset-4 text-primary"
+              >
+                Scratch: 2{" "}
+              </a>
+            </div>
+            {/* 关于配送 */}
+            <div className="mt-4 flex flex-col gap-1">
+              <span className="font-medium text-xl">
+                Home Delivery in 3 days.
+              </span>
+              <div className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 256 256"
+                  className="w-10 h-10"
+                >
+                  <rect width="256" height="256" fill="none" />
+                  <line
+                    x1="16"
+                    y1="216"
+                    x2="240"
+                    y2="216"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="16"
+                  />
+                  <polyline
+                    points="152 216 152 152 104 152 104 216"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="16"
+                  />
+                  <line
+                    x1="40"
+                    y1="116.69"
+                    x2="40"
+                    y2="216"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="16"
+                  />
+                  <line
+                    x1="216"
+                    y1="216"
+                    x2="216"
+                    y2="116.69"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="16"
+                  />
+                  <path
+                    d="M24,132.69l98.34-98.35a8,8,0,0,1,11.32,0L232,132.69"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="16"
+                  />
+                </svg>
+                <div className="flex flex-col">
+                  <span className="text-sm text-gray-600">
+                    Send to my address <strong>from $50</strong>
+                  </span>
+                  <span className="text-sm font-bold">Baseline, Ottawa</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </>
+          <div className="fixed bottom-4 left-0 right-0 flex justify-center">
+            <button className="btn btn-primary btn-xl w-4/5 rounded-full">
+              Buy now
+            </button>
+          </div>
+        </div>
       )}
     </>
   );

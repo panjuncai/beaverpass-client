@@ -62,7 +62,7 @@ const Search: React.FC = () => {
         <CenteredLoading />
       ) : (
         // 搜索框
-        <div className="container grid grid-cols-1 gap-0 p-4">
+        <div className="container grid grid-cols-1 gap-0 p-2">
           <label className="input input-bordered input-lg flex items-center gap-2 ml-4 mr-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
