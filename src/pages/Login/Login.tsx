@@ -4,6 +4,7 @@ import Logo from "@/components/Logo/Logo";
 import { LoginRequest } from "@/types/user";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 
 interface State {
   email: string;
@@ -58,9 +59,6 @@ const Login: React.FC = () => {
       console.log(`Login failed:${e}`)
     }
   };
-  // const handleBack = () => {
-  //   navigate(-1);
-  // };
   const handleRegister = async () => {
     navigate("/register");
   };
@@ -91,10 +89,8 @@ const Login: React.FC = () => {
 
   return (
     <>
-      {/* <NavBar back="" backIcon={true} onBack={handleBack}>
-        Login
-      </NavBar>
-      <div className="body"> */}
+      
+      <CustomNavBar />
       <div style={styles.innerContainer}>
         <Logo height={80} width={300} />
         <Space align="center">

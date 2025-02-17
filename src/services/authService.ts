@@ -3,7 +3,7 @@ import apiClient from "@/api/api";
 
 export const registerUser = async (data: RegisterRequest): Promise<User> => {
   try {
-    const user: User = await apiClient.post(`/users/register`, data);
+    const user: User = await apiClient.post(`/auth/register`, data);
     return user;
   } catch (e) {
     throw e;
@@ -12,7 +12,7 @@ export const registerUser = async (data: RegisterRequest): Promise<User> => {
 
 export const loginUser = async (data: LoginRequest): Promise<User> => {
   try {
-    const user: User = await apiClient.post(`/users/login`, data);
+    const user: User = await apiClient.post(`/auth/login`, data);
     return user;
   } catch (e) {
     throw e;
@@ -21,16 +21,7 @@ export const loginUser = async (data: LoginRequest): Promise<User> => {
 
 export const logoutUser = async (): Promise<void> => {
   try {
-    await apiClient.post(`/users/logout`);
-  } catch (e) {
-    throw e;
-  }
-};
-
-export const getUser = async (): Promise<User> => {
-  try {
-    const user: User = await apiClient.get(`/users/user`);
-    return user;
+    await apiClient.post(`/auth/logout`);
   } catch (e) {
     throw e;
   }

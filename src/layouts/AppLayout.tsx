@@ -30,8 +30,8 @@ const Bottom = () => {
     },
     { key: "/post", title: <Title msg="Post" />, icon: <CameraOutline /> },
     {
-      key: "/listings",
-      title: <Title msg="Listings" />,
+      key: "/deals",
+      title: <Title msg="Deals" />,
       icon: <ReceivePaymentOutline />,
     },
     {

@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Input, Button, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
-import { registerUser } from "@/services/userService";
+import { registerUser } from "@/services/authService";
 import { RegisterRequest } from "@/types/user";
 import {useNavigate } from "react-router-dom";
+import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 
 interface State {
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -24,6 +27,8 @@ const styles: { innerContainer: React.CSSProperties } = {
 
 const Register: React.FC = () => {
   const [state, setState] = useState<State>({
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -40,9 +45,7 @@ const Register: React.FC = () => {
     navigate("/login");
   };
 
-  // const handleBack = () => {
-  //   navigate(-1);
-  // };
+ 
   const handleRegister = async () => {
     if (state.password !== state.confirmPassword) {
       Toast.show({ icon: "fail", content: "Passwords do not match!" });
@@ -56,6 +59,8 @@ const Register: React.FC = () => {
 
     const data: RegisterRequest = {
       email: state.email,
+      firstName: state.firstName,
+      lastName: state.lastName,
       password: state.password,
       confirmPassword: state.confirmPassword,
     };
@@ -92,14 +97,33 @@ const Register: React.FC = () => {
 
   return (
     <>
-      {/* <NavBar back="" backIcon={true} onBack={handleBack}>
-        Register
-      </NavBar>
-      <div className="body"> */}
+      <CustomNavBar />
       <div style={styles.innerContainer}>
         <Space align="center" direction="vertical">
           <Logo height={80} width={300}/>
           <Form layout="horizontal" footer={footer}>
+            <Form.Item
+              label="First name"
+              name="firstName"
+              rules={[{ required: true, message: "First name is required" }]}
+            >
+              <Input
+                placeholder="Please input first name"
+                type="text"
+                onChange={(val) => handleChange("firstName", val)}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Last name"
+              name="lastName"
+              rules={[{ required: true, message: "Last name is required" }]}
+            >
+              <Input
+                placeholder="Please input last name"
+                type="text"
+                onChange={(val) => handleChange("lastName", val)}
+              />
+            </Form.Item>
             <Form.Item
               label="Email"
               name="email"
@@ -146,7 +170,6 @@ const Register: React.FC = () => {
           </Form>
         </Space>
       </div>
-      {/* </div> */}
     </>
   );
 };

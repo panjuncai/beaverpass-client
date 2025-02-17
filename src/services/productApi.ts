@@ -20,7 +20,7 @@ export const productApi = createApi({
           : [{ type: 'product', id: 'LIST' }],
     }),
     // 查询单个 product，通过 id 查询
-    getproduct: builder.query<Product, string>({
+    getProduct: builder.query<Product, string>({
       query: (id) => ({ url: `/${id}`, method: 'GET' }),
       providesTags: (_result, _error, id) => [{ type: 'product', id }],
     }),
@@ -60,7 +60,7 @@ export const productApi = createApi({
 // 导出自动生成的 Hooks
 export const {
   useGetProductsQuery,
-  useGetproductQuery,
+  useGetProductQuery,
   useAddProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,

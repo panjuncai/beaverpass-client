@@ -1,14 +1,12 @@
 import { useAuth } from "@/hooks/useAuth";
-import { getUser } from "@/services/userService";
+import { useGetUserQuery } from "@/services/userApi";
 import { Button } from "antd-mobile";
 import { useNavigate} from "react-router-dom";
 
 const Test:React.FC=()=>{
     const navigate=useNavigate();
-    const {user,logout}=useAuth()
-    const handleUser=async ()=>{
-        await getUser();
-    }
+    const {loginUser,logout}=useAuth()
+    const {data:user}=useGetUserQuery("");
     return (
         <>
         <Button onClick={()=>navigate('/register')}>Sign up</Button> 
@@ -16,13 +14,22 @@ const Test:React.FC=()=>{
         <Button onClick={()=>logout()}>Sign out</Button> 
         <Button onClick={()=>navigate('/post')}>Post</Button> 
         <Button onClick={()=>navigate('/order')}>Order</Button> 
-        <Button onClick={handleUser}>Get User</Button>
         <div style={{display:'flex',gap:'5px',flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
-            <h3>User Info</h3>
+            <h3>Login User Info</h3>
+            <ul>
+                <li>{loginUser?._id}</li>
+                <li>{loginUser?.email}</li>
+                <li>{String(loginUser?.isVerified)}</li>
+            </ul>
+        </div>
+        <div style={{display:'flex',gap:'5px',flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
+            <h3>Seller User Info</h3>
             <ul>
                 <li>{user?._id}</li>
                 <li>{user?.email}</li>
-                <li>{String(user?.isVerified)}</li>
+                <li>{user?.avatar}</li>
+                <li>{user?.firstName}</li>
+                <li>{user?.lastName}</li>
             </ul>
         </div>
         </>

@@ -1,19 +1,25 @@
 /** @type {import('tailwindcss').Config} */
+import daisyui from "daisyui"
 export default {
-    darkMode: ["class"],
-    content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
-  	extend: {
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		},
-  		colors: {
-        primary: '#b45309',
-      }
-  	}
+    extend: {},
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    daisyui,
+  ],
+  daisyui: {
+    themes: [
+      {
+        light: {
+          ...require("daisyui/src/theming/themes")["light"],
+          primary: "#b45309",
+          "primary-content": "#ffffff",
+          secondary: "#f6d860",
+          accent: "#97bc56",
+        },
+      },
+    ],
+  }, 
 }
 

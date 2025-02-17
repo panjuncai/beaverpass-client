@@ -19,21 +19,25 @@
   :root:root {
     --adm-color-primary:#b45309;
   }
+
+  .adm-toast-mask .adm-toast-main-icon .adm-toast-icon {
+    display:flex;
+    justify-content: center;
+  }
   
-  .container {
+   .container {
     display: flex;
     flex-direction: column;
     height: 100%;
-  }
+  } 
   
-  @media (min-width: 768px) {
+   @media (min-width: 768px) {
     .container {
-      width: 61.8%; /* 设置为黄金分割比例 */
-      margin: 0 auto; /* 居中对齐 */
+      width: 61.8%; 
+      margin: 0 auto; 
       border:solid 1px #10c6b1
     }
   }
-  
   .no-select {
     user-select: none;
     -webkit-user-select: none;
