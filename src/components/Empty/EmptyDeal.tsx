@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-const EmptyOrder:React.FC=()=> {
+const EmptyDeal:React.FC=()=> {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -24,10 +24,9 @@ const EmptyOrder:React.FC=()=> {
           stroke-width="16"
         />
       </svg>
-      <h2 className="text-lg font-semibold">No Order</h2>
-      <p className="text-sm">Go find the products you like.</p>
+      <h2 className="text-lg font-semibold">No Deal</h2>
     </motion.div>
   );
 }
 
-export default EmptyOrder;
+export default EmptyDeal;

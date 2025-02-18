@@ -1,10 +1,10 @@
-import EmptyMessage from "@/components/Empty/EmptyMessage";
-import EmptyOrder from "@/components/Empty/EmptyOrder";
+// import EmptyMessage from "@/components/Empty/EmptyMessage";
+import LoginCard from "@/components/LoginCard/LoginCard";
 
 const Order: React.FC = () => {
   return <>
-  {/* <EmptyOrder></EmptyOrder> */}
-  <EmptyMessage></EmptyMessage>
+  {/* <EmptyMessage></EmptyMessage> */}
+  <LoginCard></LoginCard>
   </>
 }
 export default Order;

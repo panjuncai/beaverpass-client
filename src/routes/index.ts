@@ -92,7 +92,7 @@ export const routes: RouteConfig[] = [
       {
         path: "post",
         element: React.createElement(Post),
-        meta: { requiresAuth: true, title: "Post" },
+        meta: { requiresAuth:false, title: "Post" },
       },
     ],
   },
@@ -103,7 +103,7 @@ export const routes: RouteConfig[] = [
       {
         path: "messages",
         element: React.createElement(Messages),
-        meta: { requiresAuth: true, title: "Messages" },
+        meta: { requiresAuth:false, title: "Messages" },
       },
     ],
   },
@@ -114,7 +114,7 @@ export const routes: RouteConfig[] = [
       {
         path: "deals",
         element: React.createElement(Deals),
-        meta: { requiresAuth: true, title: "Deals" },
+        meta: { requiresAuth: false, title: "Deals" },
       },
     ],
   },

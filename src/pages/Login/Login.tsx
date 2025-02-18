@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Input, Button, Space, Form, Toast } from "antd-mobile";
+import { Input, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { LoginRequest } from "@/types/user";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 
@@ -59,37 +59,32 @@ const Login: React.FC = () => {
       console.log(`Login failed:${e}`)
     }
   };
-  const handleRegister = async () => {
-    navigate("/register");
-  };
 
   const footer = (
-    <Space direction="vertical" block>
-      <Button
-        block
-        type="submit"
-        color="primary"
-        size="large"
-        onClick={handleLogin}
-      >
-        Sign In
-      </Button>
-      <Button block color="default" size="large" onClick={handleRegister}>
-        Sign Up
-      </Button>
-    </Space>
+      <div className="flex flex-col items-center justify-center">
+        {/* 主按钮区域 */}
+        <button
+          className="btn btn-primary btn-xl w-full text-white rounded-full shadow-md"
+          onClick={handleLogin}
+        >
+          Log in
+        </button>
+        {/* 提示文字与链接 */}
+        <div className="mt-4 text-center">
+          <span className="text-gray-600 mr-1">Don't have an account?</span>
+          <Link to="/register" className="text-green-600">
+            Sign up
+          </Link>
+        </div>
+      </div>
   );
 
-  // if (loading) {
-  //   return <div>加载中...</div>;
-  // }
   if (isAuthenticated) {
     return <Navigate to="/" />
   }
 
   return (
     <>
-      
       <CustomNavBar />
       <div style={styles.innerContainer}>
         <Logo height={80} width={300} />

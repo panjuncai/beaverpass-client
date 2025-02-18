@@ -3,7 +3,7 @@ import { Input, Button, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { registerUser } from "@/services/authService";
 import { RegisterRequest } from "@/types/user";
-import {useNavigate } from "react-router-dom";
+import {Link, useNavigate } from "react-router-dom";
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 
 interface State {
@@ -79,20 +79,36 @@ const Register: React.FC = () => {
   };
 
   const footer = (
-    <Space direction="vertical" block>
-      <Button
-        block
-        type="submit"
-        color="primary"
-        size="large"
-        onClick={handleRegister}
-      >
-        Sign Up
-      </Button>
-      <Button block color="default" size="large" onClick={handleLogin}>
-        Sign In
-      </Button>
-    </Space>
+    // <Space direction="vertical" block>
+    //   <Button
+    //     block
+    //     type="submit"
+    //     color="primary"
+    //     size="large"
+    //     onClick={handleRegister}
+    //   >
+    //     Sign Up
+    //   </Button>
+    //   <Button block color="default" size="large" onClick={handleLogin}>
+    //     Sign In
+    //   </Button>
+    // </Space>
+    <div className="flex flex-col items-center justify-center">
+        {/* 主按钮区域 */}
+        <button
+          className="btn btn-primary btn-xl w-full text-white rounded-full shadow-md"
+          onClick={handleRegister}
+        >
+          Sign up
+        </button>
+        {/* 提示文字与链接 */}
+        <div className="mt-4 text-center">
+          <span className="text-gray-600 mr-1">Already have an account?</span>
+          <Link to="/login" className="text-green-600">
+            Sign in 
+          </Link>
+        </div>
+      </div>
   );
 
   return (
