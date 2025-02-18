@@ -1,7 +1,7 @@
 import { TabBar } from "antd-mobile";
 import {
   CameraOutline,
-  HeartOutline,
+  // HeartOutline,
   MessageOutline,
   ReceivePaymentOutline,
   SearchOutline,
@@ -21,7 +21,7 @@ const Bottom = () => {
   };
 
   const tabs = [
-    { key: "/test", title: <Title msg="Test" />, icon: <SmileOutline /> },
+    // { key: "/test", title: <Title msg="Test" />, icon: <SmileOutline /> },
     { key: "/search", title: <Title msg="Search" />, icon: <SearchOutline /> },
     {
       key: "/messages",
@@ -34,11 +34,11 @@ const Bottom = () => {
       title: <Title msg="Deals" />,
       icon: <ReceivePaymentOutline />,
     },
-    {
-      key: "/favourites",
-      title: <Title msg="Favourites" />,
-      icon: <HeartOutline />,
-    },
+    // {
+    //   key: "/favourites",
+    //   title: <Title msg="Favourites" />,
+    //   icon: <HeartOutline />,
+    // },
   ];
 
   return (
