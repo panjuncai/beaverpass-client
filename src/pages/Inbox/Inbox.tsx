@@ -27,6 +27,7 @@ const Inbox: React.FC = () => {
             role="tab"
             className="tab text-primary font-bold text-xl"
             aria-label="All"
+            defaultChecked
           />
           <div role="tabpanel" className="tab-content p-10">
             All
@@ -48,7 +49,6 @@ const Inbox: React.FC = () => {
             role="tab"
             className="tab text-primary font-bold text-xl"
             aria-label="Selling"
-            defaultChecked
           />
           <div role="tabpanel" className="tab-content p-10">
             Selling

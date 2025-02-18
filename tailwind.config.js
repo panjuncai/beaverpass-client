@@ -17,6 +17,7 @@ export default {
           "primary-content": "#ffffff",
           secondary: "#f6d860",
           accent: "#97bc56",
+          success:'#7EAC2D'
         },
       },
     ],

@@ -3,3 +3,11 @@
 @tailwind utilities;
 
 /* ... */
+/* 仅对 step-success 步骤的 data-content 文本变白 */
+
+.step[data-content]:after {
+    color: #D1D5DB !important;
+  }
+.step-success[data-content]:after {
+  color: #fff !important;
+}
