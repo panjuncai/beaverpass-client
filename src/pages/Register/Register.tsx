@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Input, Button, Space, Form, Toast } from "antd-mobile";
+import { Input, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { registerUser } from "@/services/authService";
 import { RegisterRequest } from "@/types/user";
@@ -41,11 +41,6 @@ const Register: React.FC = () => {
     setState((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleLogin = () => {
-    navigate("/login");
-  };
-
- 
   const handleRegister = async () => {
     if (state.password !== state.confirmPassword) {
       Toast.show({ icon: "fail", content: "Passwords do not match!" });
