@@ -11,7 +11,7 @@ const NotFound = lazy(() => import("@/components/NotFound/NotFound"));
 const Order = lazy(() => import("@/pages/Order/Order"));
 const Post= lazy(() => import("@/pages/Post/Post"));
 const Search= lazy(() => import("@/pages/Search/Search"));
-const Messages= lazy(() => import("@/pages/Messages/Messages"));
+const Inbox= lazy(() => import("@/pages/Inbox/Inbox"));
 const Deals= lazy(() => import("@/pages/Deals/Deals"));
 const Favourites= lazy(() => import("@/pages/Favourites/Favourites"));
 const Test= lazy(() => import("@/pages/Test/Test"));
@@ -101,9 +101,9 @@ export const routes: RouteConfig[] = [
     element: React.createElement(AppLayout),
     children: [
       {
-        path: "messages",
-        element: React.createElement(Messages),
-        meta: { requiresAuth:false, title: "Messages" },
+        path: "inbox",
+        element: React.createElement(Inbox),
+        meta: { requiresAuth:false, title: "Inbox" },
       },
     ],
   },

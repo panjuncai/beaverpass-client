@@ -24,8 +24,8 @@ const Bottom = () => {
     { key: "/test", title: <Title msg="Test" />, icon: <SmileOutline /> },
     { key: "/search", title: <Title msg="Search" />, icon: <SearchOutline /> },
     {
-      key: "/messages",
-      title: <Title msg="Messages" />,
+      key: "/inbox",
+      title: <Title msg="Inbox" />,
       icon: <MessageOutline />,
     },
     { key: "/post", title: <Title msg="Post" />, icon: <CameraOutline /> },
