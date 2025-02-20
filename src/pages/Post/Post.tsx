@@ -65,7 +65,6 @@ const Post: React.FC = () => {
       // const response = await uploadImage(file);
       // const imageUrl = response.url;
 
-
       setFormData((prev) => ({
         ...prev,
         images: {
@@ -107,9 +106,9 @@ const Post: React.FC = () => {
     return value;
   };
 
-    // const handleImagesChange = (images: Record<string, string | null>) => {
-    //   setFormData((prev) => ({ ...prev, images }));
-    // };
+  // const handleImagesChange = (images: Record<string, string | null>) => {
+  //   setFormData((prev) => ({ ...prev, images }));
+  // };
 
   const handlePriceChange = (updates: Partial<typeof formData.price>) => {
     setFormData((prev) => ({
@@ -299,90 +298,62 @@ const Post: React.FC = () => {
             </label>
           </div>
           <div className="flex flex-col items-center mt-4">
-            {/* 外层容器：带边框、圆角，使用 group 触发子元素的悬停样式 */}
-            <div className="group w-full border border-base-300 bg-base-100 rounded-xl transition-all group-focus-within:border-primary group-focus-within:ring group-focus-within:ring-primary/50">
-              {/* 上部分：图标 + 禁用输入框 */}
-              <label
-                className="
-            flex items-center gap-2 
-            px-3 py-2 
-            border-b-none border-base-300
-            group-hover:cursor-pointer
-          "
+            <label className="input input-bordered flex items-start gap-2 w-full h-48">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 256 256"
+                className="w-2 h-2 mt-4"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 256 256"
-                  className="w-2 h-2"
-                >
-                  <rect width="256" height="256" fill="none" />
-                  <line
-                    x1="128"
-                    y1="40"
-                    x2="128"
-                    y2="216"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="16"
-                  />
-                  <line
-                    x1="48"
-                    y1="80"
-                    x2="208"
-                    y2="176"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="16"
-                  />
-                  <line
-                    x1="48"
-                    y1="176"
-                    x2="208"
-                    y2="80"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="16"
-                  />
-                </svg>
-                {/* 禁用输入框 */}
-                <input
-                  type="text"
-                  className="grow bg-transparent outline-none text-lg"
-                  placeholder="Description"
-                  readOnly
+                <rect width="256" height="256" fill="none" />
+                <line
+                  x1="128"
+                  y1="40"
+                  x2="128"
+                  y2="216"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="16"
                 />
-              </label>
-
-              {/* 下部分：可编辑文本域 */}
-              <textarea
-                className="
-            w-full h-40
-            bg-base-100
-            px-3 py-2
-            bg-transparent
-            outline-none
-            border-0
-            group-hover:cursor-pointer
-          "
-                placeholder="E.g., Solid wood dining table with minor scratches on the top surface. Dimensions: 120cm x 80cm."
-                maxLength={10}
-                value={formData.description}
-                onChange={(e) => handleDescriptionChange(e)}
-              />
-            </div>
-
-            {/* 底部字符计数 */}
-            <label className="label w-full">
-              <span className="label-text-alt">
-                {formData.description.length}/10 characters
-              </span>
+                <line
+                  x1="48"
+                  y1="80"
+                  x2="208"
+                  y2="176"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="16"
+                />
+                <line
+                  x1="48"
+                  y1="176"
+                  x2="208"
+                  y2="80"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="16"
+                />
+              </svg>
+                <textarea
+                  className="grow h-full resize-none bg-transparent border-none outline-none pt-1"
+                  placeholder={`Description
+E.g., Solid wood dining table with minor scratches on the top surface. Dimensions: 120cm x 80cm.
+            `}
+                  maxLength={10}
+                  value={formData.description}
+                  onChange={(e) => handleDescriptionChange(e)}
+                ></textarea>
             </label>
+            <div className="flex w-full mt-2">
+                  <span className="label-text-alt">
+                    {formData.description.length}/10 characters
+                  </span>
+                </div>
           </div>
           {showStepTwoTitleError && (
             <div className="text-error text-sm mt-2">Please enter a title</div>
