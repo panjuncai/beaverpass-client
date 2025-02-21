@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useAddPostMutation } from "@/services/postApi";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "antd-mobile";
+import { BasePost } from "@/types/post";
 
 const Post: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -168,7 +169,7 @@ const Post: React.FC = () => {
           },
         };
 
-        await addPost(processedFormData).unwrap();
+        await addPost(processedFormData as BasePost).unwrap();
         // 发布成功后跳转到详情页
         void navigate("/search");
         void Toast.show({
