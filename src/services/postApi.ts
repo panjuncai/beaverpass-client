@@ -15,13 +15,29 @@ interface CreatePostRequest {
   delivery: string;
 }
 
+interface CreatePostResponse {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  condition: string;
+  images: Record<string, string | null>;
+  price: {
+    amount: string;
+    isFree: boolean;
+    isNegotiable: boolean;
+  };
+  delivery: string;
+  createdAt: string;
+}
+
 export const postApi = createApi({
   reducerPath: 'postApi',
-  baseQuery: axiosBaseQuery({ baseUrl: '/api' }),
+  baseQuery: axiosBaseQuery({ baseUrl: '/posts' }),
   endpoints: (builder) => ({
-    createPost: builder.mutation<any, CreatePostRequest>({
+    addPost: builder.mutation<CreatePostResponse, CreatePostRequest>({
       query: (data) => ({
-        url: '/posts',
+        url: '/',
         method: 'POST',
         data,
       }),
@@ -29,4 +45,4 @@ export const postApi = createApi({
   }),
 });
 
-export const { useCreatePostMutation } = postApi;
+export const { useAddPostMutation } = postApi;

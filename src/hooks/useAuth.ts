@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { type RootState, type AppDispatch, persistor } from '@/store';
+import { type RootState, type AppDispatch } from '@/store';
 import { login, logout, setRedirectPath } from '@/store/slices/authSlice';
 import type { LoginRequest } from '@/types/user';
 
@@ -23,7 +23,6 @@ export const useAuth = () => {
   // 封装登出操作
   const logoutHandler = async () => {
     await dispatch(logout()).unwrap();
-    await persistor.purge();
   };
 
   // 封装设置重定向路径操作

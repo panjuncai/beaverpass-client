@@ -2,11 +2,20 @@ import ImageUpload from "@/components/ImageUpload/ImageUpload";
 import LoginCard from "@/components/LoginCard/LoginCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
+import { useAddPostMutation } from "@/services/postApi";
+import { useNavigate } from "react-router-dom";
+import { Toast } from "antd-mobile";
+
 const Post: React.FC = () => {
   const { isAuthenticated } = useAuth();
+  const [addPost, { isLoading:isLoadingPost }] = useAddPostMutation();
+  const navigate = useNavigate();
   const [showStepTwoTitleError, setShowStepTwoTitleError] = useState(false);
   const [showStepTwoDescriptionError, setShowStepTwoDescriptionError] =
     useState(false);
+    const [showStepFourFrontError, setShowStepFourFrontError] = useState(false);
+
+  const [showStepFivePriceError, setShowStepFivePriceError] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     category: "Living Room Furniture",
@@ -130,6 +139,13 @@ const Post: React.FC = () => {
           : prev.price.isNegotiable,
       },
     }));
+    if (updates?.amount?.trim()) {
+      setShowStepFivePriceError(false);
+    }
+
+    if (updates?.isFree) {
+      setShowStepFivePriceError(false);
+    }
   };
 
   const handleDeliveryChange = (delivery: string) => {
@@ -137,10 +153,38 @@ const Post: React.FC = () => {
   };
 
   // Add form submission handler
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (currentStep === 6) {
       console.log("Form data to submit:", formData);
       // Add your API call here to save the data
+      try {
+        // 处理价格格式
+        const processedFormData = {
+          ...formData,
+          price: {
+            ...formData.price,
+            // 如果是免费，确保金额为 "0"
+            amount: formData.price.isFree ? "0" : formData.price.amount,
+          },
+        };
+
+        await addPost(processedFormData).unwrap();
+        // 发布成功后跳转到详情页
+        void navigate("/search");
+        void Toast.show({
+          icon: 'success',
+          content: 'Post created successfully',
+          duration: 2000,
+        });
+      } catch (error) {
+        console.error('Failed to create post:', error);
+        // 可以添加错误提示，比如使用 toast
+        void Toast.show({
+          icon: 'fail',
+          content: 'Failed to create post',
+          duration: 2000,
+        });
+      }
     } else {
       handleNext();
     }
@@ -169,6 +213,23 @@ const Post: React.FC = () => {
 
       // If validation fails, don't proceed
       if (!isValid) {
+        return;
+      }
+    }
+
+    // Step 4 validation
+  if (currentStep === 4) {
+    if (!formData.images.FRONT) {
+      setShowStepFourFrontError(true);
+      return;
+    }
+    setShowStepFourFrontError(false);
+  }
+
+    // Step 5 validation
+    if (currentStep === 5) {
+      if (!formData.price.amount.trim() && !formData.price.isFree) {
+        setShowStepFivePriceError(true);
         return;
       }
     }
@@ -297,6 +358,9 @@ const Post: React.FC = () => {
               />
             </label>
           </div>
+          {showStepTwoTitleError && (
+            <div className="text-error text-sm mt-2">Please enter a title</div>
+          )}
           <div className="flex flex-col items-center mt-4">
             <label className="input input-bordered flex items-start gap-2 w-full h-48">
               <svg
@@ -344,20 +408,17 @@ const Post: React.FC = () => {
                   placeholder={`Description
 E.g., Solid wood dining table with minor scratches on the top surface. Dimensions: 120cm x 80cm.
             `}
-                  maxLength={10}
+                  maxLength={500}
                   value={formData.description}
                   onChange={(e) => handleDescriptionChange(e)}
                 ></textarea>
             </label>
             <div className="flex w-full mt-2">
                   <span className="label-text-alt">
-                    {formData.description.length}/10 characters
+                    {formData.description.length}/500 characters
                   </span>
                 </div>
           </div>
-          {showStepTwoTitleError && (
-            <div className="text-error text-sm mt-2">Please enter a title</div>
-          )}
           {showStepTwoDescriptionError && (
             <div className="text-error text-sm mt-2">
               Please enter a description
@@ -433,6 +494,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
               imageUrl={formData.images.FRONT}
               onImageUpload={handleImageUpload}
               onImageDelete={handleImageDelete}
+              showError={showStepFourFrontError}
             />
             <ImageUpload
               viewType="SIDE"
@@ -488,6 +550,9 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                 />
               </div>
             </label>
+            {showStepFivePriceError && (
+            <div className="text-error text-sm mt-2">Please enter a price</div>
+          )}
           </div>
           <div className="form-control">
             <label className="label cursor-pointer justify-start gap-6">
@@ -672,6 +737,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                 currentStep === 1 ? "hidden" : ""
               }`}
               onClick={handlePrevious}
+              disabled={isLoadingPost}
             >
               Previous
             </button>
@@ -679,9 +745,14 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
               className={`btn btn-primary btn-xl ${
                 currentStep === 1 ? "w-4/5" : "w-1/3"
               } rounded-full shadow-md`}
-              onClick={handleSubmit}
+              onClick={() => void handleSubmit()}
+              disabled={isLoadingPost}
             >
-              {currentStep === 6 ? "Publish" : "Next"}
+              {currentStep === 6 ? (isLoadingPost ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "Publish"
+              )) : "Next"}
             </button>
           </div>
         </div>

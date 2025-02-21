@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import imageCompression from "browser-image-compression";
 
 interface ImageUploadProps {
@@ -6,14 +6,15 @@ interface ImageUploadProps {
   imageUrl: string | null;
   onImageUpload: (viewType: string, file: string) => void;
   onImageDelete: (viewType: string) => void;
+  showError?: boolean;
 }
 
 // 添加压缩选项
 const compressionOptions = {
-  maxSizeMB: 1, // 最大文件大小
-  maxWidthOrHeight: 1920, // 最大宽度/高度
+  maxSizeMB: 0.3, // 最大文件大小
+  maxWidthOrHeight: 1280, // 最大宽度/高度
   useWebWorker: true, // 使用 Web Worker 提高性能
-  preserveExif: true, // 保留 EXIF 数据
+  preserveExif: false, // 保留 EXIF 数据
 };
 
 export default function ImageUpload({
@@ -21,7 +22,9 @@ export default function ImageUpload({
   imageUrl,
   onImageUpload,
   onImageDelete,
+  showError = false,
 }: ImageUploadProps) {
+  const [isUploading, setIsUploading] = useState(false);
   // Hidden file input reference
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,19 +34,22 @@ export default function ImageUpload({
       const file = event.target.files?.[0];
       if (file) {
         try {
+          setIsUploading(true);
           const compressedFile = await imageCompression(
             file,
             compressionOptions
           );
-          
+
           const reader = new FileReader();
           reader.onloadend = () => {
             const base64String = reader.result as string;
             onImageUpload(viewType, base64String);
+            setIsUploading(false);
           };
           reader.readAsDataURL(compressedFile);
         } catch (error) {
           console.error("Error compressing image:", error);
+          setIsUploading(false);
         }
       }
     })();
@@ -60,7 +66,7 @@ export default function ImageUpload({
   };
 
   return (
-    // <div className="flex justify-center w-full">
+    <div className="flex flex-col w-full">
     <div className="flex items-center gap-2 w-full">
       {/* Hidden file input */}
       <input
@@ -136,26 +142,41 @@ export default function ImageUpload({
         ) : (
           // Upload button
           <button
-            className="btn btn-circle btn-outline btn-sm"
+            className={`btn btn-circle btn-outline btn-sm ${
+              isUploading ? "loading" : ""
+            }`}
             onClick={handleUploadClick}
+            disabled={isUploading}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
+            {isUploading ? (
+              <span className="loading loading-spinner loading-xs"></span>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
               className="w-4 h-4"
             >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
+                />
+              </svg>
+            )}
           </button>
+          
         )}
       </div>
+    </div>
+    {/* 添加错误提示 */}
+    {viewType === "FRONT" && showError && !imageUrl && (
+        <div className="text-error text-sm mt-2">
+          Please upload a front view image
+        </div>
+      )}
     </div>
   );
 }
