@@ -31,7 +31,7 @@ export const axiosBaseQuery =
       // 此处 result 就是我们最终需要的数据
       return { data: result };
     } catch (axiosError) {
-      let err = axiosError as AxiosError;
+      const err = axiosError as AxiosError;
       return {
         error: {
           status: err.response?.status,

@@ -1,51 +1,57 @@
 import CenteredLoading from "@/components/CenterLoading";
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 import StarRating from "@/components/StarRating/StarRating";
-import { useGetProductQuery } from "@/services/productApi";
+import { useGetPostQuery } from "@/services/postApi";
 import { useGetUserQuery } from "@/services/userApi";
+import { useEffect } from "react";
 
-interface ProductDetailProps {
-  productId: string;
-}
-const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
-  const { data: product, isLoading: isLoadingProduct } =
-    useGetProductQuery(productId);
-  // const { loginUser, isLoading:isLoadingLogin } = useSelector((state: RootState) => state.auth);
+
+// eslint-disable-next-line react/prop-types
+const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
+  const { data: post, isLoading: isLoadingPost } =
+    useGetPostQuery(postId);
   const { data: seller, isLoading: isLoadingSeller } = useGetUserQuery(
-    product?.sellerId!,
+    post?.poster?._id ?? '',
     {
-      skip: !product?.sellerId,
+      skip: !post?.poster?._id,
     }
   );
+  useEffect(()=>{
+    console.log(post?.poster?._id);
+  },[post?.poster]);
   return (
     <>
-      {isLoadingProduct || isLoadingSeller ? (
+      {isLoadingPost || isLoadingSeller ? (
         <CenteredLoading />
       ) : (
         <div className="relative">
           {/* 页头返回 */}
-          <CustomNavBar title={product?.title ? product?.title : "Detail"} />
+          <CustomNavBar title={post?.title ? post?.title : "Detail"} />
           <div className="pl-4 pr-4 pb-24">
             {/* 跑马灯 */}
             <div className="carousel w-full h-60 rounded-xl">
-              {product?.images?.map((i, index) => (
-                <div key={i} id={index + ""} className="carousel-item w-full">
-                  <img src={i} className="w-full" />
+              {Object.entries(post?.images || {}).map(([key, url]) => (
+                url && (
+                <div key={key} id={key} className="carousel-item w-full">
+                  <img src={url} className="w-full" alt={key} />
                 </div>
+                )
               ))}
             </div>
             <div className="flex w-full justify-center gap-2 py-2">
-              {product?.images?.map((i, index) => (
-                <a key={i} href={"#" + index} className="btn btn-xs">
+              {Object.keys(post?.images || {}).map((key, index) => (
+                post?.images[key] && (
+                <a key={key} href={"#" + key} className="btn btn-xs">
                   {index + 1}
                 </a>
+                )
               ))}
             </div>
             {/* 商品说明 */}
             <div className="shadow-sm p-2">
               <div className="flex justify-between">
                 <div className="text-2xl font-bold">
-                  {product?.price ? "$" + product?.price : "Negotiation"}
+                  {post?.price.isFree ?"Free":"$" + post?.price.amount} <em>{post?.price.isNegotiable ? "Negotiable":""}</em>
                 </div>
                 <div className="text-sm text-green-600 text-center">
                   <div>New $350</div>
@@ -54,7 +60,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
               </div>
 
               <p className="text-2xl mt-1 text-gray-700">
-                {product?.description}
+                {post?.description}
               </p>
             </div>
             {/* 卖家展示 */}
@@ -148,17 +154,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
                     y2="216"
                     fill="none"
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="16"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="16"
                   />
                   <polyline
                     points="152 216 152 152 104 152 104 216"
                     fill="none"
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="16"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="16"
                   />
                   <line
                     x1="40"
@@ -167,9 +173,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
                     y2="216"
                     fill="none"
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="16"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="16"
                   />
                   <line
                     x1="216"
@@ -178,17 +184,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
                     y2="116.69"
                     fill="none"
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="16"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="16"
                   />
                   <path
                     d="M24,132.69l98.34-98.35a8,8,0,0,1,11.32,0L232,132.69"
                     fill="none"
                     stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="16"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="16"
                   />
                 </svg>
                 <div className="flex flex-col">
@@ -210,4 +216,4 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId }) => {
     </>
   );
 };
-export default ProductDetail;
+export default PostDetail;

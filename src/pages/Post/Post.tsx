@@ -155,7 +155,7 @@ const Post: React.FC = () => {
   // Add form submission handler
   const handleSubmit = async () => {
     if (currentStep === 6) {
-      console.log("Form data to submit:", formData);
+      // console.log("Form data to submit:", formData);
       // Add your API call here to save the data
       try {
         // 处理价格格式

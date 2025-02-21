@@ -1,59 +1,31 @@
-import { AxiosBaseQueryError } from "@/api/axiosBaseQuery";
 import CenteredLoading from "@/components/CenterLoading";
-import { useGetProductsQuery } from "@/services/productApi";
+import { useGetPostsQuery } from "@/services/postApi";
 import { HeartFill, HeartOutline } from "antd-mobile-icons";
-import { showToast } from "@/store/slices/toastSlice";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store";
 import { useEffect, useState } from "react";
-import { Product } from "@/types/product";
+import { Post } from "@/types/post";
 import { useNavigate } from "react-router-dom";
 
 const Search: React.FC = () => {
-  const { data: products, isLoading, error } = useGetProductsQuery();
+  const { data:posts, isLoading } = useGetPostsQuery();
   const [search, setSearch] = useState<string>("");
-  const [filteredProducts, setFilteredProducts] = useState<Product[]|undefined>([]);
-  const dispatch = useDispatch<AppDispatch>();
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const navigate = useNavigate();
 
-  // 添加类型检查函数
-  function isAxiosError(error: any): error is AxiosBaseQueryError {
-    return "status" in error && "data" in error;
-  }
-  useEffect(()=>{
-    if(search){
-      setFilteredProducts(products?.filter((product)=>product.title.toLowerCase().includes(search.toLowerCase())));
-    }else{
-      setFilteredProducts(products);
-    }
-  },[search,products]);
-
-
   useEffect(() => {
-    if (error) {
-      if (isAxiosError(error)) {
-        dispatch(
-          showToast({
-            message: `Error: ${error.status}: ${JSON.stringify(error.data)}`,
-            type: "error",
-            duration: 4000,
-          })
-        );
-      } else {
-        dispatch(
-          showToast({
-            message: `Error: ${error.message}`,
-            type: "error",
-            duration: 4000,
-          })
-        );
-      }
+    if (!posts) return;
+    if (search) {
+      setFilteredPosts(
+        posts.filter((post) => 
+          post.title.toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredPosts(posts);
     }
-  }, [error, dispatch]);
+  }, [search, posts]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    // console.log(e.target.value);
   };
 
   return (
@@ -80,21 +52,21 @@ const Search: React.FC = () => {
           </label>
           {/* 商品列表 */}
           <div className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-4">
-            {filteredProducts?.map((product, index) => (
-              <div key={product._id} className="card bg-base-100 shadow-md">
-                <figure onClick={()=>{navigate(`/products/${product._id}`)}}>
+            {filteredPosts?.map((post, index) => (
+              <div key={post._id} className="card bg-base-100 shadow-md">
+                <figure onClick={()=>{void navigate(`/posts/${post._id}`)}}>
                   <img
                     className="h-44 w-full"
-                    src={product.images?.[0]}
-                    alt={product.title}
+                    src={post.images.FRONT}
+                    alt={post.title}
                   />
                 </figure>
                 <div
                   className="card-body"
                   style={{ "--padding-card": "0.5rem" } as React.CSSProperties}
                 >
-                  <h2 className="card-title">{product.title}</h2>
-                  <p>${product.price}</p>
+                  <h2 className="card-title">{post.title}</h2>
+                  <p>${post.price.isFree?'Free':post.price.amount} <em>{post.price.isNegotiable?'Negotiable':''}</em></p>
                   <button className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center">
                     {index % 2 === 0 ? (
                       <HeartOutline fontSize={24} />

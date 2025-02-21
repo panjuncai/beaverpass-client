@@ -51,6 +51,10 @@ const authSlice = createSlice({
     clearRedirectPath(state) {
       state.redirectPath = null;
     },
+    setAuthState: (state, action: PayloadAction<{ isAuthenticated: boolean; user: User }>) => {
+      state.isAuthenticated = action.payload.isAuthenticated;
+      state.loginUser = action.payload.user;
+    },
   },
   extraReducers: (builder) => {
     // login
@@ -80,5 +84,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setRedirectPath, clearRedirectPath } = authSlice.actions;
+export const { setRedirectPath, clearRedirectPath, setAuthState } = authSlice.actions;
 export default authSlice.reducer;

@@ -18,7 +18,7 @@ const App: React.FC = () => {
           path={path}
           element={
             meta?.requiresAuth ? (
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <ProtectedRoute isAuthenticated={isAuthenticated || false}>
                 <Suspense fallback={<CenteredLoading />}>{element}</Suspense>
               </ProtectedRoute>
             ) : (

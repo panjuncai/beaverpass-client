@@ -62,14 +62,16 @@ const Register: React.FC = () => {
 
     try {
       Toast.show({ icon: "loading" });
+      // console.log(`data is ${JSON.stringify(data)}`)
       await registerUser(data);
       Toast.show({
         icon: "success",
         content: "Please verify your email",
         duration: 2000,
       });
-      navigate("/login",{replace:true});
-    } catch (e) {
+      void navigate("/login", { replace: true });
+    } catch (error) {
+      console.error('Registration failed:', error);
     }
   };
 

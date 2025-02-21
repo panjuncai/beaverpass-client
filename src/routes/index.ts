@@ -13,10 +13,9 @@ const Post= lazy(() => import("@/pages/Post/Post"));
 const Search= lazy(() => import("@/pages/Search/Search"));
 const Inbox= lazy(() => import("@/pages/Inbox/Inbox"));
 const Deals= lazy(() => import("@/pages/Deals/Deals"));
-const Favourites= lazy(() => import("@/pages/Favourites/Favourites"));
 const Test= lazy(() => import("@/pages/Test/Test"));
 const AppLayout = lazy(() => import("@/layouts/AppLayout"));
-const ProductDetailWrapper = lazy(() => import("@/pages/ProductDetail/ProductDetailWrapper"));
+const PostDetailWrapper = lazy(() => import("@/pages/PostDetail/PostDetailWrapper"));
 
 export const routes: RouteConfig[] = [
   {
@@ -25,11 +24,11 @@ export const routes: RouteConfig[] = [
     meta: { requiresAuth: false, title: "Search" },
   },
   {
-    path:"/products/:productId",
-    element:React.createElement(ProductDetailWrapper),
+    path:"/posts/:postId",
+    element:React.createElement(PostDetailWrapper),
     meta:{
       requiresAuth:false,
-      title:"Product Detail"
+      title:"Post Detail"
     }
   },
   {
@@ -115,17 +114,6 @@ export const routes: RouteConfig[] = [
         path: "deals",
         element: React.createElement(Deals),
         meta: { requiresAuth: false, title: "Deals" },
-      },
-    ],
-  },
-  {
-    path: "/",
-    element: React.createElement(AppLayout),
-    children: [
-      {
-        path: "favourites",
-        element: React.createElement(Favourites),
-        meta: { requiresAuth: true, title: "favourites" },
       },
     ],
   },

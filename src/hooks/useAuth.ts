@@ -2,7 +2,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { type RootState, type AppDispatch } from '@/store';
 import { login, logout, setRedirectPath } from '@/store/slices/authSlice';
 import type { LoginRequest } from '@/types/user';
-
+import { useCheckSessionQuery } from '@/services/authApi';
+import { useEffect } from 'react';
 /**
  * useAuth 自定义 Hook
  * 用于在任意函数组件中获取 Redux 中的 auth 状态及其操作方法
@@ -13,6 +14,22 @@ export const useAuth = () => {
   const { isAuthenticated,loginUser,isLoading, redirectPath } = useSelector(
     (state: RootState) => state.auth
   );
+
+  // 自动检查会话状态
+  const { data: sessionUser, isSuccess, isFetching } = useCheckSessionQuery();
+
+  // 使用 useEffect 来同步状态
+  useEffect(() => {
+    if (isSuccess && sessionUser) {
+      dispatch({
+        type: 'auth/setAuthState',
+        payload: {
+          isAuthenticated: true,
+          user: sessionUser
+        }
+      });
+    }
+  }, [sessionUser, isSuccess, dispatch]);
 
   // 封装登录操作
   const loginHandler = async (data: LoginRequest) => {
@@ -31,9 +48,9 @@ export const useAuth = () => {
   };
 
   return {
-    isAuthenticated,
-    loginUser,
-    isLoading,
+    isAuthenticated: isAuthenticated || (isSuccess && !!sessionUser) || false,
+    loginUser: loginUser || sessionUser,
+    isLoading: isLoading || isFetching,
     redirectPath,
     login: loginHandler,
     logout: logoutHandler,
