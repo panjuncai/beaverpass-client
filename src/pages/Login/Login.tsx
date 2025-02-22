@@ -54,9 +54,10 @@ const Login: React.FC = () => {
       //   password: "",
       //   error: "",
       // });
-      navigate(redirectPath||'/');
-    } catch (e) {
-      console.log(`Login failed:${e}`)
+      void navigate(redirectPath||'/');
+    } catch (e: unknown) {
+      const error = e instanceof Error ? e.message : 'Unknown error';
+      console.log(`Login failed: ${error}`);
     }
   };
 
@@ -65,13 +66,13 @@ const Login: React.FC = () => {
         {/* 主按钮区域 */}
         <button
           className="btn btn-primary btn-xl w-full text-white rounded-full shadow-md"
-          onClick={handleLogin}
+          onClick={() => void handleLogin()}
         >
           Log in
         </button>
         {/* 提示文字与链接 */}
         <div className="mt-4 text-center">
-          <span className="text-gray-600 mr-1">Don't have an account?</span>
+          <span className="text-gray-600 mr-1">Don&apos;t have an account?</span>
           <Link to="/register" className="text-green-600">
             Sign up
           </Link>

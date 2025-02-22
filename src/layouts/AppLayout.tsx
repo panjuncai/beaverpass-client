@@ -79,6 +79,7 @@ const Top = () => {
   );
 };
 
+/* eslint-disable react/prop-types */
 const Bottom = () => {
   const navigate = useNavigate();
   const location = useLocation();

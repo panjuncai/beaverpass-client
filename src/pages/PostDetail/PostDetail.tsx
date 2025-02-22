@@ -208,13 +208,16 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
             </div>
           </div>
           <div className="fixed bottom-4 left-0 right-0 flex justify-center">
-            <button className="btn btn-primary btn-xl w-4/5 rounded-full shadow-md" onClick={()=>{
-              navigate("/orderView",{
-                state:{
-                  productId:post?._id
-                }
-              })
-            }}>
+            <button 
+              className="btn btn-primary btn-xl w-4/5 rounded-full shadow-md" 
+              onClick={() => {
+                void navigate("/orderView", {
+                  state: {
+                    productId: post?._id
+                  }
+                });
+              }}
+            >
               Buy now
             </button>
           </div>

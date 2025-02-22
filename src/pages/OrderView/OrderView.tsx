@@ -58,13 +58,13 @@ const OrderView: React.FC = () => {
     const fees = calculateFees();
    
       const orderData = {
-        buyerId: loginUser._id,
-        sellerId: post.poster._id,
+        buyerId: { _id: loginUser._id },
+        sellerId: { _id: post.poster._id },
         postSnapshot: {
           postId: post._id,
           title: post.title,
           price: Number(post.price.amount),
-          images: [post.images.FRONT],
+          images: post.images.FRONT ? [post.images.FRONT] : [],
         },
         ...fees,
         shippingInfo,
