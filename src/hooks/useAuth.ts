@@ -3,7 +3,7 @@ import { type RootState, type AppDispatch } from '@/store';
 import { login, logout, setRedirectPath } from '@/store/slices/authSlice';
 import type { LoginRequest } from '@/types/user';
 import { useCheckSessionQuery } from '@/services/authApi';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 /**
  * useAuth 自定义 Hook
@@ -17,12 +17,16 @@ export const useAuth = () => {
     (state: RootState) => state.auth
   );
 
-  // 自动检查会话状态
-  const { data: sessionUser, isSuccess, isFetching } = useCheckSessionQuery();
-  // console.log(`sessionUser is ${JSON.stringify(sessionUser)}`)
+  // 添加一个跳过 session 检查的标志
+  const [skipSessionCheck, setSkipSessionCheck] = useState(false);
+
+  const { data: sessionUser, isSuccess } = useCheckSessionQuery(undefined, {
+    skip: skipSessionCheck // 当 skipSessionCheck 为 true 时跳过查询
+  });
+
   // 使用 useEffect 来同步状态
   useEffect(() => {
-    if (isSuccess && sessionUser) {
+    if (isSuccess && sessionUser && !skipSessionCheck) {
       dispatch({
         type: 'auth/setAuthState',
         payload: {
@@ -31,7 +35,7 @@ export const useAuth = () => {
         }
       });
     }
-  }, [sessionUser, isSuccess, dispatch]);
+  }, [sessionUser, isSuccess, dispatch, skipSessionCheck]);
 
   // 封装登录操作
   const loginHandler = async (data: LoginRequest) => {
@@ -43,11 +47,13 @@ export const useAuth = () => {
   const logoutHandler = async () => {
     try {
       await dispatch(logout()).unwrap();
+      setSkipSessionCheck(true); // 登出后跳过 session 检查
       dispatch({
         type: 'auth/setAuthState',
         payload: {
           isAuthenticated: false,
-          user: null
+          user: null,
+          isLoading: false
         }
       });
       void navigate("/search");
@@ -64,9 +70,9 @@ export const useAuth = () => {
   };
 
   return {
-    isAuthenticated: isAuthenticated || (isSuccess && !!sessionUser) || false,
-    loginUser: loginUser || sessionUser,
-    isLoading: isLoading || isFetching,
+    isAuthenticated: isAuthenticated || (!skipSessionCheck && isSuccess && !!sessionUser) || false,
+    loginUser: loginUser || (!skipSessionCheck ? sessionUser : null),
+    isLoading,
     redirectPath,
     login: loginHandler,
     logout: logoutHandler,

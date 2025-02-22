@@ -25,4 +25,5 @@ export interface Post extends BasePost {
   createdAt?: string;
   updatedAt?: string;
   poster: {_id:string};
+  status:string;
 } 

@@ -30,7 +30,18 @@ export const postApi = createApi({
         method: 'GET',
       }),
     }),
+    updatePost: builder.mutation<Post, { postId: string; status: string }>({
+      query: ({ postId, status }) => ({
+        url: `/${postId}/status`,
+        method: 'PATCH',
+        data: { status },
+      }),
+      invalidatesTags: (_result, _error, { postId }) => [
+        { type: 'Post', id: postId },
+        'Post',
+      ],
+    }),
   }),
 });
 
-export const { useAddPostMutation, useGetPostsQuery, useGetPostQuery } = postApi;
+export const { useAddPostMutation, useGetPostsQuery, useGetPostQuery, useUpdatePostMutation } = postApi;

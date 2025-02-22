@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URI = import.meta.env.VITE_API_URI;
 const apiClient = axios.create({
   baseURL: API_URI, // 替换为实际后端 URL
-  timeout: 5000, // 请求超时时间
+  timeout: 10000, // 请求超时时间
   withCredentials: true, // 添加这行来支持跨域凭证
 });
 
@@ -34,8 +34,8 @@ apiClient.interceptors.response.use(
     return data;
   },
   (error) => {
-    // console.log(`Axios Response Error:${JSON.stringify(error)}`);
-    // console.log(`error response is ${JSON.stringify(error.response)}`)
+    console.log(`Axios Response Error:${JSON.stringify(error)}`);
+    console.log(`error response is ${JSON.stringify(error.response)}`)
     if (error.response?.data.code === 4001) {
       // window.location.href = '/login';
       //console.log(`error response is ${JSON.stringify(error.response)}`);
