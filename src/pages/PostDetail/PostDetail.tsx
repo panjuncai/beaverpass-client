@@ -17,7 +17,7 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
     }
   );
   useEffect(()=>{
-    console.log(post?.poster?._id);
+    // console.log(post?.poster?._id);
   },[post?.poster]);
   return (
     <>

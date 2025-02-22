@@ -19,9 +19,9 @@ const EmptyDeal:React.FC=()=> {
           d="M16,32H40L76.75,164.28A16,16,0,0,0,92.16,176H191a16,16,0,0,0,15.42-11.72L232,72H51.11"
           fill="none"
           stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="16"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="16"
         />
       </svg>
       <h2 className="text-lg font-semibold">No Deal</h2>

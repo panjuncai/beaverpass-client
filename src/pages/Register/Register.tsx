@@ -94,7 +94,7 @@ const Register: React.FC = () => {
         {/* 主按钮区域 */}
         <button
           className="btn btn-primary btn-xl w-full text-white rounded-full shadow-md"
-          onClick={handleRegister}
+          onClick={() => void handleRegister()}
         >
           Sign up
         </button>

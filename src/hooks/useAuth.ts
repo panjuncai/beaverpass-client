@@ -17,7 +17,7 @@ export const useAuth = () => {
 
   // 自动检查会话状态
   const { data: sessionUser, isSuccess, isFetching } = useCheckSessionQuery();
-
+  console.log(`sessionUser is ${JSON.stringify(sessionUser)}`)
   // 使用 useEffect 来同步状态
   useEffect(() => {
     if (isSuccess && sessionUser) {
@@ -39,7 +39,20 @@ export const useAuth = () => {
 
   // 封装登出操作
   const logoutHandler = async () => {
-    await dispatch(logout()).unwrap();
+    try {
+      await dispatch(logout()).unwrap();
+      // 登出后重置认证状态
+      dispatch({
+        type: 'auth/setAuthState',
+        payload: {
+          isAuthenticated: false,
+          user: null
+        }
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error;
+    }
   };
 
   // 封装设置重定向路径操作
