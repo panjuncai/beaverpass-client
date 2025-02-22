@@ -4,6 +4,7 @@ import { HeartFill, HeartOutline } from "antd-mobile-icons";
 import { useEffect, useState } from "react";
 import { Post } from "@/types/post";
 import { useNavigate } from "react-router-dom";
+import Logo from "@/components/Logo/Logo";
 
 const Search: React.FC = () => {
   const { data:posts, isLoading } = useGetPostsQuery();
@@ -35,6 +36,9 @@ const Search: React.FC = () => {
       ) : (
         // 搜索框
         <div className="container grid grid-cols-1 gap-0 p-2">
+          <div className="flex mb-2 justify-center items-center">
+            <Logo height={60} width={225} />
+          </div>
           <label className="input input-bordered input-lg flex items-center gap-2 ml-4 mr-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"

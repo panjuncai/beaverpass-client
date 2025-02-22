@@ -5,6 +5,7 @@ import { productApi } from "@/services/productApi";
 import { postApi } from "@/services/postApi";
 import { userApi } from "@/services/userApi";
 import { authApi } from '@/services/authApi';
+import { orderApi } from '@/services/orderApi';
 
 // 合并所有的 reducers
 const rootReducer = combineReducers({
@@ -13,7 +14,8 @@ const rootReducer = combineReducers({
   [productApi.reducerPath]: productApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
   [postApi.reducerPath]: postApi.reducer,
-  [authApi.reducerPath]: authApi.reducer
+  [authApi.reducerPath]: authApi.reducer,
+  [orderApi.reducerPath]: orderApi.reducer
 });
 
 export const store = configureStore({
@@ -24,7 +26,8 @@ export const store = configureStore({
         productApi.middleware,
         userApi.middleware,
         postApi.middleware,
-        authApi.middleware
+        authApi.middleware,
+        orderApi.middleware
       ),
 });
 

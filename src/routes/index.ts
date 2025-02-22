@@ -16,7 +16,7 @@ const Deals= lazy(() => import("@/pages/Deals/Deals"));
 const Test= lazy(() => import("@/pages/Test/Test"));
 const AppLayout = lazy(() => import("@/layouts/AppLayout"));
 const PostDetailWrapper = lazy(() => import("@/pages/PostDetail/PostDetailWrapper"));
-
+const OrderView= lazy(() => import("@/pages/OrderView/OrderView"));
 export const routes: RouteConfig[] = [
   {
     path: "/",
@@ -59,6 +59,17 @@ export const routes: RouteConfig[] = [
         path: "order",
         element: React.createElement(Order),
         meta: { requiresAuth: true, title: "Order" },
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: React.createElement(AppLayout),
+    children: [
+      {
+        path: "orderView",
+        element: React.createElement(OrderView),
+        meta: { requiresAuth: true, title: "Order View" },
       },
     ],
   },

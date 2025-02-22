@@ -4,10 +4,11 @@ import StarRating from "@/components/StarRating/StarRating";
 import { useGetPostQuery } from "@/services/postApi";
 import { useGetUserQuery } from "@/services/userApi";
 import { useEffect } from "react";
-
+import { useNavigate } from "react-router-dom";
 
 // eslint-disable-next-line react/prop-types
 const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
+  const navigate = useNavigate();
   const { data: post, isLoading: isLoadingPost } =
     useGetPostQuery(postId);
   const { data: seller, isLoading: isLoadingSeller } = useGetUserQuery(
@@ -207,7 +208,13 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
             </div>
           </div>
           <div className="fixed bottom-4 left-0 right-0 flex justify-center">
-            <button className="btn btn-primary btn-xl w-4/5 rounded-full shadow-md">
+            <button className="btn btn-primary btn-xl w-4/5 rounded-full shadow-md" onClick={()=>{
+              navigate("/orderView",{
+                state:{
+                  productId:post?._id
+                }
+              })
+            }}>
               Buy now
             </button>
           </div>

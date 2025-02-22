@@ -27,14 +27,14 @@ apiClient.interceptors.response.use(
     const { code, msg, data } = response.data;
     if (code !== 0) {
       Toast.show({ icon: "fail", content: msg, duration: 2000 });
-      console.log(`Error: ${msg}`);
+      // console.log(`Error: ${msg}`);
       // 手动抛出业务错误
       return Promise.reject(new Error(msg || "Unknown Error"));
     }
     return data;
   },
   (error) => {
-    console.log(`Axios Response Error:${JSON.stringify(error)}`);
+    // console.log(`Axios Response Error:${JSON.stringify(error)}`);
     // console.log(`error response is ${JSON.stringify(error.response)}`)
     if (error.response?.data.code === 4001) {
       // window.location.href = '/login';

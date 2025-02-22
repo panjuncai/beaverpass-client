@@ -1,4 +1,4 @@
-import logo from './logo.jpg'
+import logo from './logo.png'
 
 const Logo:React.FC<{height:number,width:number}>=({height,width})=>{
     return(

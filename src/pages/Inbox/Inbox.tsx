@@ -59,7 +59,7 @@ const Inbox: React.FC = () => {
   };
   return (
     <div className="flex flex-col h-full">
-      <CustomNavBar title="Inbox" />
+      <CustomNavBar title="Inbox" showBack={false} />
       {isAuthenticated ? InboxBuyFunc() : LoginCardFunc()}
     </div>
   );

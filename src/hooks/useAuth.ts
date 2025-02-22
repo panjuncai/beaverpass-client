@@ -4,12 +4,14 @@ import { login, logout, setRedirectPath } from '@/store/slices/authSlice';
 import type { LoginRequest } from '@/types/user';
 import { useCheckSessionQuery } from '@/services/authApi';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 /**
  * useAuth 自定义 Hook
  * 用于在任意函数组件中获取 Redux 中的 auth 状态及其操作方法
  */
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   // 从 Redux store 中获取 auth 状态
   const { isAuthenticated,loginUser,isLoading, redirectPath } = useSelector(
     (state: RootState) => state.auth
@@ -17,7 +19,7 @@ export const useAuth = () => {
 
   // 自动检查会话状态
   const { data: sessionUser, isSuccess, isFetching } = useCheckSessionQuery();
-  console.log(`sessionUser is ${JSON.stringify(sessionUser)}`)
+  // console.log(`sessionUser is ${JSON.stringify(sessionUser)}`)
   // 使用 useEffect 来同步状态
   useEffect(() => {
     if (isSuccess && sessionUser) {
@@ -41,7 +43,6 @@ export const useAuth = () => {
   const logoutHandler = async () => {
     try {
       await dispatch(logout()).unwrap();
-      // 登出后重置认证状态
       dispatch({
         type: 'auth/setAuthState',
         payload: {
@@ -49,9 +50,11 @@ export const useAuth = () => {
           user: null
         }
       });
-    } catch (error) {
-      console.error('Logout failed:', error);
-      throw error;
+      void navigate("/search");
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Logout failed:', err);
+      throw new Error(err);
     }
   };
 

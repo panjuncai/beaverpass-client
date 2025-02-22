@@ -6,15 +6,15 @@ import { useAddPostMutation } from "@/services/postApi";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "antd-mobile";
 import { BasePost } from "@/types/post";
-
+import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 const Post: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  const [addPost, { isLoading:isLoadingPost }] = useAddPostMutation();
+  const [addPost, { isLoading: isLoadingPost }] = useAddPostMutation();
   const navigate = useNavigate();
   const [showStepTwoTitleError, setShowStepTwoTitleError] = useState(false);
   const [showStepTwoDescriptionError, setShowStepTwoDescriptionError] =
     useState(false);
-    const [showStepFourFrontError, setShowStepFourFrontError] = useState(false);
+  const [showStepFourFrontError, setShowStepFourFrontError] = useState(false);
 
   const [showStepFivePriceError, setShowStepFivePriceError] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -173,16 +173,16 @@ const Post: React.FC = () => {
         // 发布成功后跳转到详情页
         void navigate("/search");
         void Toast.show({
-          icon: 'success',
-          content: 'Post created successfully',
+          icon: "success",
+          content: "Post created successfully",
           duration: 2000,
         });
       } catch (error) {
-        console.error('Failed to create post:', error);
+        console.error("Failed to create post:", error);
         // 可以添加错误提示，比如使用 toast
         void Toast.show({
-          icon: 'fail',
-          content: 'Failed to create post',
+          icon: "fail",
+          content: "Failed to create post",
           duration: 2000,
         });
       }
@@ -219,13 +219,13 @@ const Post: React.FC = () => {
     }
 
     // Step 4 validation
-  if (currentStep === 4) {
-    if (!formData.images.FRONT) {
-      setShowStepFourFrontError(true);
-      return;
+    if (currentStep === 4) {
+      if (!formData.images.FRONT) {
+        setShowStepFourFrontError(true);
+        return;
+      }
+      setShowStepFourFrontError(false);
     }
-    setShowStepFourFrontError(false);
-  }
 
     // Step 5 validation
     if (currentStep === 5) {
@@ -404,21 +404,21 @@ const Post: React.FC = () => {
                   strokeWidth="16"
                 />
               </svg>
-                <textarea
-                  className="grow h-full resize-none bg-transparent border-none outline-none pt-1"
-                  placeholder={`Description
+              <textarea
+                className="grow h-full resize-none bg-transparent border-none outline-none pt-1"
+                placeholder={`Description
 E.g., Solid wood dining table with minor scratches on the top surface. Dimensions: 120cm x 80cm.
             `}
-                  maxLength={500}
-                  value={formData.description}
-                  onChange={(e) => handleDescriptionChange(e)}
-                ></textarea>
+                maxLength={500}
+                value={formData.description}
+                onChange={(e) => handleDescriptionChange(e)}
+              ></textarea>
             </label>
             <div className="flex w-full mt-2">
-                  <span className="label-text-alt">
-                    {formData.description.length}/500 characters
-                  </span>
-                </div>
+              <span className="label-text-alt">
+                {formData.description.length}/500 characters
+              </span>
+            </div>
           </div>
           {showStepTwoDescriptionError && (
             <div className="text-error text-sm mt-2">
@@ -552,8 +552,10 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
               </div>
             </label>
             {showStepFivePriceError && (
-            <div className="text-error text-sm mt-2">Please enter a price</div>
-          )}
+              <div className="text-error text-sm mt-2">
+                Please enter a price
+              </div>
+            )}
           </div>
           <div className="form-control">
             <label className="label cursor-pointer justify-start gap-6">
@@ -749,11 +751,15 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
               onClick={() => void handleSubmit()}
               disabled={isLoadingPost}
             >
-              {currentStep === 6 ? (isLoadingPost ? (
-                <span className="loading loading-spinner"></span>
+              {currentStep === 6 ? (
+                isLoadingPost ? (
+                  <span className="loading loading-spinner"></span>
+                ) : (
+                  "Publish"
+                )
               ) : (
-                "Publish"
-              )) : "Next"}
+                "Next"
+              )}
             </button>
           </div>
         </div>
@@ -763,11 +769,18 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
   // 显示未登录
   const noLoginFunc = () => {
     return (
-      <div className="flex flex-col h-full justify-center">
-        <LoginCard />
-      </div>
+      <>
+        <div className="flex flex-col h-full justify-center">
+          <LoginCard />
+        </div>
+      </>
     );
   };
-  return <>{isAuthenticated ? stepsPost() : noLoginFunc()}</>;
+  return (
+    <div className="flex flex-col h-full">
+      <CustomNavBar title="Post" showBack={false} />
+      {isAuthenticated ? stepsPost() : noLoginFunc()}
+    </div>
+  );
 };
 export default Post;
