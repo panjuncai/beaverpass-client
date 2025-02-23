@@ -1,7 +1,7 @@
 import CenteredLoading from "@/components/CenterLoading";
 import { useGetPostsQuery } from "@/services/postApi";
-import { HeartFill, HeartOutline } from "antd-mobile-icons";
-import { useEffect, useState } from "react";
+import { HeartOutline } from "antd-mobile-icons";
+import { useEffect, useState, useMemo } from "react";
 import { Post } from "@/types/post";
 import { useNavigate } from "react-router-dom";
 import Logo from "@/components/Logo/Logo";
@@ -12,18 +12,19 @@ const Search: React.FC = () => {
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const navigate = useNavigate();
 
+  const activePosts = useMemo(() => 
+    posts?.filter(post => post.status === 'active') || [], 
+    [posts]
+  );
+
   useEffect(() => {
-    if (!posts) return;
-    if (search) {
-      setFilteredPosts(
-        posts.filter((post) => 
-          post.title.toLowerCase().includes(search.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredPosts(posts);
-    }
-  }, [search, posts]);
+    if (!activePosts) return;
+    setFilteredPosts(
+      search
+        ? activePosts.filter(post => post.title.toLowerCase().includes(search.toLowerCase()))
+        : activePosts
+    );
+  }, [search, activePosts]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -56,7 +57,7 @@ const Search: React.FC = () => {
           </label>
           {/* 商品列表 */}
           <div className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-4">
-            {filteredPosts?.map((post, index) => (
+            {filteredPosts?.map((post) => (
               <div key={post._id} className="card bg-base-100 shadow-md">
                 <figure onClick={()=>{void navigate(`/posts/${post._id}`)}}>
                   <img
@@ -72,11 +73,12 @@ const Search: React.FC = () => {
                   <h2 className="card-title">{post.title}</h2>
                   <p>${post.price.isFree?'Free':post.price.amount} <em>{post.price.isNegotiable?'Negotiable':''}</em></p>
                   <button className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center">
-                    {index % 2 === 0 ? (
+                    {/* {index % 2 === 0 ? (
                       <HeartOutline fontSize={24} />
                     ) : (
                       <HeartFill color="#BED596" fontSize={24} />
-                    )}
+                    )} */}
+                    <HeartOutline fontSize={24} />
                   </button>
                 </div>
               </div>

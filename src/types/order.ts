@@ -2,7 +2,12 @@ export interface PostSnapshot {
   postId: string;
   title: string;
   price: number;
-  images: string[];
+  images: {
+    FRONT: string;
+    BACK: string;
+    LEFT: string;
+    RIGHT: string;
+  };
 }
 
 export interface ShippingInfo {

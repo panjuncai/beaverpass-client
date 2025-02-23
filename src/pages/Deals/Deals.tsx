@@ -7,7 +7,7 @@ import { useState } from "react";
 import CenteredLoading from "@/components/CenterLoading";
 import { Order } from "@/types/order";
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
-import { useGetPostsQuery, useUpdatePostMutation } from "@/services/postApi";
+import { useGetUserPostsQuery, useUpdatePostMutation } from "@/services/postApi";
 import { Post } from "@/types/post";
 import { Toast } from "antd-mobile";
 
@@ -18,7 +18,10 @@ const Deals: React.FC = () => {
   const { isAuthenticated, loginUser } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("buy");
   const { data: orders, isLoading } = useGetOrdersQuery();
-  const {data:posts,isLoading:isPostLoading} = useGetPostsQuery();
+  const { data: posts, isLoading: isPostLoading } = useGetUserPostsQuery(undefined, {
+    skip: !loginUser?._id,
+    refetchOnMountOrArgChange: true
+  });
   const [buyTabState, setBuyTabState] = useState<'active' | 'history'>('active');
   const [sellTabState, setSellTabState] = useState<'active' | 'inactive' |'sold' |'deleted'>('active');
 
@@ -64,7 +67,7 @@ const Deals: React.FC = () => {
       <div className="card-body">
         <div className="flex items-center gap-4">
           <img
-            src={order.postSnapshot.images[0]}
+            src={order.postSnapshot.images.FRONT}
             alt={order.postSnapshot.title}
             className="w-24 h-24 object-cover rounded-lg"
           />

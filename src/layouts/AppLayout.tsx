@@ -10,7 +10,7 @@ import { Outlet, useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 const Top = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated,logout,loginUser } = useAuth();
 
   return (
     <div className="fixed top-1 right-1 z-50">
@@ -57,7 +57,9 @@ const Top = () => {
           {isAuthenticated ? (
             <>
               <li>
-                <Link to="/profile">Profile Settings</Link>
+                <Link to="/profile">
+                  {(loginUser?.firstName ?? '') + (loginUser?.lastName ?? '')} Profile Settings
+                </Link>
               </li>
               <li>
                 <button onClick={() => void logout()}>Logout</button>

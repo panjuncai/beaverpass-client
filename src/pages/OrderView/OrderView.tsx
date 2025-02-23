@@ -64,7 +64,12 @@ const OrderView: React.FC = () => {
           postId: post._id,
           title: post.title,
           price: Number(post.price.amount),
-          images: post.images.FRONT ? [post.images.FRONT] : [],
+          images: {
+            FRONT: post.images.FRONT || '',
+            BACK: post.images.BACK || '',
+            LEFT: post.images.LEFT || '',
+            RIGHT: post.images.RIGHT || ''
+          }
         },
         ...fees,
         shippingInfo,
@@ -89,7 +94,11 @@ const OrderView: React.FC = () => {
         <div className="card bg-base-100 shadow">
           <div className="card-body">
             <h2 className="card-title">{post?.title}</h2>
-            <img src={post?.images.FRONT} alt={post?.title} className="w-32 h-32 object-cover" />
+            <img 
+                src={post?.images.FRONT} 
+                alt={post?.title} 
+                className="w-full h-36 object-cover"
+              />
             <p>{post?.description}</p>
             <div className="badge badge-outline">{post?.condition}</div>
           </div>

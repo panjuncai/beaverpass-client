@@ -2,9 +2,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { type RootState, type AppDispatch } from '@/store';
 import { login, logout, setRedirectPath } from '@/store/slices/authSlice';
 import type { LoginRequest } from '@/types/user';
-import { useCheckSessionQuery } from '@/services/authApi';
-import { useEffect, useState } from 'react';
+// import { useCheckSessionQuery } from '@/services/authApi';
+// import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '@/services/api';  // 导入 api slice
 /**
  * useAuth 自定义 Hook
  * 用于在任意函数组件中获取 Redux 中的 auth 状态及其操作方法
@@ -18,24 +19,24 @@ export const useAuth = () => {
   );
 
   // 添加一个跳过 session 检查的标志
-  const [skipSessionCheck, setSkipSessionCheck] = useState(false);
+  // const [skipSessionCheck, setSkipSessionCheck] = useState(false);
 
-  const { data: sessionUser, isSuccess } = useCheckSessionQuery(undefined, {
-    skip: skipSessionCheck // 当 skipSessionCheck 为 true 时跳过查询
-  });
+  // const { data: sessionUser, isSuccess } = useCheckSessionQuery(undefined, {
+  //   skip: skipSessionCheck // 当 skipSessionCheck 为 true 时跳过查询
+  // });
 
   // 使用 useEffect 来同步状态
-  useEffect(() => {
-    if (isSuccess && sessionUser && !skipSessionCheck) {
-      dispatch({
-        type: 'auth/setAuthState',
-        payload: {
-          isAuthenticated: true,
-          user: sessionUser
-        }
-      });
-    }
-  }, [sessionUser, isSuccess, dispatch, skipSessionCheck]);
+  // useEffect(() => {
+  //   if (!isAuthenticated && isSuccess && sessionUser && !skipSessionCheck) {
+  //     dispatch({
+  //       type: 'auth/setAuthState',
+  //       payload: {
+  //         isAuthenticated: true,
+  //         user: sessionUser
+  //       }
+  //     });
+  //   }
+  // }, [sessionUser, isSuccess, dispatch, skipSessionCheck, isAuthenticated]);
 
   // 封装登录操作
   const loginHandler = async (data: LoginRequest) => {
@@ -47,7 +48,7 @@ export const useAuth = () => {
   const logoutHandler = async () => {
     try {
       await dispatch(logout()).unwrap();
-      setSkipSessionCheck(true); // 登出后跳过 session 检查
+      // setSkipSessionCheck(true); // 登出后跳过 session 检查
       dispatch({
         type: 'auth/setAuthState',
         payload: {
@@ -56,11 +57,13 @@ export const useAuth = () => {
           isLoading: false
         }
       });
+
+      // 重置所有 API 缓存
+      dispatch(api.util.resetApiState());
+      
       void navigate("/search");
-    } catch (error: unknown) {
-      const err = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Logout failed:', err);
-      throw new Error(err);
+    } catch {
+      throw new Error('Logout failed');
     }
   };
 
@@ -70,8 +73,8 @@ export const useAuth = () => {
   };
 
   return {
-    isAuthenticated: isAuthenticated || (!skipSessionCheck && isSuccess && !!sessionUser) || false,
-    loginUser: loginUser || (!skipSessionCheck ? sessionUser : null),
+    isAuthenticated,
+    loginUser,
     isLoading,
     redirectPath,
     login: loginHandler,
