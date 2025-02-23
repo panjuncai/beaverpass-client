@@ -4,7 +4,7 @@ import { createApiWithBaseUrl, TAGS } from './api';
 const TAG_TYPE = { type: TAGS.Post };
 
 // 创建带有特定 baseUrl 的 API 实例
-export const postApi = createApiWithBaseUrl('/posts').injectEndpoints({
+export const postApi = createApiWithBaseUrl('/posts', 'postApi').injectEndpoints({
   endpoints: (builder) => ({
     getPosts: builder.query<Post[], void>({
       query: () => ({

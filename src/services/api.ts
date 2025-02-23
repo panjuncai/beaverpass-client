@@ -3,17 +3,19 @@ import { axiosBaseQuery } from '@/api/axiosBaseQuery';
 
 // 定义标签常量
 export const TAGS = {
-  Post: 'Post'
+  Post: 'Post',
+  Chat: 'Chat'
 } as const;
 
+
 // 创建基础 API slice 工厂函数
-export const createApiWithBaseUrl = (baseUrl: string) => createApi({
-  reducerPath: 'api',
+export const createApiWithBaseUrl = (baseUrl: string, path: string) => createApi({
+  reducerPath: path,  // 使用传入的路径作为 reducerPath
   baseQuery: axiosBaseQuery({ baseUrl }),
-  tagTypes: [TAGS.Post],
+  tagTypes: [TAGS.Post, TAGS.Chat],
   endpoints: () => ({}),
 });
 
 // 创建默认 API 实例
-export const api = createApiWithBaseUrl('');
-export const { resetApiState } = api.util; 
+export const api = createApiWithBaseUrl('', 'baseApi');
+export const { resetApiState } = api.util;

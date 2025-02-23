@@ -106,7 +106,8 @@ const Deals: React.FC = () => {
           icon: 'success',
           content: 'Post status updated'
         });
-      } catch {
+      } catch(error) {
+        console.log('update post statuserror',error);
         Toast.show({
           icon: 'fail',
           content: 'Failed to update post status'

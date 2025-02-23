@@ -5,9 +5,15 @@ import { useGetPostQuery } from "@/services/postApi";
 import { useGetUserQuery } from "@/services/userApi";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCreateChatRoomMutation, useSendMessageMutation, useGetRoomWithUserQuery } from "@/services/chatApi";
+import { useAuth } from "@/hooks/useAuth";
+import { Toast } from "antd-mobile";
 
 // eslint-disable-next-line react/prop-types
 const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
+  const { loginUser } = useAuth();
+  const [createChatRoom] = useCreateChatRoomMutation();
+  const [sendMessage] = useSendMessageMutation();
   const navigate = useNavigate();
   const { data: post, isLoading: isLoadingPost } =
     useGetPostQuery(postId);
@@ -17,9 +23,58 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
       skip: !post?.poster?._id,
     }
   );
+  const sellerId = post?.poster._id || '';
+  const { data: existingRoom } = useGetRoomWithUserQuery(sellerId, {
+    skip: !sellerId  // 当没有 sellerId 时跳过查询
+  });
   useEffect(()=>{
     // console.log(post?.poster?._id);
   },[post?.poster]);
+
+  const handleChatClick = async () => {
+    if (!loginUser) {
+      Toast.show({
+        content: 'Please login first',
+        icon: 'fail'
+      });
+      return;
+    }
+
+    try {
+      if (existingRoom) {
+        // 如果已有聊天室，直接跳转
+        void navigate(`/chat/${existingRoom._id}`,{
+          state:{
+            chatRoom: existingRoom
+          }
+        });
+      } else {
+        // 创建新聊天室并发送商品消息
+        const room = await createChatRoom({
+          sellerId: sellerId
+        }).unwrap();
+
+        await sendMessage({
+          roomId: room._id,
+          postId: post?._id,
+          messageType: 'post'
+        }).unwrap();
+        
+        void navigate(`/chat/${room._id}`,{
+          state:{
+            chatRoom: room
+          }
+        });
+      }
+    } catch (error) {
+      console.log('error', error);
+      Toast.show({
+        content: 'Failed to create chat',
+        icon: 'fail'
+      });
+    }
+  };
+
   return (
     <>
       {isLoadingPost || isLoadingSeller ? (
@@ -115,7 +170,12 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
                     <StarRating rating={4} />
                     <span className="text-lg">4.0</span>
                   </div>
-                  <button className="btn btn-primary btn-sm">Chat</button>
+                  <button 
+                    className="btn btn-sm btn-primary"
+                    onClick={() => void handleChatClick()}
+                  >
+                    Chat
+                  </button>
                 </div>
               </div>
             </div>

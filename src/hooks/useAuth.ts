@@ -62,7 +62,8 @@ export const useAuth = () => {
       dispatch(api.util.resetApiState());
       
       void navigate("/search");
-    } catch {
+    } catch(error) {
+      console.log('logout error',error);
       throw new Error('Logout failed');
     }
   };

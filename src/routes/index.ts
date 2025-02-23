@@ -3,6 +3,7 @@ import { RouteConfig } from "@/types/routes";
 import { Navigate } from "react-router-dom";
 import React from "react";
 
+
 // 页面组件懒加载
 const Register = lazy(() => import("@/pages/Register/Register"));
 const VerifyEmail = lazy(() => import("@/pages/VerifyEmail/VerifyEmail"));
@@ -17,6 +18,8 @@ const Test= lazy(() => import("@/pages/Test/Test"));
 const AppLayout = lazy(() => import("@/layouts/AppLayout"));
 const PostDetailWrapper = lazy(() => import("@/pages/PostDetail/PostDetailWrapper"));
 const OrderView= lazy(() => import("@/pages/OrderView/OrderView"));
+const Chat= lazy(() => import("@/pages/Chat/Chat"));
+
 export const routes: RouteConfig[] = [
   {
     path: "/",
@@ -30,6 +33,17 @@ export const routes: RouteConfig[] = [
       requiresAuth:false,
       title:"Post Detail"
     }
+  },
+  {
+    path: "/",
+    element: React.createElement(AppLayout),
+    children: [
+      {
+        path: "/chat/:roomId",
+        element: React.createElement(Chat),
+        meta: { requiresAuth: true, title: "Chat" },
+      },
+    ],
   },
   {
     path: "/register",
