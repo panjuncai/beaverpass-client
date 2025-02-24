@@ -9,13 +9,13 @@ const LoginCard: React.FC = () => {
         {/* 主按钮区域 */}
         <button
           className="btn btn-primary btn-xl w-4/5 text-white rounded-full shadow-md"
-          onClick={() => navigate("/login")}
+          onClick={() =>void navigate("/login")}
         >
           Log in
         </button>
         {/* 提示文字与链接 */}
         <div className="mt-4 text-center">
-          <span className="text-gray-600 mr-1">Don't have an account?</span>
+          <span className="text-gray-600 mr-1">Don&apos;t have an account?</span>
           <Link to="/register" className="text-green-600">
             Sign up
           </Link>

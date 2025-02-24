@@ -5,6 +5,7 @@ import { useCreateOrderMutation } from "@/services/orderApi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Toast } from "antd-mobile";
+import CenteredLoading from "@/components/CenterLoading";
 
 interface LocationState {
   productId: string;
@@ -31,7 +32,7 @@ const OrderView: React.FC = () => {
   });
 
   if (isLoadingPost) {
-    return <>Loading...</>;
+    return <CenteredLoading />;
   }
 
   const calculateFees = () => {

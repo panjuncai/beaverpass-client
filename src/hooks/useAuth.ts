@@ -13,10 +13,12 @@ import { api } from '@/services/api';  // 导入 api slice
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  
   // 从 Redux store 中获取 auth 状态
   const { isAuthenticated,loginUser,isLoading, redirectPath } = useSelector(
     (state: RootState) => state.auth
   );
+  console.log("loginUser",loginUser?.firstName)
 
   // 添加一个跳过 session 检查的标志
   // const [skipSessionCheck, setSkipSessionCheck] = useState(false);

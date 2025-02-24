@@ -2,12 +2,78 @@ import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 // import EmptyMessage from "@/components/Empty/EmptyMessage";
 import LoginCard from "@/components/LoginCard/LoginCard";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState } from "react";
+import { ChatRoom } from "@/types/chat";
+import { formatDistanceToNow } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+import { useGetChatRoomsQuery } from "@/services/chatApi";
+import { useNavigate } from 'react-router-dom';
+import CenteredLoading from "@/components/CenterLoading";
 
 const Inbox: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-  {
-    /* <EmptyMessage /> */
-  }
+  const { isAuthenticated, loginUser } = useAuth();
+  const { data: chatRooms, isLoading } = useGetChatRoomsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // TODO: 从API获取聊天室列表
+    // fetchChatRooms();
+  }, []);
+
+  const ChatRoomList = () => {
+    return (
+      <div className="flex-1 overflow-y-auto">
+        {chatRooms?.map((room) => {
+          const otherParticipant = room.participants.find(p => p._id !== loginUser?._id);
+          if (!otherParticipant) return null;
+          console.log(`otherParticipant:${JSON.stringify(otherParticipant)}`)
+          return (
+            <div 
+              key={room._id} 
+              className="flex items-center gap-4 p-4 hover:bg-base-200 cursor-pointer border-b"
+              onClick={() => void navigate(`/chat/${room._id}`, {
+                state: {
+                  chatRoom: room
+                }
+              })}
+            >
+              <div className="relative">
+                <div className="avatar">
+                  <div className="w-12 h-12 rounded-full">
+                    <img src={`/avators/${otherParticipant.avatar}.png`} alt="avatar" />
+                  </div>
+                </div>
+                {otherParticipant.unreadCount > 0 && (
+                  <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    {otherParticipant.unreadCount}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start">
+                  <h3 className="font-semibold">
+                    {`${otherParticipant.firstName} ${otherParticipant.lastName}`}
+                  </h3>
+                  <span className="text-sm text-gray-500">
+                    {room.lastMessage?.createdAt && formatDistanceToNow(new Date(room.lastMessage.createdAt), {
+                      addSuffix: true,
+                      locale: enUS
+                    })}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 line-clamp-1">
+                  {room.lastMessage?.content || 'No message'}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const LoginCardFunc = () => {
     return (
       <>
@@ -17,6 +83,7 @@ const Inbox: React.FC = () => {
       </>
     );
   };
+
   const InboxBuyFunc = () => {
     return (
       <div className="flex-1">
@@ -29,8 +96,8 @@ const Inbox: React.FC = () => {
             aria-label="All"
             defaultChecked
           />
-          <div role="tabpanel" className="tab-content p-10">
-            All
+          <div role="tabpanel" className="tab-content">
+            <ChatRoomList />
           </div>
           <input
             type="radio"
@@ -57,6 +124,10 @@ const Inbox: React.FC = () => {
       </div>
     );
   };
+
+  if (isLoading) {
+    return  <CenteredLoading />;
+  }
   return (
     <div className="flex flex-col h-full">
       <CustomNavBar title="Inbox" showBack={false} />

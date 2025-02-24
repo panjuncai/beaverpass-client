@@ -9,7 +9,7 @@ import { BasePost } from "@/types/post";
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 const Post: React.FC = () => {
   const { isAuthenticated } = useAuth();
-  console.log("Post isAuthenticated:", isAuthenticated);
+  // console.log("Post isAuthenticated:", isAuthenticated);
   const [addPost, { isLoading: isLoadingPost }] = useAddPostMutation();
   const navigate = useNavigate();
   const [showStepTwoTitleError, setShowStepTwoTitleError] = useState(false);
