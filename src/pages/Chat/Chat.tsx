@@ -38,15 +38,10 @@ const Chat: React.FC = () => {
       <CustomNavBar title="Chat" showBack={true} />
       <div className="flex-1 overflow-auto p-4 pb-20">
         {messages?.map((message) => {
-          console.log(`message:${JSON.stringify(message)}`)
-          console.log(`loginUser:${JSON.stringify(loginUser)}`)
-          console.log(`message.senderId === loginUser?._id:${message.senderId._id === loginUser?._id}`)
-          return <ChatMessage
+           return <ChatMessage
             key={message._id}
             message={message}
             isSender={message.senderId._id === loginUser?._id}
-            senderAvatar={`/avators/${loginUser?.avatar}.png`}
-            receiverAvatar={`/avators/${otherParticipant?.avatar}.png`}
           />
         })}
       </div>
