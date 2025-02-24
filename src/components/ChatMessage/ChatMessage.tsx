@@ -1,14 +1,20 @@
 import { Message } from "@/types/chat";
 import { useGetPostQuery } from "@/services/postApi";
-import PropTypes from 'prop-types';
 
 interface ChatMessageProps {
   message: Message;
   isSender: boolean;
+  senderAvatar?: string;
+  receiverAvatar?: string;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSender }) => {
-  const { data: post } = useGetPostQuery(message.post?._id || '', {
+const ChatMessage: React.FC<ChatMessageProps> = ({ 
+  message, 
+  isSender,
+  senderAvatar = "/avators/1.png",
+  receiverAvatar = "/avators/2.png"
+}) => {
+  const { data: post } = useGetPostQuery(message.postId || '', {
     skip: message.messageType !== 'post'
   });
 
@@ -16,10 +22,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSender }) => {
     switch (message.messageType) {
       case 'post':
         return (
-          <div className="bg-gray-50 p-2 rounded">
+          <div className="bg-base-100 rounded-lg p-2">
             <div className="flex items-center">
               <img
-                src={post?.images.FRONT}
+                src={post?.images.FRONT ?? undefined}
                 alt={post?.title}
                 className="w-16 h-16 object-cover rounded"
               />
@@ -35,7 +41,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSender }) => {
           <img
             src={message.content}
             alt="chat image"
-            className="max-w-[200px] rounded"
+            className="max-w-[200px] rounded-lg"
           />
         );
       default:
@@ -44,35 +50,27 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isSender }) => {
   };
 
   return (
-    <div className={`flex ${isSender ? 'justify-end' : 'justify-start'} mb-4`}>
-      <div
-        className={`max-w-[70%] ${
-          isSender ? 'bg-primary text-white' : 'bg-gray-100'
-        } p-3 rounded-lg`}
-      >
-        {renderMessageContent()}
-        <div className="text-xs mt-1 text-right">
-          {new Date(message.createdAt).toLocaleTimeString()}
+    <div className={`chat ${isSender ? 'chat-end' : 'chat-start'} mb-4`}>
+      <div className="chat-image avatar">
+        <div className="w-10 rounded-full">
+          <img src={isSender ? senderAvatar : receiverAvatar} alt="avatar" />
         </div>
+      </div>
+      <div className="chat-header">
+        {isSender ? 'You' : 'Seller'}
+        <time className="text-xs opacity-50 ml-2">
+          {new Date(message.createdAt).toLocaleTimeString()}
+        </time>
+      </div>
+      <div className={`chat-bubble ${isSender ? 'chat-bubble-primary' : ''}`}>
+        {renderMessageContent()}
+      </div>
+      <div className="chat-footer opacity-50">
+        {/* 可以添加消息状态，比如已读/未读 */}
+        {isSender ? 'Sent' : 'Received'}
       </div>
     </div>
   );
-};
-
-ChatMessage.propTypes = {
-  message: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-    roomId: PropTypes.string.isRequired,
-    senderId: PropTypes.string.isRequired,
-    content: PropTypes.string,
-    post: PropTypes.shape({
-      _id: PropTypes.string.isRequired
-    }),
-    createdAt: PropTypes.string.isRequired,
-    messageType: PropTypes.oneOf(['text', 'image', 'post']).isRequired,
-    readBy: PropTypes.arrayOf(PropTypes.string).isRequired,
-  }).isRequired,
-  isSender: PropTypes.bool.isRequired
 };
 
 export default ChatMessage; 

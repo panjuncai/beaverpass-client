@@ -37,11 +37,19 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
         content: 'Please login first',
         icon: 'fail'
       });
+      void navigate('/login');
       return;
     }
 
     try {
       if (existingRoom) {
+        // 先发送商品
+        await sendMessage({
+          roomId: existingRoom._id,
+          postId: post?._id,
+          messageType: 'post'
+        }).unwrap();
+
         // 如果已有聊天室，直接跳转
         void navigate(`/chat/${existingRoom._id}`,{
           state:{
@@ -86,22 +94,22 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
           <div className="pl-4 pr-4 pb-24">
             {/* 跑马灯 */}
             <div className="carousel w-full h-60 rounded-xl">
-              {Object.entries(post?.images || {}).map(([key, url]) => (
-                url && (
-                <div key={key} id={key} className="carousel-item w-full">
-                  <img src={url} className="w-full" alt={key} />
-                </div>
-                )
-              ))}
+              {post?.images && Object.entries(post.images)
+                .filter(([, url]) => url !== null)
+                .map(([key, url]) => (
+                  <div key={key} id={key} className="carousel-item w-full">
+                    <img src={url as string} className="w-full" alt={key} />
+                  </div>
+                ))}
             </div>
             <div className="flex w-full justify-center gap-2 py-2">
-              {Object.keys(post?.images || {}).map((key, index) => (
-                post?.images[key] && (
-                <a key={key} href={"#" + key} className="btn btn-xs">
-                  {index + 1}
-                </a>
-                )
-              ))}
+              {post?.images && Object.entries(post.images)
+                .filter(([, url]) => url !== null)
+                .map(([key], index) => (
+                  <a key={key} href={`#${key}`} className="btn btn-xs">
+                    {index + 1}
+                  </a>
+                ))}
             </div>
             {/* 商品说明 */}
             <div className="shadow-sm p-2">
@@ -172,6 +180,7 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
                   </div>
                   <button 
                     className="btn btn-sm btn-primary"
+                    disabled={loginUser?._id === sellerId}
                     onClick={() => void handleChatClick()}
                   >
                     Chat
@@ -269,8 +278,17 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
           </div>
           <div className="fixed bottom-4 left-0 right-0 flex justify-center">
             <button 
+              disabled={loginUser?._id === sellerId}
               className="btn btn-primary btn-xl w-4/5 rounded-full shadow-md" 
               onClick={() => {
+                if (!loginUser) {
+                  Toast.show({
+                    content: 'Please login first',
+                    icon: 'fail'
+                  });
+                  void navigate('/login');
+                  return;
+                }
                 void navigate("/orderView", {
                   state: {
                     productId: post?._id

@@ -1,11 +1,14 @@
 export interface PostPrice {
-  amount: string;
+  amount: number;
   isFree: boolean;
   isNegotiable: boolean;
 }
 
 export interface PostImages {
-  [key: string]: string | undefined;
+  FRONT: string | null;
+  SIDE?: string | null;
+  BACK?: string | null;
+  DAMAGE?: string | null;
 }
 
 export interface BasePost {
@@ -16,14 +19,29 @@ export interface BasePost {
   images: PostImages;
   price: PostPrice;
   delivery: string;
+  deliveryType: DeliveryType;
+  status: PostStatus;
 }
 
-export type CreatePostRequest = BasePost
+export enum PostStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SOLD = 'sold',
+  DELETED = 'deleted',
+}
+
+export enum DeliveryType {
+  HOME_DELIVERY = 'Home Delivery',
+  PICKUP = 'Pickup',
+  BOTH = 'Both'
+}
 
 export interface Post extends BasePost {
   _id: string;
-  createdAt?: string;
-  updatedAt?: string;
-  poster: {_id:string};
-  status:string;
-} 
+  createdAt: string;
+  updatedAt: string;
+  poster: { _id: string };
+  
+}
+
+export type CreatePostRequest = BasePost 

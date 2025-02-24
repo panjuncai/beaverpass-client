@@ -50,8 +50,8 @@ export const chatApi = createApiWithBaseUrl('/chat', 'chatApi').injectEndpoints(
     invalidatesTags: [TAG_TYPE],
     }),
     getRoomWithUser: builder.query<ChatRoom | null, string>({
-      query: (sellerId) => ({
-        url: `/rooms/user/${sellerId}`,
+      query: (userId) => ({
+        url: `/rooms/user/${userId}`,
         method: 'GET',
       }),
       providesTags: [TAG_TYPE],
