@@ -779,7 +779,6 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
   };
   return (
     <div className="flex flex-col h-full">
-      <CustomNavBar title="Post" showBack={false} />
       {isAuthenticated ? stepsPost() : noLoginFunc()}
     </div>
   );

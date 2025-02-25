@@ -43,11 +43,15 @@ export const chatApi = createApiWithBaseUrl('/chat', 'chatApi').injectEndpoints(
       invalidatesTags: [TAG_TYPE],
     }),
     markAsRead: builder.mutation<void, string>({
-    query: (roomId) => ({
-      url: `/rooms/${roomId}/read`,
-      method: 'POST',
-    }),
-    invalidatesTags: [TAG_TYPE],
+      query: (roomId) => ({
+        url: `/rooms/${roomId}/read`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, roomId) => [
+        { type: TAGS.Chat },
+        'Messages',
+        'ChatRooms'
+      ],
     }),
     getRoomWithUser: builder.query<ChatRoom | null, string>({
       query: (userId) => ({
@@ -65,4 +69,5 @@ export const {
   useSendMessageMutation,
   useCreateChatRoomMutation,
   useGetRoomWithUserQuery,
+  useMarkAsReadMutation,
 } = chatApi; 

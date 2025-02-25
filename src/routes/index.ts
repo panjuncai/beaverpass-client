@@ -2,7 +2,7 @@ import { lazy } from "react";
 import { RouteConfig } from "@/types/routes";
 import { Navigate } from "react-router-dom";
 import React from "react";
-
+import Logo  from "@/components/Logo/Logo";
 
 // 页面组件懒加载
 const Register = lazy(() => import("@/pages/Register/Register"));
@@ -36,7 +36,26 @@ export const routes: RouteConfig[] = [
   },
   {
     path: "/",
-    element: React.createElement(AppLayout),
+    element: React.createElement(AppLayout, { 
+      showBack: false, 
+      title: React.createElement(Logo, { height: 60, width: 225 }),
+      showNavBar:true 
+    }),
+    children: [
+      {
+        path: "search",
+        element: React.createElement(Search),
+        meta: { requiresAuth: false, title: "Search" },
+      },
+    ],
+  },
+  {
+    path: "/",
+    element: React.createElement(AppLayout, { 
+      showBack: true, 
+      title: "Chat",
+      showNavBar: true 
+    }),
     children: [
       {
         path: "/chat/:roomId",
@@ -45,6 +64,14 @@ export const routes: RouteConfig[] = [
       },
     ],
   },
+  // {
+  //   path:"/chat/:roomId",
+  //   element:React.createElement(Chat),
+  //   meta:{
+  //     requiresAuth:false,
+  //     title:"Chat"
+  //   }
+  // },
   {
     path: "/register",
     element: React.createElement(Register),
@@ -100,40 +127,29 @@ export const routes: RouteConfig[] = [
   },
   {
     path: "/",
-    element: React.createElement(AppLayout),
-    children: [
-      {
-        path: "search",
-        element: React.createElement(Search),
-        meta: { requiresAuth:false, title: "Search" },
-      },
-    ],
-  },
-  {
-    path: "/",
-    element: React.createElement(AppLayout),
+    element: React.createElement(AppLayout, { showBack: true, title: "Post" }),
     children: [
       {
         path: "post",
         element: React.createElement(Post),
-        meta: { requiresAuth:false, title: "Post" },
+        meta: { requiresAuth: false, title: "Post" },
       },
     ],
   },
   {
     path: "/",
-    element: React.createElement(AppLayout),
+    element: React.createElement(AppLayout, { showBack: true, title: "Inbox" }),
     children: [
       {
         path: "inbox",
         element: React.createElement(Inbox),
-        meta: { requiresAuth:false, title: "Inbox" },
+        meta: { requiresAuth: false, title: "Inbox" },
       },
     ],
   },
   {
     path: "/",
-    element: React.createElement(AppLayout),
+    element: React.createElement(AppLayout, { showBack: true, title: "Deals" }),
     children: [
       {
         path: "deals",

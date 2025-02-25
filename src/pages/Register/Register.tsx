@@ -110,7 +110,7 @@ const Register: React.FC = () => {
 
   return (
     <>
-      <CustomNavBar />
+      <CustomNavBar title="Register" showBack={true}/>
       <div style={styles.innerContainer}>
         <Space align="center" direction="vertical">
           <Logo height={80} width={300}/>

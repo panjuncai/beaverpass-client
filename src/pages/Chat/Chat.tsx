@@ -1,20 +1,50 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useGetChatMessagesQuery, useSendMessageMutation } from "@/services/chatApi";
+import { useGetChatMessagesQuery, useSendMessageMutation, useMarkAsReadMutation } from "@/services/chatApi";
 import { useLocation } from "react-router-dom";
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 import CenteredLoading from "@/components/CenterLoading";
 import { ChatRoom } from "@/types/chat";
 import ChatMessage from "@/components/ChatMessage/ChatMessage";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const Chat: React.FC = () => {
   const { loginUser } = useAuth();
   const { state } = useLocation() as { state: { chatRoom: ChatRoom } };
   const { chatRoom } = state;
   const { data: messages, isLoading } = useGetChatMessagesQuery(chatRoom?._id);
-  const otherParticipant = chatRoom?.participants.find(p => p._id !== loginUser?._id);
+  // const otherParticipant = chatRoom?.participants.find(p => p._id !== loginUser?._id);
   const [sendMessage] = useSendMessageMutation();
   const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [markAsRead] = useMarkAsReadMutation();
+  const currentUserUnreadCount = chatRoom.participants.find(
+    p => p._id === loginUser?._id
+  )?.unreadCount || 0;
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // 当消息列表更新时滚动到底部
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // 处理已读逻辑
+  useEffect(() => {
+    const handleMarkAsRead = async () => {
+      if (currentUserUnreadCount > 0) {
+        try {
+          await markAsRead(chatRoom._id).unwrap();
+        } catch (error) {
+          console.error('Failed to mark messages as read:', error);
+        }
+      }
+    };
+
+    // 当用户查看消息时标记为已读
+    void handleMarkAsRead();
+  }, [chatRoom._id, currentUserUnreadCount, markAsRead]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -34,20 +64,20 @@ const Chat: React.FC = () => {
   if (isLoading) return <CenteredLoading />;
 
   return (
-    <div className="flex flex-col h-full">
-      <CustomNavBar title="Chat" showBack={true} />
-      <div className="flex-1 overflow-auto p-4 pb-20">
-        {messages?.map((message) => {
-           return <ChatMessage
+    <div className="h-full flex flex-col">
+      {/* 消息列表容器 */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {messages?.map((message) => (
+          <ChatMessage
             key={message._id}
             message={message}
             isSender={message.senderId._id === loginUser?._id}
           />
-        })}
+        ))}
+        <div ref={messagesEndRef} />
       </div>
-      
       {/* 发送消息框 */}
-      <div className="fixed bottom-12 left-0 right-0 bg-base-100 border-t p-2">
+      <div className="p-2">
         <div className="flex items-center gap-2 max-w-4xl mx-auto">
           <input
             type="text"

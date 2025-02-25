@@ -86,7 +86,7 @@ const Login: React.FC = () => {
 
   return (
     <>
-      <CustomNavBar />
+      <CustomNavBar title="Login" showBack={true}/>
       <div style={styles.innerContainer}>
         <Logo height={80} width={300} />
         <Space align="center">

@@ -120,7 +120,7 @@ const Deals: React.FC = () => {
         <div className="card-body">
           <div className="flex items-center gap-4">
             <img
-              src={post.images.FRONT}
+              src={post.images.FRONT || ''}
               alt={post.title}
               className="w-24 h-24 object-cover rounded-lg"
             />
@@ -337,7 +337,6 @@ const Deals: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <CustomNavBar title="Deals" showBack={false} />
       {isAuthenticated ? (
         <DealsFunc />
       ) : (

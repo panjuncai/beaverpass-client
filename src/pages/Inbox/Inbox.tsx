@@ -27,8 +27,9 @@ const Inbox: React.FC = () => {
       <div className="flex-1 overflow-y-auto">
         {chatRooms?.map((room) => {
           const otherParticipant = room.participants.find(p => p._id !== loginUser?._id);
-          if (!otherParticipant) return null;
-          console.log(`otherParticipant:${JSON.stringify(otherParticipant)}`)
+          const loginUserParticipant = room.participants.find(p => p._id === loginUser?._id);
+          if (!otherParticipant || !loginUserParticipant) return null;
+          // console.log(`otherParticipant:${JSON.stringify(otherParticipant)}`)
           return (
             <div 
               key={room._id} 
@@ -45,9 +46,9 @@ const Inbox: React.FC = () => {
                     <img src={`/avators/${otherParticipant.avatar}.png`} alt="avatar" />
                   </div>
                 </div>
-                {otherParticipant.unreadCount > 0 && (
+                {loginUserParticipant.unreadCount > 0 && (
                   <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                    {otherParticipant.unreadCount}
+                    {loginUserParticipant.unreadCount}
                   </div>
                 )}
               </div>
@@ -130,7 +131,6 @@ const Inbox: React.FC = () => {
   }
   return (
     <div className="flex flex-col h-full">
-      <CustomNavBar title="Inbox" showBack={false} />
       {isAuthenticated ? InboxBuyFunc() : LoginCardFunc()}
     </div>
   );
