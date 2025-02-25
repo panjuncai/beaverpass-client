@@ -1,9 +1,6 @@
-import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
-// import EmptyMessage from "@/components/Empty/EmptyMessage";
 import LoginCard from "@/components/LoginCard/LoginCard";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
-import { ChatRoom } from "@/types/chat";
+import { useEffect } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { useGetChatRoomsQuery } from "@/services/chatApi";
