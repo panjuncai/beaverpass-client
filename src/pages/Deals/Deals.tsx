@@ -6,7 +6,6 @@ import { useGetOrdersQuery } from "@/services/orderApi";
 import { useState } from "react";
 import CenteredLoading from "@/components/CenterLoading";
 import { Order } from "@/types/order";
-import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 import { useGetUserPostsQuery, useUpdatePostMutation } from "@/services/postApi";
 import { Post } from "@/types/post";
 import { Toast } from "antd-mobile";

@@ -5,8 +5,7 @@ import { useState } from "react";
 import { useAddPostMutation } from "@/services/postApi";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "antd-mobile";
-import { BasePost } from "@/types/post";
-import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
+import { BasePost, PostImages, PostPrice } from "@/types/post";
 const Post: React.FC = () => {
   const { isAuthenticated } = useAuth();
   // console.log("Post isAuthenticated:", isAuthenticated);
@@ -29,13 +28,14 @@ const Post: React.FC = () => {
       SIDE: null,
       BACK: null,
       DAMAGE: null,
-    } as Record<string, string | null>,
+    } as PostImages,
     price: {
-      amount: "",
+      amount: 0,
       isFree: false,
       isNegotiable: false,
-    },
-    delivery: "Home Delivery",
+    } as PostPrice,
+    deliveryType: "Home Delivery",
+    status: "ACTIVE",
   });
 
   const steps = [1, 2, 3, 4, 5, 6];
@@ -129,7 +129,7 @@ const Post: React.FC = () => {
         ...updates,
         // If setting to free, clear the amount
         amount: updates.isFree
-          ? ""
+          ? 0
           : updates.amount !== undefined
           ? updates.amount
           : prev.price.amount,
@@ -141,9 +141,6 @@ const Post: React.FC = () => {
           : prev.price.isNegotiable,
       },
     }));
-    if (updates?.amount?.trim()) {
-      setShowStepFivePriceError(false);
-    }
 
     if (updates?.isFree) {
       setShowStepFivePriceError(false);
@@ -151,7 +148,7 @@ const Post: React.FC = () => {
   };
 
   const handleDeliveryChange = (delivery: string) => {
-    setFormData((prev) => ({ ...prev, delivery }));
+    setFormData((prev) => ({ ...prev, deliveryType: delivery }));
   };
 
   // Add form submission handler
@@ -229,12 +226,12 @@ const Post: React.FC = () => {
     }
 
     // Step 5 validation
-    if (currentStep === 5) {
-      if (!formData.price.amount.trim() && !formData.price.isFree) {
-        setShowStepFivePriceError(true);
-        return;
-      }
-    }
+    // if (currentStep === 5) {
+    //   if (!formData.price.amount.trim() && !formData.price.isFree) {
+    //     setShowStepFivePriceError(true);
+    //     return;
+    //   }
+    // }
 
     if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
@@ -546,7 +543,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                   className="input input-bordered w-full max-w-xs"
                   value={formData.price.amount}
                   onChange={(e) =>
-                    handlePriceChange({ amount: formatPrice(e.target.value) })
+                    handlePriceChange({ amount: Number(formatPrice(e.target.value)) })
                   }
                   disabled={formData.price.isFree}
                 />
@@ -568,7 +565,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                 onChange={() => {
                   handlePriceChange({
                     isFree: true,
-                    amount: "", // Clear price when selecting Free
+                    amount: 0, // Clear price when selecting Free
                   });
                 }}
               />
@@ -610,7 +607,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                 type="radio"
                 name="radio-10"
                 className="radio checked:bg-primary"
-                checked={formData.delivery === "Home Delivery"}
+                checked={formData.deliveryType === "Home Delivery"}
                 onChange={() => handleDeliveryChange("Home Delivery")}
               />
               <span className="label-text text-lg">
@@ -624,7 +621,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                 type="radio"
                 name="radio-10"
                 className="radio checked:bg-primary"
-                checked={formData.delivery === "Pickup"}
+                checked={formData.deliveryType === "Pickup"}
                 onChange={() => handleDeliveryChange("Pickup")}
               />
               <span className="label-text text-lg">Pickup by Buyer</span>
@@ -636,7 +633,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                 type="radio"
                 name="radio-10"
                 className="radio checked:bg-primary"
-                checked={formData.delivery === "Both"}
+                checked={formData.deliveryType === "Both"}
                 onChange={() => handleDeliveryChange("Both")}
               />
               <span className="label-text text-lg">Both Options</span>
@@ -686,7 +683,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
               Choose the delivery methods you can offer. Delivery services may
               charge extra.
             </span>
-            {!formData.delivery && (
+            {!formData.deliveryType && (
               <div className="text-error text-sm mt-2">
                 Please select a delivery option
               </div>

@@ -3,7 +3,7 @@ import imageCompression from "browser-image-compression";
 
 interface ImageUploadProps {
   viewType: "FRONT" | "SIDE" | "BACK" | "DAMAGE";
-  imageUrl: string | null;
+  imageUrl: string | null|undefined;
   onImageUpload: (viewType: string, file: string) => void;
   onImageDelete: (viewType: string) => void;
   showError?: boolean;

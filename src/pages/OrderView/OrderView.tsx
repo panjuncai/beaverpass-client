@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Toast } from "antd-mobile";
 import CenteredLoading from "@/components/CenterLoading";
+import { DeliveryType } from "@/types/post";
 
 interface LocationState {
   productId: string;
@@ -37,7 +38,7 @@ const OrderView: React.FC = () => {
 
   const calculateFees = () => {
     const baseAmount = Number(post?.price?.amount || 0);
-    const deliveryFee = post?.delivery === "Home Delivery" ? 10 : 0;
+    const deliveryFee = post?.deliveryType === DeliveryType.HOME_DELIVERY ? 10 : 0;
     const serviceFee = post?.price?.isFree ? 10 : 0;
     const tax = baseAmount * 0.13;
     const paymentFee = (baseAmount + deliveryFee + serviceFee + tax) * 0.029 + 0.30; // 假设支付处理费为2.9% + $0.30
@@ -68,8 +69,8 @@ const OrderView: React.FC = () => {
           images: {
             FRONT: post.images.FRONT || '',
             BACK: post.images.BACK || '',
-            LEFT: post.images.LEFT || '',
-            RIGHT: post.images.RIGHT || ''
+            LEFT: post.images.SIDE || '',
+            RIGHT: post.images.DAMAGE || ''
           }
         },
         ...fees,
@@ -96,7 +97,7 @@ const OrderView: React.FC = () => {
           <div className="card-body">
             <h2 className="card-title">{post?.title}</h2>
             <img 
-                src={post?.images.FRONT} 
+                src={post?.images.FRONT||''} 
                 alt={post?.title} 
                 className="w-full h-36 object-cover"
               />

@@ -9,9 +9,10 @@ export const useSocket = () => {
   useEffect(() => {
     // 确保用户已登录
     if (!loginUser?._id) return;
-
+    const SOCKET_API_URI = import.meta.env.VITE_SOCKET_API_URI;
+    // console.log(API_URI);
     // 创建 socket 连接
-    const socket = io(import.meta.env.VITE_API_URL, {
+    const socket = io(SOCKET_API_URI, {
       auth: {
         userId: loginUser._id
       }

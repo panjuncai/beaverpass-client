@@ -18,7 +18,7 @@ export const useAuth = () => {
   const { isAuthenticated,loginUser,isLoading, redirectPath } = useSelector(
     (state: RootState) => state.auth
   );
-  console.log("loginUser",loginUser?.firstName)
+  // console.log("loginUser",loginUser?.firstName)
 
   // 添加一个跳过 session 检查的标志
   // const [skipSessionCheck, setSkipSessionCheck] = useState(false);

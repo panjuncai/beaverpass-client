@@ -18,7 +18,6 @@ export interface BasePost {
   condition: string;
   images: PostImages;
   price: PostPrice;
-  delivery: string;
   deliveryType: DeliveryType;
   status: PostStatus;
 }

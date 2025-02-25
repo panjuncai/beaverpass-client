@@ -4,7 +4,6 @@ import { HeartOutline } from "antd-mobile-icons";
 import { useEffect, useState, useMemo } from "react";
 import { Post } from "@/types/post";
 import { useNavigate } from "react-router-dom";
-import Logo from "@/components/Logo/Logo";
 
 const Search: React.FC = () => {
   const { data:posts, isLoading } = useGetPostsQuery();
@@ -59,7 +58,7 @@ const Search: React.FC = () => {
                 <figure onClick={()=>{void navigate(`/posts/${post._id}`)}}>
                   <img
                     className="h-44 w-full"
-                    src={post.images.FRONT}
+                    src={post.images.FRONT||''}
                     alt={post.title}
                   />
                 </figure>

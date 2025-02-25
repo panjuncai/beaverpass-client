@@ -47,11 +47,7 @@ export const chatApi = createApiWithBaseUrl('/chat', 'chatApi').injectEndpoints(
         url: `/rooms/${roomId}/read`,
         method: 'POST',
       }),
-      invalidatesTags: (result, error, roomId) => [
-        { type: TAGS.Chat },
-        'Messages',
-        'ChatRooms'
-      ],
+      invalidatesTags: [TAG_TYPE],
     }),
     getRoomWithUser: builder.query<ChatRoom | null, string>({
       query: (userId) => ({

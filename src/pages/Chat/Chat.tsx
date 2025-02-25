@@ -30,14 +30,21 @@ const Chat: React.FC = () => {
   useEffect(() => {
     if (messages) {
       setLocalMessages(messages);
+      scrollToBottom();
     }
   }, [messages]);
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [localMessages]);
 
   
   // Socket.IO 事件监听
   useEffect(() => {
     if (!socket) return;
+
+    // 加入聊天室
+    socket.emit('join_room', chatRoom._id);
 
     // 监听新消息
     socket.on('new_message', (newMessage: Message) => {
@@ -56,6 +63,8 @@ const Chat: React.FC = () => {
     });
 
     return () => {
+      // 离开聊天室
+      socket.emit('leave_room', chatRoom._id);
       socket.off('new_message');
       socket.off('message_read');
     };
@@ -78,6 +87,7 @@ const Chat: React.FC = () => {
       });
 
       setNewMessage('');
+      scrollToBottom();
     } catch (error) {
       console.error('Failed to send message:', error);
     }
@@ -117,6 +127,7 @@ const Chat: React.FC = () => {
           />
         ))}
         <div ref={messagesEndRef} />
+        <div className="h-1"></div>
       </div>
       {/* 发送消息框 */}
       <div className="p-2">

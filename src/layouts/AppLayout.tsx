@@ -12,7 +12,7 @@ import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 
 interface TopProps {
   showBack?: boolean;
-  title?: string;
+  title?: string|React.ReactNode;
   showNavBar?: boolean;
 }
 
@@ -73,7 +73,7 @@ const Bottom = () => {
 
 interface AppLayoutProps {
   showBack?: boolean;
-  title?: string;
+  title?: string | React.ReactNode;
   showNavBar?: boolean;
 }
 
