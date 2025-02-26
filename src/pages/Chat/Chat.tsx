@@ -35,7 +35,9 @@ const Chat: React.FC = () => {
   }, [messages]);
 
   useEffect(() => {
-    scrollToBottom();
+    if(localMessages.length > 0) {
+      scrollToBottom();
+    }
   }, [localMessages]);
 
   
@@ -43,47 +45,93 @@ const Chat: React.FC = () => {
   useEffect(() => {
     if (!socket) return;
 
-    // 加入聊天室
-    socket.emit('join_room', chatRoom._id);
+    // 加入聊天室时发送更多信息
+    socket.emit('join_room', {
+      roomId: chatRoom._id,
+      userId: loginUser?._id
+    });
+
+    // 监听其他用户的在线状态
+    socket.on('user_status', (data: { userId: string; roomId: string; status: 'online' | 'offline' }) => {
+      if (data.roomId === chatRoom._id && data.userId !== loginUser?._id) {
+        console.log(`Other user is ${data.status}`);
+        
+        // 如果对方上线，可以自动标记我们发送的消息为已读
+        if (data.status === 'online') {
+          // 可以在这里触发标记已读
+        }
+      }
+    });
 
     // 监听新消息
-    socket.on('new_message', (newMessage: Message) => {
-      if (newMessage.roomId === chatRoom._id) {
-        setLocalMessages(prev => [...prev, newMessage]);
+    socket.on('new_message', (data: { 
+      message: Message; 
+      receiverOnline: boolean;
+      senderId: string;
+      receiverId: string;
+    }) => {
+      if (data.message.roomId === chatRoom._id) {
+        // 如果我是接收者且在线，自动标记为已读
+        if (data.receiverId === loginUser?._id) {
+          socket.emit('mark_read', {
+            roomId: chatRoom._id,
+            userId: loginUser?._id
+          });
+        }
+        
+        setLocalMessages(prev => [...prev, data.message]);
         scrollToBottom();
       }
     });
 
-    // 监听消息已读状态
-    socket.on('message_read', (data: { roomId: string; userId: string }) => {
+    // 添加消息已读状态监听
+    socket.on('messages_read', (data: { roomId: string; userId: string }) => {
       if (data.roomId === chatRoom._id) {
-        // 可以在这里更新消息的已读状态
-        // 或者直接触发重新获取消息列表
+        // 更新本地消息的已读状态
+        setLocalMessages(prev => prev.map(msg => ({
+          ...msg,
+          readBy: msg.readBy.includes(data.userId) 
+            ? msg.readBy 
+            : [...msg.readBy, data.userId]
+        })));
       }
     });
 
     return () => {
-      // 离开聊天室
-      socket.emit('leave_room', chatRoom._id);
+      socket.emit('leave_room', {
+        roomId: chatRoom._id,
+        userId: loginUser?._id
+      });
       socket.off('new_message');
-      socket.off('message_read');
+      socket.off('user_status');
+      socket.off('messages_read');
     };
-  }, [socket, chatRoom._id]);
+  }, [socket, chatRoom._id, loginUser?._id]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
     try {
+      // 获取对方用户ID
+      const otherParticipantId = chatRoom.participants.find(
+        p => p._id !== loginUser?._id
+      )?._id;
+
+      // 如果 otherParticipantId 为空，直接返回
+      if (!otherParticipantId) return;
+
       const message = await sendMessage({
         roomId: chatRoom._id,
         content: newMessage.trim(),
         messageType: 'text'
       }).unwrap();
 
-      // 发送 socket 事件
+      // 发送消息时包含房间信息和接收者ID
       socket?.emit('send_message', {
         roomId: chatRoom._id,
-        message
+        message,
+        senderId: loginUser?._id,
+        receiverId: otherParticipantId
       });
 
       setNewMessage('');

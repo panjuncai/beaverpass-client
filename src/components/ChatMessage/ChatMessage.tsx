@@ -49,6 +49,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     }
   };
 
+  // 检查消息是否已读（对方已读）
+  const isRead = () => {
+    if (!isSender) return false; // 只有发送者需要显示已读状态
+    
+    // 检查消息是否被接收者读取
+    const otherParticipants = message.readBy.filter(id => id !== message.senderId._id);
+    return otherParticipants.length > 0;
+  };
+
   return (
     <div className={`chat ${isSender ? 'chat-end' : 'chat-start'} mb-4`}>
       <div className="chat-header">
@@ -62,6 +71,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       <div className={`chat-bubble ${isSender ? 'chat-bubble-primary' : ''}`}>
         {renderMessageContent()}
       </div>
+      {!isSender && (
+        <div className="text-xs opacity-50 mt-1">
+          {isRead() ? '已读' : '未读'}
+        </div>
+      )}
     </div>
   );
 };

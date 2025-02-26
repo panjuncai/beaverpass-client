@@ -3,14 +3,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { useGetChatRoomsQuery } from "@/services/chatApi";
+import { useGetRoomWithUserQuery } from "@/services/chatApi";
 import { useNavigate } from 'react-router-dom';
 import CenteredLoading from "@/components/CenterLoading";
 
 const Inbox: React.FC = () => {
   const { isAuthenticated, loginUser } = useAuth();
-  const { data: chatRooms, isLoading } = useGetChatRoomsQuery(undefined, {
-    skip: !isAuthenticated,
+  const { data: chatRooms, isLoading } = useGetRoomWithUserQuery(loginUser?._id, {
+    skip: !isAuthenticated||!loginUser?._id,
   });
   const navigate = useNavigate();
 

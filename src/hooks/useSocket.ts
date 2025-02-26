@@ -27,6 +27,11 @@ export const useSocket = () => {
       console.error('Socket connection error:', error);
     });
 
+    // 添加在线状态监听
+    socket.on('user_status', (data: { userId: string; roomId: string; status: 'online' | 'offline' }) => {
+      // console.log(`User ${data.userId} is ${data.status} in room ${data.roomId}`);
+    });
+
     socketRef.current = socket;
 
     // 清理函数

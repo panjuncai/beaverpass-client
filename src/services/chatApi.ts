@@ -6,14 +6,6 @@ const TAG_TYPE = { type: TAGS.Chat };
 
 export const chatApi = createApiWithBaseUrl('/chat', 'chatApi').injectEndpoints({
   endpoints: (builder) => ({
-    getChatRooms: builder.query<ChatRoom[], void>({
-      query: () => ({
-        url: '/rooms',
-        method: 'GET',
-      }),
-      providesTags: [TAG_TYPE],
-    }),
-    
     getChatMessages: builder.query<Message[], string>({
       query: (roomId) => ({
         url: `/rooms/${roomId}/messages`,
@@ -60,7 +52,6 @@ export const chatApi = createApiWithBaseUrl('/chat', 'chatApi').injectEndpoints(
 });
 
 export const {
-  useGetChatRoomsQuery,
   useGetChatMessagesQuery,
   useSendMessageMutation,
   useCreateChatRoomMutation,
