@@ -1,23 +1,17 @@
 import LoginCard from "@/components/LoginCard/LoginCard";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
 import { formatDistanceToNow } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { useGetRoomWithUserQuery } from "@/services/chatApi";
+import { useGetChatRoomsQuery } from "@/services/chatApi";
 import { useNavigate } from 'react-router-dom';
 import CenteredLoading from "@/components/CenterLoading";
 
 const Inbox: React.FC = () => {
   const { isAuthenticated, loginUser } = useAuth();
-  const { data: chatRooms, isLoading } = useGetRoomWithUserQuery(loginUser?._id, {
-    skip: !isAuthenticated||!loginUser?._id,
+  const { data: chatRooms, isLoading } = useGetChatRoomsQuery(undefined, {
+    skip: !isAuthenticated,
   });
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // TODO: 从API获取聊天室列表
-    // fetchChatRooms();
-  }, []);
 
   const ChatRoomList = () => {
     return (
@@ -26,7 +20,6 @@ const Inbox: React.FC = () => {
           const otherParticipant = room.participants.find(p => p._id !== loginUser?._id);
           const loginUserParticipant = room.participants.find(p => p._id === loginUser?._id);
           if (!otherParticipant || !loginUserParticipant) return null;
-          // console.log(`otherParticipant:${JSON.stringify(otherParticipant)}`)
           return (
             <div 
               key={room._id} 

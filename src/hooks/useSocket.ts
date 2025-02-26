@@ -9,7 +9,7 @@ export const useSocket = () => {
   useEffect(() => {
     // 确保用户已登录
     if (!loginUser?._id) return;
-    const SOCKET_API_URI = import.meta.env.VITE_SOCKET_API_URI;
+    const SOCKET_API_URI = import.meta.env.VITE_SOCKET_API_URI as string;
     // console.log(API_URI);
     // 创建 socket 连接
     const socket = io(SOCKET_API_URI, {
@@ -29,7 +29,7 @@ export const useSocket = () => {
 
     // 添加在线状态监听
     socket.on('user_status', (data: { userId: string; roomId: string; status: 'online' | 'offline' }) => {
-      // console.log(`User ${data.userId} is ${data.status} in room ${data.roomId}`);
+      console.log(`User ${data.userId} is ${data.status} in room ${data.roomId}`);
     });
 
     socketRef.current = socket;
