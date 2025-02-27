@@ -27,7 +27,7 @@ const VerifyEmail: React.FC = () => {
         });
         setMessage("Verified Successfully!");
         const timerId = setTimeout(() => {
-          navigate("/login", { replace: true });
+          void navigate("/login", { replace: true });
         }, 2000);
 
         return () => clearTimeout(timerId);

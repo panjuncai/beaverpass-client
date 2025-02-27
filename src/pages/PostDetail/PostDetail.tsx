@@ -292,7 +292,8 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
                 void navigate("/orderView", {
                   state: {
                     productId: post?._id
-                  }
+                  },
+                  replace: true
                 });
               }}
             >

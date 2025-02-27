@@ -169,7 +169,7 @@ const Post: React.FC = () => {
 
         await addPost(processedFormData as BasePost).unwrap();
         // 发布成功后跳转到详情页
-        void navigate("/search");
+        void navigate("/search",{replace:true});
         void Toast.show({
           icon: "success",
           content: "Post created successfully",

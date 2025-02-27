@@ -6,26 +6,25 @@ import { enUS } from "date-fns/locale";
 interface ChatMessageProps {
   message: Message;
   isSender: boolean;
-  senderAvatar?: string;
-  receiverAvatar?: string;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ 
   message, 
   isSender
 }) => {
-  const { data: post } = useGetPostQuery(message.postId || '', {
+  const { data: post } = useGetPostQuery(message.postId ?? '', {
     skip: message.messageType !== 'post'
   });
 
   const renderMessageContent = () => {
+    // console.log(`render message: ${JSON.stringify(message)}`);
     switch (message.messageType) {
       case 'post':
         return (
           <div className="bg-base-100 rounded-lg p-2">
             <div className="flex items-center">
               <img
-                src={post?.images.FRONT ?? undefined}
+                src={post?.images.FRONT ?? ''}
                 alt={post?.title}
                 className="w-16 h-16 object-cover rounded"
               />
@@ -71,9 +70,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       <div className={`chat-bubble ${isSender ? 'chat-bubble-primary' : ''}`}>
         {renderMessageContent()}
       </div>
-      {!isSender && (
+      {isSender && (
         <div className="text-xs opacity-50 mt-1">
-          {isRead() ? '已读' : '未读'}
+          {isRead() ? 'read' : 'unread'}
         </div>
       )}
     </div>

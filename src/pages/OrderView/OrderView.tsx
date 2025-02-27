@@ -82,7 +82,7 @@ const OrderView: React.FC = () => {
         icon: "success",
         content: "Order created successfully",
       });
-      void navigate("/deals");
+      void navigate("/deals",{replace:true});
     
   };
 

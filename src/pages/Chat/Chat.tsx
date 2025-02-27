@@ -10,12 +10,21 @@ import { ChatRoom, Message } from "@/types/chat";
 import ChatMessage from "@/components/ChatMessage/ChatMessage";
 import { useState, useRef, useEffect } from "react";
 import { useSocket } from "@/hooks/useSocket";
+import { useDispatch } from 'react-redux';
+import { chatApi } from '@/services/chatApi';
+import { TAGS } from "@/services/api";
+
+const TAG_TYPE = TAGS.Chat;
 
 const Chat: React.FC = () => {
   const { loginUser } = useAuth();
   const { state } = useLocation() as { state: { chatRoom: ChatRoom } };
   const { chatRoom } = state;
-  const { data: messages, isLoading } = useGetChatMessagesQuery(
+  const { 
+    data: messages, 
+    isLoading, 
+    refetch: refetchMessages 
+  } = useGetChatMessagesQuery(
     chatRoom?._id ?? "",
     {
       skip: !chatRoom?._id,
@@ -30,24 +39,33 @@ const Chat: React.FC = () => {
   const currentUserUnreadCount =
     chatRoom.participants.find((p) => p._id === loginUser?._id)?.unreadCount ||
     0;
+  const dispatch = useDispatch();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
   };
 
-  // 初始化本地消息列表
+  // 在组件挂载和 chatRoom 变化时重新获取消息
+  useEffect(() => {
+    if (chatRoom?._id) {
+      void refetchMessages();
+    }
+  }, [chatRoom?._id, refetchMessages]);
+
+  // 修改初始化本地消息列表的逻辑
   useEffect(() => {
     if (messages) {
+      // console.log("Received messages from API:", messages.length);
       setLocalMessages(messages);
       scrollToBottom();
     }
   }, [messages]);
 
-  useEffect(() => {
-    if (localMessages.length > 0) {
-      scrollToBottom();
-    }
-  }, [localMessages]);
+  // useEffect(() => {
+  //   if (localMessages.length > 0) {
+  //     scrollToBottom();
+  //   }
+  // }, [localMessages]);
 
   // Socket.IO 事件监听
   useEffect(() => {
@@ -70,11 +88,17 @@ const Chat: React.FC = () => {
         status: "online" | "offline";
       }) => {
         if (data.roomId === chatRoom._id && data.userId !== loginUser._id) {
-          console.log(`Other user is ${data.status}`);
+          // console.log(`Other user is ${data.status}`);
 
           // 如果对方上线，可以自动标记我们发送的消息为已读
           if (data.status === "online") {
             // 可以在这里触发标记已读
+            setTimeout(() => {
+              socket.emit("mark_read", {
+                roomId: chatRoom._id,
+                userId: data.userId,
+              });
+            }, 500);
           }
         }
       }
@@ -89,16 +113,23 @@ const Chat: React.FC = () => {
         senderId: string;
         receiverId: string;
       }) => {
+        console.log(`new_message data: ${JSON.stringify(data)}`);
         if (data.message.roomId === chatRoom._id) {
+          // 添加消息到本地列表
+          setLocalMessages((prev) => [...prev, data.message]);
+          
           // 如果我是接收者且在线，自动标记为已读
           if (data.receiverId === loginUser._id) {
-            socket.emit("mark_read", {
-              roomId: chatRoom._id,
-              userId: loginUser._id,
-            });
+            // 短暂延迟确保消息已显示
+            setTimeout(() => {
+              socket.emit("mark_read", {
+                roomId: chatRoom._id,
+                userId: loginUser._id,
+              });
+            }, 500);
           }
-
-          setLocalMessages((prev) => [...prev, data.message]);
+          
+          // 滚动到底部
           scrollToBottom();
         }
       }
@@ -130,6 +161,30 @@ const Chat: React.FC = () => {
     };
   }, [socket, chatRoom._id, loginUser?._id]);
 
+  // 在组件挂载时清除缓存
+  useEffect(() => {
+    if (chatRoom?._id) {
+      // 清除特定聊天室的消息缓存
+      dispatch(
+        chatApi.util.invalidateTags([TAG_TYPE])
+      );
+    }
+    
+    return () => {
+      // 组件卸载时也清除缓存
+      dispatch(
+        chatApi.util.invalidateTags([TAG_TYPE])
+      );
+    };
+  }, [chatRoom?._id, dispatch]);
+
+  // 在 useGetChatMessagesQuery 之后添加日志
+  // useEffect(() => {
+  //   console.log("Chat room ID:", chatRoom?._id);
+  //   console.log("Messages loading:", isLoading);
+  //   console.log("Messages data:", messages);
+  // }, [chatRoom?._id, isLoading, messages]);
+
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
@@ -150,12 +205,15 @@ const Chat: React.FC = () => {
         messageType: "text",
       }).unwrap();
 
-      // 发送消息时包含房间信息和接收者ID
-      socket?.emit("send_message", {
-        roomId: chatRoom._id,
-        message,
-        senderId: loginUser._id
-      });
+      
+      if(message){
+        // 发送消息时包含房间信息和接收者ID
+        socket?.emit("send_message", {
+          roomId: chatRoom._id,
+          message,
+          senderId: loginUser._id
+        });
+      }
 
       setNewMessage("");
       scrollToBottom();
@@ -167,6 +225,7 @@ const Chat: React.FC = () => {
   // 处理已读逻辑
   useEffect(() => {
     const handleMarkAsRead = async () => {
+      console.log("currentUserUnreadCount:", currentUserUnreadCount);
       if (currentUserUnreadCount > 0) {
         try {
           await markAsRead(chatRoom._id).unwrap();

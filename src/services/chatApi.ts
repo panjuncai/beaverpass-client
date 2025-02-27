@@ -19,6 +19,7 @@ export const chatApi = createApiWithBaseUrl('/chat', 'chatApi').injectEndpoints(
         method: 'GET',
       }),
       providesTags: [TAG_TYPE],
+      keepUnusedDataFor: 5,
     }),
     
     sendMessage: builder.mutation<

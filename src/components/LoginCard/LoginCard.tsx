@@ -9,7 +9,7 @@ const LoginCard: React.FC = () => {
         {/* 主按钮区域 */}
         <button
           className="btn btn-primary btn-xl w-4/5 text-white rounded-full shadow-md"
-          onClick={() =>void navigate("/login")}
+          onClick={() =>void navigate("/login", { replace: true })}
         >
           Log in
         </button>

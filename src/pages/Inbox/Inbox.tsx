@@ -5,13 +5,17 @@ import { enUS } from 'date-fns/locale';
 import { useGetChatRoomsQuery } from "@/services/chatApi";
 import { useNavigate } from 'react-router-dom';
 import CenteredLoading from "@/components/CenterLoading";
-
+import { useEffect } from "react";
 const Inbox: React.FC = () => {
   const { isAuthenticated, loginUser } = useAuth();
-  const { data: chatRooms, isLoading } = useGetChatRoomsQuery(undefined, {
+  const { data: chatRooms, isLoading,refetch } = useGetChatRoomsQuery(undefined, {
     skip: !isAuthenticated,
   });
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
 
   const ChatRoomList = () => {
     return (
