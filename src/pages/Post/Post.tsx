@@ -35,7 +35,7 @@ const Post: React.FC = () => {
       isNegotiable: false,
     } as PostPrice,
     deliveryType: "Home Delivery",
-    status: "ACTIVE",
+    status: "active",
   });
 
   const steps = [1, 2, 3, 4, 5, 6];
