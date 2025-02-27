@@ -1,43 +1,59 @@
 import LoginCard from "@/components/LoginCard/LoginCard";
 import { useAuth } from "@/hooks/useAuth";
-import { formatDistanceToNow } from 'date-fns';
-import { enUS } from 'date-fns/locale';
+import { formatDistanceToNow } from "date-fns";
+import { enUS } from "date-fns/locale";
 import { useGetChatRoomsQuery } from "@/services/chatApi";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import CenteredLoading from "@/components/CenterLoading";
 import { useEffect } from "react";
 const Inbox: React.FC = () => {
   const { isAuthenticated, loginUser } = useAuth();
-  const { data: chatRooms, isLoading,refetch } = useGetChatRoomsQuery(undefined, {
+  const {
+    data: chatRooms,
+    isLoading,
+    refetch,
+  } = useGetChatRoomsQuery(undefined, {
     skip: !isAuthenticated,
   });
   const navigate = useNavigate();
-  
   useEffect(() => {
-    void refetch();
-  }, [refetch]);
+    if (!loginUser?._id) void navigate("/login", { replace: true });
+    const intervalId = setInterval(() => {
+      void refetch();
+    }, 6000); // 每6秒刷新一次
+    return () => clearInterval(intervalId);
+  }, [refetch, loginUser?._id, navigate]);
 
   const ChatRoomList = () => {
     return (
       <div className="flex-1 overflow-y-auto">
         {chatRooms?.map((room) => {
-          const otherParticipant = room.participants.find(p => p._id !== loginUser?._id);
-          const loginUserParticipant = room.participants.find(p => p._id === loginUser?._id);
+          const otherParticipant = room.participants.find(
+            (p) => p._id !== loginUser?._id
+          );
+          const loginUserParticipant = room.participants.find(
+            (p) => p._id === loginUser?._id
+          );
           if (!otherParticipant || !loginUserParticipant) return null;
           return (
-            <div 
-              key={room._id} 
+            <div
+              key={room._id}
               className="flex items-center gap-4 p-4 hover:bg-base-200 cursor-pointer border-b"
-              onClick={() => void navigate(`/chat/${room._id}`, {
-                state: {
-                  chatRoom: room
-                }
-              })}
+              onClick={() =>
+                void navigate(`/chat/${room._id}`, {
+                  state: {
+                    chatRoom: room,
+                  },
+                })
+              }
             >
               <div className="relative">
                 <div className="avatar">
                   <div className="w-12 h-12 rounded-full">
-                    <img src={`/avators/${otherParticipant.avatar}.png`} alt="avatar" />
+                    <img
+                      src={`/avators/${otherParticipant.avatar}.png`}
+                      alt="avatar"
+                    />
                   </div>
                 </div>
                 {loginUserParticipant.unreadCount > 0 && (
@@ -52,14 +68,18 @@ const Inbox: React.FC = () => {
                     {`${otherParticipant.firstName} ${otherParticipant.lastName}`}
                   </h3>
                   <span className="text-sm text-gray-500">
-                    {room.lastMessage?.createdAt && formatDistanceToNow(new Date(room.lastMessage.createdAt), {
-                      addSuffix: true,
-                      locale: enUS
-                    })}
+                    {room.lastMessage?.createdAt &&
+                      formatDistanceToNow(
+                        new Date(room.lastMessage.createdAt),
+                        {
+                          addSuffix: true,
+                          locale: enUS,
+                        }
+                      )}
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 line-clamp-1">
-                  {room.lastMessage?.content || 'No message'}
+                  {room.lastMessage?.content || "No message"}
                 </p>
               </div>
             </div>
@@ -83,7 +103,7 @@ const Inbox: React.FC = () => {
     return (
       <div className="flex-1">
         <div role="tablist" className="tabs tabs-bordered grid-cols-3 ">
-        <input
+          <input
             type="radio"
             name="tabs_1"
             role="tab"
@@ -121,7 +141,7 @@ const Inbox: React.FC = () => {
   };
 
   if (isLoading) {
-    return  <CenteredLoading />;
+    return <CenteredLoading />;
   }
   return (
     <div className="flex flex-col h-full">
