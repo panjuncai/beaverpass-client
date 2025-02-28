@@ -19,6 +19,7 @@ const AppLayout = lazy(() => import("@/layouts/AppLayout"));
 const PostDetailWrapper = lazy(() => import("@/pages/PostDetail/PostDetailWrapper"));
 const OrderView= lazy(() => import("@/pages/OrderView/OrderView"));
 const Chat= lazy(() => import("@/pages/Chat/Chat"));
+const EditProfile= lazy(() => import("@/pages/Profile/EditProfile"));
 
 export const routes: RouteConfig[] = [
   {
@@ -64,14 +65,21 @@ export const routes: RouteConfig[] = [
       },
     ],
   },
-  // {
-  //   path:"/chat/:roomId",
-  //   element:React.createElement(Chat),
-  //   meta:{
-  //     requiresAuth:false,
-  //     title:"Chat"
-  //   }
-  // },
+  {
+    path: "/",
+    element: React.createElement(AppLayout, { 
+      showBack: true, 
+      title: "Edit Profile",
+      showNavBar: true 
+    }),
+    children: [
+      {
+        path: "/profile/edit",
+        element: React.createElement(EditProfile),
+        meta: { requiresAuth: true, title: "Edit Profile" },
+      },
+    ],
+  },
   {
     path: "/register",
     element: React.createElement(Register),

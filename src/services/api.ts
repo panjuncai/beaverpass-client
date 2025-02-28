@@ -4,7 +4,8 @@ import { axiosBaseQuery } from '@/api/axiosBaseQuery';
 // 定义标签常量
 export const TAGS = {
   Post: 'Post',
-  Chat: 'Chat'
+  Chat: 'Chat',
+  User: 'User',
 } as const;
 
 
@@ -12,7 +13,7 @@ export const TAGS = {
 export const createApiWithBaseUrl = (baseUrl: string, path: string) => createApi({
   reducerPath: path,  // 使用传入的路径作为 reducerPath
   baseQuery: axiosBaseQuery({ baseUrl }),
-  tagTypes: [TAGS.Post, TAGS.Chat],
+  tagTypes: [TAGS.Post, TAGS.Chat, TAGS.User],
   endpoints: () => ({}),
 });
 
