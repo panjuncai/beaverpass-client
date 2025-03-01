@@ -3,6 +3,8 @@ export interface User {
   email: string;
   firstName:string;
   lastName:string;
+  address?:string;
+  phone?:string;
   avatar?:string;
   isVerified:boolean;
 }

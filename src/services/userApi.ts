@@ -1,13 +1,5 @@
 import { createApiWithBaseUrl, TAGS } from './api';
-
-export interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  address?: string;
-  avatar?: string;
-}
+import { User } from '@/types/user';
 
 export interface UpdateUserRequest {
   userId: string;
@@ -15,6 +7,7 @@ export interface UpdateUserRequest {
   lastName?: string;
   address?: string;
   avatar?: string;
+  phone?: string;
 }
 
 const TAG_TYPE = TAGS.User;
@@ -23,7 +16,7 @@ export const userApi = createApiWithBaseUrl('/users', 'userApi').injectEndpoints
   endpoints: (builder) => ({
     getUser: builder.query<User, string>({
       query: (userId) => ({
-        url: `/${userId}/profile`,
+        url: `/${userId}`,
         method: 'GET',
       }),
       providesTags: [TAG_TYPE],

@@ -1,11 +1,16 @@
+/// <reference types="@types/google.maps" />
 import { useState, useEffect, useRef } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
-
+import CenteredLoading from "../CenterLoading";
+import { useAuth } from "@/hooks/useAuth";
+import { useUpdateUserMutation } from "@/services/userApi";
+import { Navigate } from "react-router-dom";
 interface AddressModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (address: string) => void;
   initialAddress?: string;
+  isSave:boolean
 }
 
 const AddressModal: React.FC<AddressModalProps> = ({
@@ -13,7 +18,10 @@ const AddressModal: React.FC<AddressModalProps> = ({
   onClose,
   onSelect,
   initialAddress = "",
+  isSave=false
 }) => {
+  const {loginUser,isLoading:isLoadingAuth,isAuthenticated} = useAuth()
+  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
   const [address, setAddress] = useState(initialAddress);
   const [searchRange, setSearchRange] = useState(5);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -21,6 +29,28 @@ const AddressModal: React.FC<AddressModalProps> = ({
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const circleRef = useRef<google.maps.Circle | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
+
+  // 当 isOpen 变为 false 时重置状态
+  useEffect(() => {
+    if (!isOpen) {
+      // 重置地址为初始值
+      setAddress(initialAddress);
+      
+      // 清除地图相关引用
+      if (markerRef.current) {
+        markerRef.current.setMap(null);
+        markerRef.current = null;
+      }
+      
+      if (circleRef.current) {
+        circleRef.current.setMap(null);
+        circleRef.current = null;
+      }
+      
+      mapInstanceRef.current = null;
+      autocompleteRef.current = null;
+    }
+  }, [isOpen, initialAddress]);
 
   // 加载 Google Maps API
   useEffect(() => {
@@ -44,6 +74,63 @@ const AddressModal: React.FC<AddressModalProps> = ({
             center: defaultLocation,
             zoom: 12,
             mapTypeControl: false,
+          });
+
+          // 添加地图点击事件
+          mapInstanceRef.current.addListener("click", async (e: google.maps.MapMouseEvent) => {
+            if (e.latLng) {
+              // 使用反向地理编码获取地址
+              const geocoder = new google.maps.Geocoder();
+              geocoder.geocode(
+                { location: e.latLng },
+                (
+                  results: google.maps.GeocoderResult[] | null,
+                  status: google.maps.GeocoderStatus
+                ) => {
+                  if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+                    const clickedAddress = results[0].formatted_address;
+                    setAddress(clickedAddress);
+                    
+                    // 更新标记位置
+                    if (markerRef.current) {
+                      markerRef.current.setPosition(e.latLng!);
+                    } else {
+                      markerRef.current = new google.maps.Marker({
+                        position: e.latLng!,
+                        map: mapInstanceRef.current,
+                        icon: {
+                          path: google.maps.SymbolPath.CIRCLE,
+                          fillColor: "#4B3621",
+                          fillOpacity: 1,
+                          strokeWeight: 0,
+                          scale: 10,
+                        },
+                      });
+                    }
+                    
+                    // 更新圆圈位置
+                    if (circleRef.current) {
+                      circleRef.current.setCenter(e.latLng!);
+                    } else {
+                      circleRef.current = new google.maps.Circle({
+                        strokeColor: "#4B3621",
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: "#4B3621",
+                        fillOpacity: 0.1,
+                        map: mapInstanceRef.current,
+                        center: e.latLng!,
+                        radius: searchRange * 1000,
+                        clickable: true
+                      });
+                      
+                      // 直接为新创建的圆圈添加点击事件
+                      addCircleClickListener(circleRef.current, google);
+                    }
+                  }
+                }
+              );
+            }
           });
 
           // 初始化地址自动完成
@@ -92,7 +179,11 @@ const AddressModal: React.FC<AddressModalProps> = ({
                   map: mapInstanceRef.current,
                   center: place.geometry.location,
                   radius: searchRange * 1000,
+                  clickable: true
                 });
+                
+                // 直接为新创建的圆圈添加点击事件
+                addCircleClickListener(circleRef.current, google);
               }
             }
           });
@@ -100,34 +191,86 @@ const AddressModal: React.FC<AddressModalProps> = ({
           // 如果有初始地址，尝试地理编码
           if (initialAddress) {
             const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ address: initialAddress }, (results, status) => {
-              if (status === "OK" && results && results[0]) {
-                const location = results[0].geometry.location;
-                
-                mapInstanceRef.current?.setCenter(location);
-                
-                markerRef.current = new google.maps.Marker({
-                  position: location,
-                  map: mapInstanceRef.current,
-                  icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
+            void geocoder.geocode(
+              { address: initialAddress },
+              (
+                results: google.maps.GeocoderResult[] | null,
+                status: google.maps.GeocoderStatus
+              ) => {
+                if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+                  const location = results[0].geometry.location;
+                  
+                  mapInstanceRef.current?.setCenter(location);
+                  
+                  markerRef.current = new google.maps.Marker({
+                    position: location,
+                    map: mapInstanceRef.current,
+                    icon: {
+                      path: google.maps.SymbolPath.CIRCLE,
+                      fillColor: "#4B3621",
+                      fillOpacity: 1,
+                      strokeWeight: 0,
+                      scale: 10,
+                    },
+                  });
+                  
+                  circleRef.current = new google.maps.Circle({
+                    strokeColor: "#4B3621",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
                     fillColor: "#4B3621",
-                    fillOpacity: 1,
-                    strokeWeight: 0,
-                    scale: 10,
-                  },
-                });
-                
-                circleRef.current = new google.maps.Circle({
-                  strokeColor: "#4B3621",
-                  strokeOpacity: 0.8,
-                  strokeWeight: 2,
-                  fillColor: "#4B3621",
-                  fillOpacity: 0.1,
-                  map: mapInstanceRef.current,
-                  center: location,
-                  radius: searchRange * 1000,
-                });
+                    fillOpacity: 0.1,
+                    map: mapInstanceRef.current,
+                    center: location,
+                    radius: searchRange * 1000,
+                    clickable: true
+                  });
+                  
+                  // 直接为新创建的圆圈添加点击事件
+                  addCircleClickListener(circleRef.current, google);
+                }
+              }
+            );
+          }
+          
+          // 辅助函数：为圆圈添加点击事件监听器
+          function addCircleClickListener(circle: google.maps.Circle, googleObj: typeof google) {
+            // 移除之前的圆圈点击监听器（如果有）
+            googleObj.maps.event.clearListeners(circle, 'click');
+            
+            // 添加圆圈点击监听器
+            circle.addListener('click', (e: google.maps.MapMouseEvent) => {
+              if (e.latLng) {
+                // 使用反向地理编码获取地址
+                const geocoder = new googleObj.maps.Geocoder();
+                void geocoder.geocode(
+                  { location: e.latLng },
+                  (
+                    results: google.maps.GeocoderResult[] | null,
+                    status: google.maps.GeocoderStatus
+                  ) => {
+                    if (status === googleObj.maps.GeocoderStatus.OK && results && results[0]) {
+                      const clickedAddress = results[0].formatted_address;
+                      setAddress(clickedAddress);
+                      
+                      // 更新标记位置
+                      if (markerRef.current) {
+                        markerRef.current.setPosition(e.latLng);
+                      } else {
+                        markerRef.current = new googleObj.maps.Marker({
+                          position: e.latLng,
+                          map: mapInstanceRef.current,
+                          icon: {
+                            url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                          },
+                        });
+                      }
+                      
+                      // 更新圆圈中心位置
+                      circleRef.current?.setCenter(e.latLng);
+                    }
+                  }
+                );
               }
             });
           }
@@ -142,11 +285,16 @@ const AddressModal: React.FC<AddressModalProps> = ({
 
   // 更新搜索范围
   useEffect(() => {
-    if (circleRef.current) {
+    if (circleRef.current && mapInstanceRef.current) {
       circleRef.current.setRadius(searchRange * 1000);
+      circleRef.current.setOptions({
+        clickable: true
+      });
     }
   }, [searchRange]);
 
+  if (isLoadingAuth||isUpdating) return <CenteredLoading />;
+  if (!isAuthenticated) return <Navigate to="/login" replace/>;
   if (!isOpen) return null;
 
   return (
@@ -172,6 +320,34 @@ const AddressModal: React.FC<AddressModalProps> = ({
             ref={mapRef} 
             className="w-full h-80 rounded-lg mb-4"
           ></div>
+          
+          {/* 地图缩放控制按钮 */}
+          <div className="flex justify-end mb-2">
+            <div className="flex shadow rounded-lg overflow-hidden">
+              <button 
+                type="button"
+                className="bg-white px-3 py-1 hover:bg-gray-100"
+                onClick={() => {
+                  if (mapInstanceRef.current) {
+                    mapInstanceRef.current.setZoom((mapInstanceRef.current.getZoom() || 12) + 1);
+                  }
+                }}
+              >
+                <span className="text-xl">+</span>
+              </button>
+              <button 
+                type="button"
+                className="bg-white px-3 py-1 border-l hover:bg-gray-100"
+                onClick={() => {
+                  if (mapInstanceRef.current) {
+                    mapInstanceRef.current.setZoom((mapInstanceRef.current.getZoom() || 12) - 1);
+                  }
+                }}
+              >
+                <span className="text-xl">−</span>
+              </button>
+            </div>
+          </div>
           
           <div className="mb-4">
             <label className="label">
@@ -202,7 +378,16 @@ const AddressModal: React.FC<AddressModalProps> = ({
             </button>
             <button 
               className="btn btn-primary"
-              onClick={() => onSelect(address)}
+              onClick={() => {
+                if (isSave) {
+                  void updateUser({
+                    userId: loginUser?._id??'',
+                    address: address
+                  });
+                }
+                onSelect(address);
+                onClose();
+              }}
               disabled={!address}
             >
               Set Location

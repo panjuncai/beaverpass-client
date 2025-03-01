@@ -13,6 +13,13 @@ export const chatApi = createApiWithBaseUrl('/chat', 'chatApi').injectEndpoints(
       }),
       providesTags: [TAG_TYPE],
     }),
+    getUnreadCount: builder.query<number, void>({
+      query: () => ({
+        url: '/rooms/unread',
+        method: 'GET',
+      }),
+      providesTags: [TAG_TYPE],
+    }),
     getChatMessages: builder.query<Message[], string>({
       query: (roomId) => ({
         url: `/rooms/${roomId}/messages`,
@@ -66,4 +73,5 @@ export const {
   useCreateChatRoomMutation,
   useGetRoomWithUserQuery,
   useMarkAsReadMutation,
+  useGetUnreadCountQuery,
 } = chatApi; 

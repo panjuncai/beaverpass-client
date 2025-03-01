@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import logo from './logo_beta.png'
+import logo from './logo_beta_removebg.png'
 
 const Logo: React.FC<{height: number, width: number}> = ({height, width}) => {
     return(

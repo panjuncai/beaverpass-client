@@ -39,8 +39,9 @@ export const routes: RouteConfig[] = [
     path: "/",
     element: React.createElement(AppLayout, { 
       showBack: false, 
-      title: React.createElement(Logo, { height: 60, width: 225 }),
-      showNavBar:true 
+      title: React.createElement(Logo, { height: 48, width: 180}),
+      showNavBar:true,
+      showUnderline:false
     }),
     children: [
       {
@@ -113,7 +114,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: "/",
-    element: React.createElement(AppLayout),
+    element: React.createElement(AppLayout, { showBack: true, title: "Order View",showNavBar:true}),
     children: [
       {
         path: "orderView",

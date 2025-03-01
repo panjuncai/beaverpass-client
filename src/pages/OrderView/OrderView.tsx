@@ -1,9 +1,8 @@
-import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 import { useAuth } from "@/hooks/useAuth";
 import { useGetPostQuery } from "@/services/postApi";
 import { useCreateOrderMutation } from "@/services/orderApi";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Toast } from "antd-mobile";
 import CenteredLoading from "@/components/CenterLoading";
 import { DeliveryType } from "@/types/post";
@@ -19,11 +18,11 @@ interface ShippingInfo {
 }
 
 const OrderView: React.FC = () => {
+  const { loginUser, isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const productId = (location.state as LocationState)?.productId;
-  const { data: post, isLoading: isLoadingPost } = useGetPostQuery(productId);
-  const { loginUser } = useAuth();
+  const { data: post, isLoading: isLoadingPost } = useGetPostQuery(productId, { skip: !productId });
   const [createOrder, { isLoading: isCreatingOrder }] = useCreateOrderMutation();
   
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
@@ -32,6 +31,17 @@ const OrderView: React.FC = () => {
     phone: "",
   });
 
+  useEffect(() => {
+    if (!loginUser?._id) return;
+    setShippingInfo({
+      address: loginUser.address || "",
+      receiver: `${loginUser?.firstName} ${loginUser?.lastName}`,
+      phone: loginUser.phone || "",
+    });
+  }, [loginUser]);
+
+  if(!isAuthenticated) return <Navigate to="/login" replace />;
+  if(!productId) return <Navigate to="/search" replace />;
   if (isLoadingPost) {
     return <CenteredLoading />;
   }
@@ -90,7 +100,6 @@ const OrderView: React.FC = () => {
 
   return (
     <>
-      <CustomNavBar title="Order View" />
       <div className="p-4 space-y-6">
         {/* 商品信息 */}
         <div className="card bg-base-100 shadow">
@@ -99,7 +108,7 @@ const OrderView: React.FC = () => {
             <img 
                 src={post?.images.FRONT||''} 
                 alt={post?.title} 
-                className="w-full h-36 object-cover"
+                className="w-full h-36 object-cover rounded-lg"
               />
             <p>{post?.description}</p>
             <div className="badge badge-outline">{post?.condition}</div>
@@ -160,6 +169,8 @@ const OrderView: React.FC = () => {
             </div>
           </div>
         </div>
+
+        <div className="h-20"></div>
 
         {/* 支付按钮 */}
         <div className="fixed bottom-12 left-0 right-0 flex justify-center">

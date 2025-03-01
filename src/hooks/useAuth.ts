@@ -63,7 +63,7 @@ export const useAuth = () => {
       // 重置所有 API 缓存
       dispatch(api.util.resetApiState());
       
-      void navigate("/login",{replace:true});
+      void navigate("/search",{replace:true});
     } catch(error) {
       console.log('logout error',error);
       throw new Error('Logout failed');

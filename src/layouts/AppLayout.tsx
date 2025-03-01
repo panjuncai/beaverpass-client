@@ -9,24 +9,32 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
+import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useGetUnreadCountQuery } from "@/services/chatApi";
 
 interface TopProps {
   showBack?: boolean;
-  title?: string|React.ReactNode;
+  title?: string | React.ReactNode;
   showNavBar?: boolean;
+  showUnderline?: boolean;
 }
 
-const Top: React.FC<TopProps> = ({ showBack = false, title = "", showNavBar = true }) => {
+const Top: React.FC<TopProps> = ({
+  showBack = false,
+  title = "",
+  showNavBar = true,
+  showUnderline = true,
+}) => {
   return (
-    <div className="top">
+    <div className={`${showUnderline ? "top" : ""}`}>
       {showNavBar && <CustomNavBar title={title} showBack={showBack} />}
-      
     </div>
   );
 };
 
 /* eslint-disable react/prop-types */
-const Bottom = () => {
+const Bottom = ({ unreadCount }: { unreadCount: number }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { pathname } = location;
@@ -44,6 +52,7 @@ const Bottom = () => {
       key: "/inbox",
       title: <Title msg="Inbox" />,
       icon: <MessageOutline />,
+      badge: unreadCount,
     },
     { key: "/post", title: <Title msg="Post" />, icon: <CameraOutline /> },
     {
@@ -65,7 +74,12 @@ const Bottom = () => {
       onChange={(value) => setRouteActive(value)}
     >
       {tabs.map((item) => (
-        <TabBar.Item key={item.key} icon={item.icon} title={item.title} />
+        <TabBar.Item
+          key={item.key}
+          icon={item.icon}
+          title={item.title}
+          {...(item.badge ? { badge: item.badge } : {})}
+        />
       ))}
     </TabBar>
   );
@@ -75,21 +89,41 @@ interface AppLayoutProps {
   showBack?: boolean;
   title?: string | React.ReactNode;
   showNavBar?: boolean;
+  showUnderline?: boolean;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ 
-  showBack, 
+const AppLayout: React.FC<AppLayoutProps> = ({
+  showBack,
   title,
-  showNavBar = true 
+  showNavBar = true,
+  showUnderline = true,
 }) => {
+  const { loginUser, isAuthenticated } = useAuth();
+  const { data: unreadCount, refetch } = useGetUnreadCountQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+    if (loginUser?._id) {
+      intervalId = setInterval(() => {
+        void refetch();
+      }, 6000); // 每6秒刷新一次
+    }
+    return () => clearInterval(intervalId);
+  }, [refetch, loginUser?._id]);
   return (
     <>
-      <Top showBack={showBack} title={title} showNavBar={showNavBar} />
-      <div className={`body ${!showNavBar ? 'mt-0' : ''}`}>
+      <Top
+        showBack={showBack}
+        title={title}
+        showNavBar={showNavBar}
+        showUnderline={showUnderline}
+      />
+      <div className={`body ${!showNavBar ? "mt-0" : ""}`}>
         <Outlet />
       </div>
       <div className="bottom">
-        <Bottom />
+        <Bottom unreadCount={unreadCount ?? 0} />
       </div>
     </>
   );

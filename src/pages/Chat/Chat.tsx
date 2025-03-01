@@ -57,15 +57,30 @@ const Chat: React.FC = () => {
     if (messages) {
       // console.log("Received messages from API:", messages.length);
       setLocalMessages(messages);
-      scrollToBottom();
+      // 使用 setTimeout 确保在 DOM 更新后滚动
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
     }
   }, [messages]);
 
-  // useEffect(() => {
-  //   if (localMessages.length > 0) {
-  //     scrollToBottom();
-  //   }
-  // }, [localMessages]);
+  // 添加一个额外的 useEffect 来确保在组件挂载和更新后滚动到底部
+  useEffect(() => {
+    if (localMessages.length > 0) {
+      // 使用 setTimeout 确保在 DOM 更新后滚动
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [localMessages]);
+
+  // 添加一个 useEffect 在组件挂载后滚动到底部
+  useEffect(() => {
+    // 组件挂载后滚动到底部
+    setTimeout(() => {
+      scrollToBottom();
+    }, 300);
+  }, []);
 
   // Socket.IO 事件监听
   useEffect(() => {

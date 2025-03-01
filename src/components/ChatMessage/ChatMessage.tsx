@@ -71,7 +71,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         {renderMessageContent()}
       </div>
       {isSender && (
-        <div className="text-xs opacity-50 mt-1">
+        <div className="chat-footer opacity-50 mt-1">
           {isRead() ? 'read' : 'unread'}
         </div>
       )}

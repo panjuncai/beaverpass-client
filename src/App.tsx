@@ -14,7 +14,7 @@ const App: React.FC = () => {
       const { path, element, meta, children } = route;
       return (
         <Route
-          key={isAuthenticated ? "authenticated" : "unauthenticated"}
+          key={path}
           path={path}
           element={
             meta?.requiresAuth ? (
