@@ -9,7 +9,6 @@ import {
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
-import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useGetUnreadCountQuery } from "@/services/chatApi";
 
@@ -98,19 +97,19 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   showNavBar = true,
   showUnderline = true,
 }) => {
-  const { loginUser, isAuthenticated } = useAuth();
-  const { data: unreadCount, refetch } = useGetUnreadCountQuery(undefined, {
-    skip: !isAuthenticated,
+  const { isAuthenticated } = useAuth();
+  const { data: unreadCount } = useGetUnreadCountQuery(undefined, {
+    pollingInterval: isAuthenticated ? 6 * 1000 : undefined,
   });
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-    if (loginUser?._id) {
-      intervalId = setInterval(() => {
-        void refetch();
-      }, 6000); // 每6秒刷新一次
-    }
-    return () => clearInterval(intervalId);
-  }, [refetch, loginUser?._id]);
+  // useEffect(() => {
+  //   // let intervalId: NodeJS.Timeout;
+  //   // if (loginUser?._id) {
+  //   //   intervalId = setInterval(() => {
+  //   //     void refetch();
+  //   //   }, 6000); // 每6秒刷新一次
+  //   // }
+  //   // return () => clearInterval(intervalId);
+  // }, [refetch, loginUser?._id]);
   return (
     <>
       <Top

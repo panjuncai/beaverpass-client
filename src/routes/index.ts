@@ -20,12 +20,28 @@ const PostDetailWrapper = lazy(() => import("@/pages/PostDetail/PostDetailWrappe
 const OrderView= lazy(() => import("@/pages/OrderView/OrderView"));
 const Chat= lazy(() => import("@/pages/Chat/Chat"));
 const EditProfile= lazy(() => import("@/pages/Profile/EditProfile"));
+const PaymentSuccess = lazy(() => import("@/components/PaymentSuccess/PaymentSuccess"));
 
 export const routes: RouteConfig[] = [
   {
     path: "/",
     element: React.createElement(Navigate,{to:"/search",replace:true}),
     meta: { requiresAuth: false, title: "Search" },
+  },
+  {
+    path: "/payment-success",
+    element: React.createElement(AppLayout, { 
+      showBack: false, 
+      title: "Payment Success",
+      showNavBar: false 
+    }),
+    children: [
+      {
+        path: "",
+        element: React.createElement(PaymentSuccess),
+        meta: { requiresAuth: true, title: "Payment Success" },
+      },
+    ],
   },
   {
     path:"/posts/:postId",

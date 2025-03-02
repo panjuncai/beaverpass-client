@@ -1,5 +1,4 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import authReducer from "./slices/authSlice";
 import toastReducer from './slices/toastSlice';
 import { postApi } from "@/services/postApi";
 import { userApi } from "@/services/userApi";
@@ -9,7 +8,6 @@ import { chatApi } from '@/services/chatApi';
 import { paymentApi } from '@/services/paymentApi';
 // 合并所有的 reducers
 const rootReducer = combineReducers({
-  auth: authReducer,
   toast: toastReducer,
   [userApi.reducerPath]: userApi.reducer,
   [postApi.reducerPath]: postApi.reducer,

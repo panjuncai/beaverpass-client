@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Input, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
-import { registerUser } from "@/services/authService";
+import { useRegisterMutation } from "@/services/authApi";
 import { RegisterRequest } from "@/types/user";
 import {Link, useNavigate } from "react-router-dom";
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
+import CenterLoading from "@/components/CenterLoading";
 
-interface State {
+  interface State {
   firstName: string;
   lastName: string;
   email: string;
@@ -26,6 +27,7 @@ const styles: { innerContainer: React.CSSProperties } = {
 };
 
 const Register: React.FC = () => {
+  const [register, { isLoading }] = useRegisterMutation();
   const [state, setState] = useState<State>({
     firstName: "",
     lastName: "",
@@ -63,7 +65,7 @@ const Register: React.FC = () => {
     try {
       Toast.show({ icon: "loading" });
       // console.log(`data is ${JSON.stringify(data)}`)
-      await registerUser(data);
+      await register(data).unwrap();
       Toast.show({
         icon: "success",
         content: "Please verify your email",
@@ -76,20 +78,6 @@ const Register: React.FC = () => {
   };
 
   const footer = (
-    // <Space direction="vertical" block>
-    //   <Button
-    //     block
-    //     type="submit"
-    //     color="primary"
-    //     size="large"
-    //     onClick={handleRegister}
-    //   >
-    //     Sign Up
-    //   </Button>
-    //   <Button block color="default" size="large" onClick={handleLogin}>
-    //     Sign In
-    //   </Button>
-    // </Space>
     <div className="flex flex-col items-center justify-center">
         {/* 主按钮区域 */}
         <button
@@ -107,6 +95,10 @@ const Register: React.FC = () => {
         </div>
       </div>
   );
+
+  if (isLoading) {
+    return <CenterLoading />
+  }
 
   return (
     <>

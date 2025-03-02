@@ -1,87 +1,60 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { type RootState, type AppDispatch } from '@/store';
-import { login, logout, setRedirectPath } from '@/store/slices/authSlice';
 import type { LoginRequest } from '@/types/user';
-// import { useCheckSessionQuery } from '@/services/authApi';
-// import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '@/services/api';  // 导入 api slice
+import { api } from '@/services/api';
+import { 
+  useLoginMutation, 
+  useLogoutMutation, 
+  useCheckSessionQuery,
+} from '@/services/authApi';
+import { useState, useEffect } from 'react';
+
 /**
  * useAuth 自定义 Hook
- * 用于在任意函数组件中获取 Redux 中的 auth 状态及其操作方法
+ * 使用 RTK Query 管理认证状态
  */
 export const useAuth = () => {
-  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
   
-  // 从 Redux store 中获取 auth 状态
-  const { isAuthenticated,loginUser,isLoading, redirectPath } = useSelector(
-    (state: RootState) => state.auth
-  );
-  // console.log("loginUser",loginUser?.firstName)
+  // 使用 RTK Query 的全局状态
+  const { data: authState, isLoading: isSessionLoading } = useCheckSessionQuery(undefined, {
+    pollingInterval: isUserAuthenticated ? 6 * 1000 : undefined,
+  });
+  
+  // 当 authState 变化时更新认证状态
+  useEffect(() => {
+    setIsUserAuthenticated(!!authState?.isAuthenticated);
+  }, [authState?.isAuthenticated]);
 
-  // 添加一个跳过 session 检查的标志
-  // const [skipSessionCheck, setSkipSessionCheck] = useState(false);
-
-  // const { data: sessionUser, isSuccess } = useCheckSessionQuery(undefined, {
-  //   skip: skipSessionCheck // 当 skipSessionCheck 为 true 时跳过查询
-  // });
-
-  // 使用 useEffect 来同步状态
-  // useEffect(() => {
-  //   if (!isAuthenticated && isSuccess && sessionUser && !skipSessionCheck) {
-  //     dispatch({
-  //       type: 'auth/setAuthState',
-  //       payload: {
-  //         isAuthenticated: true,
-  //         user: sessionUser
-  //       }
-  //     });
-  //   }
-  // }, [sessionUser, isSuccess, dispatch, skipSessionCheck, isAuthenticated]);
+  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
+  const [logout, { isLoading: isLogoutLoading }] = useLogoutMutation();
 
   // 封装登录操作
   const loginHandler = async (data: LoginRequest) => {
-    // dispatch 返回的 Promise 支持 unwrap() 方法，方便错误处理
-    await dispatch(login(data)).unwrap();
+    const result = await login(data).unwrap();
+    return result;
   };
 
   // 封装登出操作
   const logoutHandler = async () => {
     try {
-      await dispatch(logout()).unwrap();
-      // setSkipSessionCheck(true); // 登出后跳过 session 检查
-      dispatch({
-        type: 'auth/setAuthState',
-        payload: {
-          isAuthenticated: false,
-          user: null,
-          isLoading: false
-        }
-      });
-
-      // 重置所有 API 缓存
-      dispatch(api.util.resetApiState());
+      const result = await logout().unwrap();
       
-      void navigate("/search",{replace:true});
-    } catch(error) {
-      console.log('logout error',error);
+      // 重置所有 API 缓存
+      api.util.resetApiState();
+      void navigate("/search", { replace: true });
+      return result;
+    } catch (error) {
+      console.error('Logout failed:', error);
       throw new Error('Logout failed');
     }
   };
 
-  // 封装设置重定向路径操作
-  const setRedirect = (path: string) => {
-    dispatch(setRedirectPath(path));
-  };
-
   return {
-    isAuthenticated,
-    loginUser,
-    isLoading,
-    redirectPath,
+    isAuthenticated: authState?.isAuthenticated ?? false,
+    loginUser: authState?.user ?? null,
+    isLoading: isSessionLoading || isLoginLoading || isLogoutLoading,
     login: loginHandler,
     logout: logoutHandler,
-    setRedirectPath: setRedirect,
   };
 };

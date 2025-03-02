@@ -23,7 +23,7 @@ const styles: { innerContainer: React.CSSProperties } = {
 };
 
 const Login: React.FC = () => {
-  const { login, isAuthenticated,redirectPath } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [state, setState] = useState<State>({
     email: "",
     password: "",
@@ -49,12 +49,7 @@ const Login: React.FC = () => {
       Toast.show({ icon: "loading" });
       await login(data);
       Toast.show({ icon: "success" });
-      // setState({
-      //   email: "",
-      //   password: "",
-      //   error: "",
-      // });
-      void navigate(redirectPath||'/');
+      void navigate('/search', { replace: true });
     } catch (e: unknown) {
       const error = e instanceof Error ? e.message : 'Unknown error';
       console.log(`Login failed: ${error}`);
@@ -81,7 +76,7 @@ const Login: React.FC = () => {
   );
 
   if (isAuthenticated) {
-    return <Navigate to="/" />
+    return <Navigate to="/search" />
   }
 
   return (

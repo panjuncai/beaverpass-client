@@ -6,6 +6,7 @@ export const TAGS = {
   Post: 'Post',
   Chat: 'Chat',
   User: 'User',
+  Auth: 'Auth',
 } as const;
 
 
@@ -13,7 +14,7 @@ export const TAGS = {
 export const createApiWithBaseUrl = (baseUrl: string, path: string) => createApi({
   reducerPath: path,  // 使用传入的路径作为 reducerPath
   baseQuery: axiosBaseQuery({ baseUrl }),
-  tagTypes: [TAGS.Post, TAGS.Chat, TAGS.User],
+  tagTypes: [TAGS.Post, TAGS.Chat, TAGS.User, TAGS.Auth],
   endpoints: () => ({}),
 });
 
