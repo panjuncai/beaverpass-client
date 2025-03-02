@@ -98,23 +98,28 @@ const Post: React.FC = () => {
       },
     }));
   };
-
+  // to do
   const formatPrice = (value: string) => {
-    // Remove any non-digit characters except decimal point
-    value = value.replace(/[^\d.]/g, "");
-
-    // Ensure only one decimal point
-    const parts = value.split(".");
+    // 移除非数字和小数点
+    let formattedValue = value.replace(/[^\d.]/g, "");
+    
+    // 确保只有一个小数点
+    const parts = formattedValue.split(".");
     if (parts.length > 2) {
-      value = parts[0] + "." + parts.slice(1).join("");
+      formattedValue = parts[0] + "." + parts.slice(1).join("");
     }
 
-    // Limit to two decimal places
+    // 如果是以小数点开始，添加前导零
+    if (formattedValue.startsWith(".")) {
+      formattedValue = "0" + formattedValue;
+    }
+
+    // 限制小数位数为两位
     if (parts[1]?.length > 2) {
-      value = parts[0] + "." + parts[1].slice(0, 2);
+      formattedValue = parts[0] + "." + parts[1].slice(0, 2);
     }
 
-    return value;
+    return formattedValue;
   };
 
   // const handleImagesChange = (images: Record<string, string | null>) => {

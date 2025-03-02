@@ -1,11 +1,18 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useGetPostQuery } from "@/services/postApi";
 import { useCreateOrderMutation } from "@/services/orderApi";
+import { useCreatePaymentIntentMutation } from "@/services/paymentApi";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Toast } from "antd-mobile";
 import CenteredLoading from "@/components/CenterLoading";
 import { DeliveryType } from "@/types/post";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import PaymentForm from "@/components/PaymentForm/PaymentForm";
+
+// 替换为您的 Stripe 公钥
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
 
 interface LocationState {
   productId: string;
@@ -24,6 +31,8 @@ const OrderView: React.FC = () => {
   const productId = (location.state as LocationState)?.productId;
   const { data: post, isLoading: isLoadingPost } = useGetPostQuery(productId, { skip: !productId });
   const [createOrder, { isLoading: isCreatingOrder }] = useCreateOrderMutation();
+  const [createPaymentIntent] = useCreatePaymentIntentMutation();
+  const [clientSecret, setClientSecret] = useState<string>("");
   
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     address: "",
@@ -51,7 +60,7 @@ const OrderView: React.FC = () => {
     const deliveryFee = post?.deliveryType === DeliveryType.HOME_DELIVERY ? 10 : 0;
     const serviceFee = post?.price?.isFree ? 10 : 0;
     const tax = baseAmount * 0.13;
-    const paymentFee = (baseAmount + deliveryFee + serviceFee + tax) * 0.029 + 0.30; // 假设支付处理费为2.9% + $0.30
+    const paymentFee = (baseAmount + deliveryFee + serviceFee + tax) * 0.029 + 0.30;
     const total = baseAmount + deliveryFee + serviceFee + tax + paymentFee;
 
     return {
@@ -69,6 +78,7 @@ const OrderView: React.FC = () => {
 
     const fees = calculateFees();
    
+    try {
       const orderData = {
         buyerId: { _id: loginUser._id },
         sellerId: { _id: post.poster._id },
@@ -87,13 +97,41 @@ const OrderView: React.FC = () => {
         shippingInfo,
       };
 
-      await createOrder(orderData).unwrap();
+      const order = await createOrder(orderData).unwrap();
+      
+      // 创建支付意向
+      const { clientSecret } = await createPaymentIntent({
+        orderId: order._id
+      }).unwrap();
+      console.log('clientSecret', clientSecret);
+      
+      setClientSecret(clientSecret);
+    } catch (error) {
+      console.error('Error creating order:', error);
       Toast.show({
-        icon: "success",
-        content: "Order created successfully",
+        icon: 'fail',
+        content: 'Create order failed',
       });
-      void navigate("/deals",{replace:true});
-    
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    Toast.show({
+      icon: 'success',
+      content: 'Payment successful!',
+    });
+    void navigate("/deals", { replace: true });
+  };
+
+  const handlePaymentError = (error: string) => {
+    Toast.show({
+      icon: 'fail',
+      content: error,
+    });
+  };
+
+  const handleClosePayment = () => {
+    setClientSecret("");
   };
 
   const fees = calculateFees();
@@ -106,10 +144,10 @@ const OrderView: React.FC = () => {
           <div className="card-body">
             <h2 className="card-title">{post?.title}</h2>
             <img 
-                src={post?.images.FRONT||''} 
-                alt={post?.title} 
-                className="w-full h-36 object-cover rounded-lg"
-              />
+              src={post?.images.FRONT||''} 
+              alt={post?.title} 
+              className="w-full h-36 object-cover rounded-lg"
+            />
             <p>{post?.description}</p>
             <div className="badge badge-outline">{post?.condition}</div>
           </div>
@@ -170,18 +208,29 @@ const OrderView: React.FC = () => {
           </div>
         </div>
 
-        <div className="h-20"></div>
-
-        {/* 支付按钮 */}
         <div className="fixed bottom-12 left-0 right-0 flex justify-center">
           <button
             className="btn btn-primary btn-xl w-4/5 rounded-full shadow-md"
             onClick={() => void handleCreateOrder()}
             disabled={isCreatingOrder}
           >
-            {isCreatingOrder ? "Processing..." : "Pay Now"}
+            {isCreatingOrder ? "Processing..." : "Confirm Order"}
           </button>
         </div>
+
+        {/* Stripe 支付模态框 */}
+        {clientSecret && (
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <PaymentForm
+              amount={fees.total}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+              onClose={handleClosePayment}
+            />
+          </Elements>
+        )}
+
+        <div className="h-20"></div>
       </div>
     </>
   );

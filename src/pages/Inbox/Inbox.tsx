@@ -79,7 +79,8 @@ const Inbox: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 line-clamp-1">
-                  {room.lastMessage?.content || "No message"}
+                  {/* 这里后续需要修改一下，当最新消息是Post时，需要转换 */}
+                  {room.lastMessage?.content}
                 </p>
               </div>
             </div>
