@@ -4,7 +4,7 @@ import imageCompression from "browser-image-compression";
 interface ImageUploadProps {
   viewType: "FRONT" | "SIDE" | "BACK" | "DAMAGE";
   imageUrl: string | null|undefined;
-  onImageUpload: (viewType: string, file: string) => void;
+  onImageUpload: (viewType: string, file: string) => Promise<void> | void;
   onImageDelete: (viewType: string) => void;
   showError?: boolean;
 }
@@ -25,6 +25,7 @@ export default function ImageUpload({
   showError = false,
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   // Hidden file input reference
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -35,20 +36,30 @@ export default function ImageUpload({
       if (file) {
         try {
           setIsUploading(true);
+          setUploadError(null);
+          
           const compressedFile = await imageCompression(
             file,
             compressionOptions
           );
 
           const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64String = reader.result as string;
-            onImageUpload(viewType, base64String);
-            setIsUploading(false);
+          reader.onloadend = async () => {
+            try {
+              const base64String = reader.result as string;
+              // 处理异步上传
+              await Promise.resolve(onImageUpload(viewType, base64String));
+              setIsUploading(false);
+            } catch (error) {
+              console.error("Error uploading image:", error);
+              setUploadError("Upload failed, please try again");
+              setIsUploading(false);
+            }
           };
           reader.readAsDataURL(compressedFile);
         } catch (error) {
           console.error("Error compressing image:", error);
+          setUploadError("Image compression failed");
           setIsUploading(false);
         }
       }
@@ -177,6 +188,11 @@ export default function ImageUpload({
           Please upload a front view image
         </div>
       )}
+    {uploadError && (
+      <div className="text-error text-sm mt-2">
+        {uploadError}
+      </div>
+    )}
     </div>
   );
 }

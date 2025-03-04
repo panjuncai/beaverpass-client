@@ -6,8 +6,10 @@ import { useAddPostMutation } from "@/services/postApi";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "antd-mobile";
 import { BasePost, PostImages, PostPrice } from "@/types/post";
+import { uploadBase64Image } from '@/utils/upload';
+
 const Post: React.FC = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated,loginUser } = useAuth();
   // console.log("Post isAuthenticated:", isAuthenticated);
   const [addPost, { isLoading: isLoadingPost }] = useAddPostMutation();
   const navigate = useNavigate();
@@ -70,22 +72,26 @@ const Post: React.FC = () => {
   };
 
   // 添加图片处理函数
-  const handleImageUpload = (viewType: string, base64String: string) => {
+  const handleImageUpload = async (viewType: string, base64String: string) => {
     try {
-      // 这里应该调用你的上传API
-      // const response = await uploadImage(file);
-      // const imageUrl = response.url;
-
+      // 调用 S3 上传工具上传 base64 图片
+      const fileName = `post_${loginUser?._id}_${viewType}.jpg`;
+      const imageUrl = await uploadBase64Image(base64String, fileName);
+      
+      // 更新表单数据，存储实际的图片 URL 而不是 base64
       setFormData((prev) => ({
         ...prev,
         images: {
           ...prev.images,
-          [viewType]: base64String,
+          [viewType]: imageUrl,
         },
       }));
     } catch (error) {
-      console.error("Error uploading image:", error);
-      // 处理错误
+      console.error("Error uploading image to S3:", error);
+      Toast.show({
+        icon: 'fail',
+        content: 'Upload image failed',
+      });
     }
   };
 
