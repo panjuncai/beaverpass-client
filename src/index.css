@@ -1,6 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Apply Poppins font globally */
+@layer base {
+  html, body {
+    font-family: 'Poppins', sans-serif;
+  }
+}
 
 /* ... */
 /* 仅对 step-success 步骤的 data-content 文本变白 */
