@@ -97,10 +97,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   showNavBar = true,
   showUnderline = true,
 }) => {
-  const { isAuthenticated } = useAuth();
-  const { data: unreadCount } = useGetUnreadCountQuery(undefined, {
-    pollingInterval: isAuthenticated ? 6 * 1000 : undefined,
-  });
+  // const { isAuthenticated } = useAuth();
+  // const { data: unreadCount } = useGetUnreadCountQuery(undefined, {
+  //   pollingInterval: isAuthenticated ? 60 * 1000 : undefined,
+  // });
+  const unreadCount = 0;
   // useEffect(() => {
   //   // let intervalId: NodeJS.Timeout;
   //   // if (loginUser?._id) {

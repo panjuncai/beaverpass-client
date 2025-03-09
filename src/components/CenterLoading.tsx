@@ -19,7 +19,6 @@ const CenteredLoading: React.FC = () => {
   return (
     <div style={styles.loadingContainer}>
       <SpinLoading color="primary" />
-      {/* Toast.show({ icon: 'loading'}); */}
     </div>
   );
 };

@@ -1,20 +1,11 @@
-import { useState } from "react";
 import { Input, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
-import { useRegisterMutation } from "@/services/authApi";
+import { useRegister } from "@/services/authService";
 import { RegisterRequest } from "@/types/user";
-import {Link, useNavigate } from "react-router-dom";
-import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
+import { useNavigate } from "react-router-dom";
 import CenterLoading from "@/components/CenterLoading";
-
-  interface State {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  error: string;
-}
+import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
+import { Link } from "react-router-dom";
 
 const styles: { innerContainer: React.CSSProperties } = {
   innerContainer: {
@@ -27,45 +18,40 @@ const styles: { innerContainer: React.CSSProperties } = {
 };
 
 const Register: React.FC = () => {
-  const [register, { isLoading }] = useRegisterMutation();
-  const [state, setState] = useState<State>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    error: "",
-  });
+  const [form] = Form.useForm();
+  const { register, isLoading } = useRegister();
 
   const navigate = useNavigate();
 
-  const handleChange = (name: string, value: string | boolean) => {
-    setState((prevState) => ({ ...prevState, [name]: value }));
-  };
-
   const handleRegister = async () => {
-    if (state.password !== state.confirmPassword) {
-      Toast.show({ icon: "fail", content: "Passwords do not match!" });
+    const values = await form.validateFields() as {
+      firstName: string;
+      lastName: string;
+      email: string;
+      password: string;
+      confirmPassword: string;
+    };
+
+    if (values.password !== values.confirmPassword) {
+      Toast.show({ icon: "fail", content: "Passwords not match" });
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
       Toast.show({ icon: "fail", content: "Invalid email format" });
       return;
     }
 
     const data: RegisterRequest = {
-      email: state.email,
-      firstName: state.firstName,
-      lastName: state.lastName,
-      password: state.password,
-      confirmPassword: state.confirmPassword,
+      email: values.email,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      password: values.password,
+      confirmPassword: values.confirmPassword,
     };
 
     try {
-      Toast.show({ icon: "loading" });
-      // console.log(`data is ${JSON.stringify(data)}`)
-      await register(data).unwrap();
+      await register(data);
       Toast.show({
         icon: "success",
         content: "Please verify your email",
@@ -106,7 +92,7 @@ const Register: React.FC = () => {
       <div style={styles.innerContainer}>
         <Space align="center" direction="vertical">
           <Logo height={80} width={300}/>
-          <Form layout="horizontal" footer={footer}>
+          <Form layout="horizontal" footer={footer} form={form}>
             <Form.Item
               label="First name"
               name="firstName"
@@ -115,7 +101,6 @@ const Register: React.FC = () => {
               <Input
                 placeholder="Please input first name"
                 type="text"
-                onChange={(val) => handleChange("firstName", val)}
               />
             </Form.Item>
             <Form.Item
@@ -126,7 +111,6 @@ const Register: React.FC = () => {
               <Input
                 placeholder="Please input last name"
                 type="text"
-                onChange={(val) => handleChange("lastName", val)}
               />
             </Form.Item>
             <Form.Item
@@ -145,7 +129,6 @@ const Register: React.FC = () => {
               <Input
                 placeholder="Please input email"
                 autoComplete="false"
-                onChange={(val) => handleChange("email", val)}
               />
             </Form.Item>
             <Form.Item
@@ -156,7 +139,6 @@ const Register: React.FC = () => {
               <Input
                 placeholder="Please input password"
                 type="password"
-                onChange={(val) => handleChange("password", val)}
               />
             </Form.Item>
             <Form.Item
@@ -169,7 +151,6 @@ const Register: React.FC = () => {
               <Input
                 placeholder="Please confirm password"
                 type="password"
-                onChange={(val) => handleChange("confirmPassword", val)}
               />
             </Form.Item>
           </Form>

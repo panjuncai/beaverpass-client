@@ -8,14 +8,18 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import { ToastInfo } from "@/components/ToastInfo/ToastInfo.tsx";
+import { ApolloProvider } from "@apollo/client";
+import apolloClient from "@/api/graphql";
 
 Toast.config({ duration: 1000 });
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
     <Provider store={store}>
-      <App />
-      <ToastInfo />
+      <ApolloProvider client={apolloClient}>
+        <App />
+        <ToastInfo />
+      </ApolloProvider>
     </Provider>
   </BrowserRouter>
 );

@@ -1,4 +1,6 @@
-import apiClient from "@/api/api";
+// import apiClient from "@/api/api";
+import CenterLoading from "@/components/CenterLoading";
+import { useVerifyUser } from "@/services/authService";
 import { Toast } from "antd-mobile";
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -7,6 +9,7 @@ const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const { verifyUser, isLoading } = useVerifyUser();
 
   // get token
   const token = searchParams.get("token");
@@ -19,7 +22,7 @@ const VerifyEmail: React.FC = () => {
       }
 
       try {
-        await apiClient.get(`/auth/verify?token=${token}`);
+        await verifyUser(token);
         Toast.show({
           icon: "success",
           content: "Verify Successfully!",
@@ -31,14 +34,18 @@ const VerifyEmail: React.FC = () => {
         }, 2000);
 
         return () => clearTimeout(timerId);
-      } catch (e) {
-        Toast.show({ icon: "fail", content: e + "" });
-        setMessage(e + "");
+      } catch(error) {
+        Toast.show({ icon: "fail", content: error as string });
+        console.error(error);
       }
     };
 
-    verifyEmail();
-  }, []);
+    void verifyEmail();
+  }, [navigate, token, verifyUser]);
+
+  if (isLoading) {
+    return <CenterLoading />;
+  }
 
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>

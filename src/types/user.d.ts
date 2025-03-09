@@ -1,18 +1,19 @@
 export interface User {
-  _id:string;
+  id: string;
   email: string;
-  firstName:string;
-  lastName:string;
-  address?:string;
-  phone?:string;
-  avatar?:string;
-  isVerified:boolean;
+  firstName: string;
+  lastName: string;
+  avatar?: string;
+  address?: string;
+  phone?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RegisterRequest {
   email: string;
-  firstName:string;
-  lastName:string;
+  firstName: string;
+  lastName: string;
   password: string;
   confirmPassword: string;
 }
@@ -20,4 +21,10 @@ export interface RegisterRequest {
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
 }

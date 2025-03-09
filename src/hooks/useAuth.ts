@@ -1,60 +1,65 @@
 import type { LoginRequest } from '@/types/user';
 import { useNavigate } from 'react-router-dom';
-import { api } from '@/services/api';
-import { 
-  useLoginMutation, 
-  useLogoutMutation, 
-  useCheckSessionQuery,
-} from '@/services/authApi';
-import { useState, useEffect } from 'react';
+import { useCheckSession, useLogin, useLogout } from '@/services/authService';
+import { useApolloClient } from '@apollo/client';
+// import { useState, useEffect } from 'react';
 
 /**
  * useAuth 自定义 Hook
- * 使用 RTK Query 管理认证状态
+ * 使用 GraphQL 管理认证状态
  */
 export const useAuth = () => {
   const navigate = useNavigate();
-  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const apolloClient = useApolloClient();
   
-  // 使用 RTK Query 的全局状态
-  const { data: authState, isLoading: isSessionLoading } = useCheckSessionQuery(undefined, {
-    pollingInterval: isUserAuthenticated ? 6 * 1000 : undefined,
-  });
+  // 使用 GraphQL 查询检查会话状态
+  const { data: authState, isLoading: isSessionLoading, refetch } = useCheckSession();
   
-  // 当 authState 变化时更新认证状态
-  useEffect(() => {
-    setIsUserAuthenticated(!!authState?.isAuthenticated);
-  }, [authState?.isAuthenticated]);
-
-  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
-  const [logout, { isLoading: isLogoutLoading }] = useLogoutMutation();
+  // 使用 GraphQL 变更进行登录和登出
+  const { login: loginMutation, isLoading: isLoginLoading } = useLogin();
+  const { logout: logoutMutation, isLoading: isLogoutLoading } = useLogout();
 
   // 封装登录操作
   const loginHandler = async (data: LoginRequest) => {
-    const result = await login(data).unwrap();
-    return result;
+    try {
+      const result = await loginMutation(data);
+      // 登录成功后刷新会话状态
+      await refetch();
+      return result;
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
   // 封装登出操作
   const logoutHandler = async () => {
     try {
-      const result = await logout().unwrap();
+      const result = await logoutMutation();
       
-      // 重置所有 API 缓存
-      api.util.resetApiState();
+      // 重置 Apollo 缓存
+      await apolloClient.resetStore();
+      
+      // 导航到搜索页面
       void navigate("/search", { replace: true });
       return result;
     } catch (error) {
       console.error('Logout failed:', error);
-      throw new Error('Logout failed');
+      throw error;
     }
   };
 
+  // 手动验证会话
+  const verifySession = async () => {
+    return await refetch();
+  };
+
   return {
-    isAuthenticated: authState?.isAuthenticated ?? false,
-    loginUser: authState?.user ?? null,
+    isAuthenticated: authState.isAuthenticated,
+    loginUser: authState.user,
     isLoading: isSessionLoading || isLoginLoading || isLogoutLoading,
     login: loginHandler,
     logout: logoutHandler,
+    verifySession,
   };
 };

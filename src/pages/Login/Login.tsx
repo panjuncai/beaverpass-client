@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input, Space, Form, Toast } from "antd-mobile";
 import Logo from "@/components/Logo/Logo";
 import { LoginRequest } from "@/types/user";
@@ -24,6 +24,7 @@ const styles: { innerContainer: React.CSSProperties } = {
 
 const Login: React.FC = () => {
   const { login, isAuthenticated } = useAuth();
+
   const [state, setState] = useState<State>({
     email: "",
     password: "",

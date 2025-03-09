@@ -15,7 +15,7 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.log(`Axios Request Error:${JSON.stringify(error)}`);
+    // console.log(`Axios Request Error:${JSON.stringify(error)}`);
     return Promise.reject(error);
   }
 );
@@ -34,8 +34,8 @@ apiClient.interceptors.response.use(
     return data;
   },
   (error) => {
-    console.log(`Axios Response Error:${JSON.stringify(error)}`);
-    console.log(`error response is ${JSON.stringify(error.response)}`)
+    // console.log(`Axios Response Error:${JSON.stringify(error)}`);
+    // console.log(`error response is ${JSON.stringify(error.response)}`)
     if (error.response?.data.code === 4001) {
       // window.location.href = '/login';
       //console.log(`error response is ${JSON.stringify(error.response)}`);
