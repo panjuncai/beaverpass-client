@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import imageCompression from "browser-image-compression";
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 interface ImageUploadProps {
   viewType: "FRONT" | "SIDE" | "BACK" | "DAMAGE";
@@ -24,46 +25,37 @@ export default function ImageUpload({
   onImageDelete,
   showError = false,
 }: ImageUploadProps) {
-  const [isUploading, setIsUploading] = useState(false);
+  const { uploadBase64Image, isUploading } = useFileUpload();
   const [uploadError, setUploadError] = useState<string | null>(null);
   // Hidden file input reference
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle file selection
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    void (async () => {
-      const file = event.target.files?.[0];
-      if (file) {
-        try {
-          setIsUploading(true);
-          setUploadError(null);
-          
-          const compressedFile = await imageCompression(
-            file,
-            compressionOptions
-          );
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-          const reader = new FileReader();
-          reader.onloadend = async () => {
-            try {
-              const base64String = reader.result as string;
-              // 处理异步上传
-              await Promise.resolve(onImageUpload(viewType, base64String));
-              setIsUploading(false);
-            } catch (error) {
-              console.error("Error uploading image:", error);
-              setUploadError("Upload failed, please try again");
-              setIsUploading(false);
-            }
-          };
-          reader.readAsDataURL(compressedFile);
+    try {
+      // 使用 imageCompression 库压缩图片
+      const compressedFile = await imageCompression(file, compressionOptions);
+      
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64String = reader.result as string;
+          // 使用 Hook 中的上传方法
+          const uploadedUrl = await uploadBase64Image(base64String, file.name);
+          await onImageUpload(viewType, uploadedUrl);
         } catch (error) {
-          console.error("Error compressing image:", error);
-          setUploadError("Image compression failed");
-          setIsUploading(false);
+          console.error('Failed to upload image:', error);
+          setUploadError('Failed to upload image');
         }
-      }
-    })();
+      };
+      reader.readAsDataURL(compressedFile); // 读取压缩后的文件
+    } catch (error) {
+      console.error('Failed to compress image:', error);
+      setUploadError('Failed to compress image');
+    }
   };
 
   // Handle upload button click
@@ -85,7 +77,9 @@ export default function ImageUpload({
         ref={fileInputRef}
         className="hidden"
         accept="image/*"
-        onChange={handleFileSelect}
+        onChange={(event) => {
+          void handleFileSelect(event);
+        }}
       />
 
       {/* Image preview area */}

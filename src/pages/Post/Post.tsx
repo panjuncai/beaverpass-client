@@ -5,11 +5,12 @@ import { useState } from "react";
 import { useAddPostMutation } from "@/services/postApi";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "antd-mobile";
-import { BasePost, PostImages, PostPrice } from "@/types/post";
-import { uploadBase64Image } from '@/utils/upload';
+import type { Post as PostType, PostImages, PostPrice } from "@/types/post";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 const Post: React.FC = () => {
   const { isAuthenticated,loginUser } = useAuth();
+  const { uploadBase64Image } = useFileUpload();
   // console.log("Post isAuthenticated:", isAuthenticated);
   const [addPost, { isLoading: isLoadingPost }] = useAddPostMutation();
   const navigate = useNavigate();
@@ -26,10 +27,10 @@ const Post: React.FC = () => {
     description: "",
     condition: "Like New",
     images: {
-      FRONT: null,
-      SIDE: null,
-      BACK: null,
-      DAMAGE: null,
+      FRONT: "",
+      SIDE: "",
+      BACK: "",
+      DAMAGE: "",
     } as PostImages,
     price: {
       amount: 0,
@@ -75,7 +76,7 @@ const Post: React.FC = () => {
   const handleImageUpload = async (viewType: string, base64String: string) => {
     try {
       // 调用 S3 上传工具上传 base64 图片
-      const fileName = `post_${loginUser?._id}_${viewType}.jpg`;
+      const fileName = `post_${loginUser?.id}_${viewType}.jpg`;
       const imageUrl = await uploadBase64Image(base64String, fileName);
       
       // 更新表单数据，存储实际的图片 URL 而不是 base64
@@ -178,7 +179,7 @@ const Post: React.FC = () => {
           },
         };
 
-        const post=await addPost(processedFormData as BasePost).unwrap();
+        const post=await addPost(processedFormData as PostType).unwrap();
         console.log("post",post);
         // 发布成功后跳转到详情页
         void navigate("/search",{replace:true});
