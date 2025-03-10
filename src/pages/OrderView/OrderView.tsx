@@ -12,7 +12,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import PaymentForm from "@/components/PaymentForm/PaymentForm";
 
 // 替换为您的 Stripe 公钥
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY as string);
 
 interface LocationState {
   productId: string;
@@ -41,7 +41,7 @@ const OrderView: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!loginUser?._id) return;
+    if (!loginUser?.id) return;
     setShippingInfo({
       address: loginUser.address || "",
       receiver: `${loginUser?.firstName} ${loginUser?.lastName}`,
@@ -57,7 +57,7 @@ const OrderView: React.FC = () => {
 
   const calculateFees = () => {
     const baseAmount = Number(post?.price?.amount || 0);
-    const deliveryFee = post?.deliveryType === DeliveryType.HOME_DELIVERY ? 10 : 0;
+    const deliveryFee = post?.deliveryType === DeliveryType.both ? 10 : 0;
     const serviceFee = post?.price?.isFree ? 10 : 0;
     const tax = baseAmount * 0.13;
     const paymentFee = (baseAmount + deliveryFee + serviceFee + tax) * 0.029 + 0.30;
@@ -80,10 +80,10 @@ const OrderView: React.FC = () => {
    
     try {
       const orderData = {
-        buyerId: { _id: loginUser._id },
-        sellerId: { _id: post.poster._id },
+        buyerId: { id: loginUser.id },
+        sellerId: { id: post.poster.id },
         postSnapshot: {
-          postId: post._id,
+          postId: post.id,
           title: post.title,
           price: Number(post.price.amount),
           images: {

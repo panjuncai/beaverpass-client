@@ -2,8 +2,9 @@ import { User } from './user';
 import { GraphQLBaseResponse } from './api';
 
 export enum DeliveryType {
+  homeDelivery = 'homeDelivery',
   pickup = 'pickup',
-  delivery = 'delivery'
+  both = 'both',
 }
 
 export enum PostStatus {
