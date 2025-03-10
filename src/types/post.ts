@@ -1,29 +1,9 @@
 import { User } from './user';
 import { GraphQLBaseResponse } from './api';
 
-// 枚举类型
-export enum PostCategory {
-  Living_Room_Furniture = 'Living_Room_Furniture',
-  Bedroom_Furniture = 'Bedroom_Furniture',
-  Dining_Room_Furniture = 'Dining_Room_Furniture',
-  Office_Furniture = 'Office_Furniture',
-  Outdoor_Furniture = 'Outdoor_Furniture',
-  Storage = 'Storage',
-  Other = 'Other'
-}
-
-export enum PostCondition {
-  Like_New = 'Like_New',
-  Gently_Used = 'Gently_Used',
-  Minor_Scratches = 'Minor_Scratches',
-  Stains = 'Stains',
-  Needs_Repair = 'Needs_Repair'
-}
-
 export enum DeliveryType {
-  Home_Delivery = 'Home_Delivery',
-  Pickup = 'Pickup',
-  Both = 'Both'
+  pickup = 'pickup',
+  delivery = 'delivery'
 }
 
 export enum PostStatus {
@@ -51,13 +31,13 @@ export interface PostPrice {
 // 帖子类型
 export interface Post {
   id: string;
-  category: PostCategory;
+  category: string;
   title: string;
   description: string;
-  condition: PostCondition;
+  condition: string;
   images: PostImages;
   price: PostPrice;
-  deliveryType: DeliveryType;
+  deliveryType: string;
   poster: User;
   status: PostStatus;
   createdAt: string;
@@ -66,32 +46,32 @@ export interface Post {
 
 // 帖子过滤条件输入
 export interface PostFilterInput {
-  category?: PostCategory;
-  condition?: PostCondition;
+  category?: string;
+  condition?: string;
   priceRange?: string;
   status?: PostStatus;
 }
 
 // 创建帖子输入
 export interface CreatePostInput {
-  category: PostCategory;
+  category: string;
   title: string;
   description: string;
-  condition: PostCondition;
+  condition: string;
   images: PostImages;
   price: PostPrice;
-  deliveryType: DeliveryType;
+  deliveryType: string;
 }
 
 // 更新帖子输入
 export interface UpdatePostInput {
-  category?: PostCategory;
+  category?: string;
   title?: string;
   description?: string;
-  condition?: PostCondition;
+  condition?: string;
   images?: PostImages;
   price?: PostPrice;
-  deliveryType?: DeliveryType;
+  deliveryType?: string;
   status?: PostStatus;
 }
 

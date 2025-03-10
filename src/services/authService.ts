@@ -6,7 +6,7 @@ import {
   REGISTER,
   VERIFY_USER,
 } from "@/api/authOperations";
-import { AuthState, LoginRequest, RegisterRequest, User } from "@/types/user";
+import type { AuthState, LoginRequest, RegisterRequest,User } from "@/types/user";
 import { GraphQLBaseResponse } from "@/types/api";
 import { Toast } from "antd-mobile";
 

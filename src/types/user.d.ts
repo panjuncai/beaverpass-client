@@ -6,8 +6,8 @@ export interface User {
   avatar?: string;
   address?: string;
   phone?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface RegisterRequest {

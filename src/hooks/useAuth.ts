@@ -2,7 +2,6 @@ import type { LoginRequest } from '@/types/user';
 import { useNavigate } from 'react-router-dom';
 import { useCheckSession, useLogin, useLogout } from '@/services/authService';
 import { useApolloClient } from '@apollo/client';
-// import { useState, useEffect } from 'react';
 
 /**
  * useAuth 自定义 Hook

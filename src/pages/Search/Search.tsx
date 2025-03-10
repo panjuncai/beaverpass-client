@@ -1,47 +1,53 @@
 import CenteredLoading from "@/components/CenterLoading";
-import { useGetPostsQuery } from "@/services/postApi";
+import {useGetPostsByFilter} from "@/services/postService";
 import { HeartOutline } from "antd-mobile-icons";
 import { useEffect, useState, useMemo } from "react";
-import { Post, PostStatus } from "@/types/post";
+import { Post, PostFilterInput, PostStatus } from "@/types/post";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import AddressModal from "@/components/AddressModal/AddressModal";
+import { useAuth } from "@/hooks/useAuth";
+
+const activeFilter:PostFilterInput={
+  status:PostStatus.active
+}
 
 const Search: React.FC = () => {
   const { loginUser, isLoading: isLoadingAuth, isAuthenticated } = useAuth();
-  const { data: posts, isLoading } = useGetPostsQuery();
+  const {posts:activePosts,isLoading}=useGetPostsByFilter(activeFilter);
   const [search, setSearch] = useState<string>("");
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [address, setAddress] = useState("");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const navigate = useNavigate();
 
-  const activePosts = useMemo(
-    () => posts?.filter((post) => post.status === PostStatus.ACTIVE) || [],
-    [posts]
-  );
-
-  useEffect(() => {
-    if (!activePosts) return;
-    
-    // 先按搜索词过滤
-    let filtered = search
-      ? activePosts.filter((post) =>
-          post.title.toLowerCase().includes(search.toLowerCase())
-        )
-      : activePosts;
-    
-    // 再按分类过滤
-    if (selectedCategory !== "All") {
-      filtered = filtered.filter((post) =>
-        post.title.toLowerCase().includes(selectedCategory.toLowerCase()) ||
-        (post.description && post.description.toLowerCase().includes(selectedCategory.toLowerCase()))
-      );
+  const filteredPosts=useMemo(()=>{
+    if(search){
+      return activePosts.filter((post)=>post.title.toLowerCase().includes(search.toLowerCase()));
+    }else{
+      return activePosts;
     }
+  },[search,activePosts]);
+
+  // useEffect(() => {
+  //   if (!activePosts) return;
     
-    setFilteredPosts(filtered);
-  }, [search, activePosts, selectedCategory]);
+  //   // 先按搜索词过滤
+  //   let filtered = search
+  //     ? activePosts.filter((post) =>
+  //         post.title.toLowerCase().includes(search.toLowerCase())
+  //       )
+  //     : activePosts;
+    
+  //   // 再按分类过滤
+  //   if (selectedCategory !== "All") {
+  //     filtered = filtered.filter((post) =>
+  //       post.title.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+  //       (post.description && post.description.toLowerCase().includes(selectedCategory.toLowerCase()))
+  //     );
+  //   }
+    
+  //   setFilteredPosts(filtered);
+  // }, [search, activePosts, selectedCategory]);
 
   useEffect(() => {
     if (loginUser) {
@@ -179,10 +185,10 @@ const Search: React.FC = () => {
           {/* 商品列表 */}
           <div className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-4">
             {filteredPosts?.map((post) => (
-              <div key={post._id} className="card bg-base-100 shadow-md">
+              <div key={post.id} className="card bg-base-100 shadow-md">
                 <figure
                   onClick={() => {
-                    void navigate(`/posts/${post._id}`);
+                    void navigate(`/posts/${post.id}`);
                   }}
                 >
                   <img

@@ -102,13 +102,9 @@ export const useCreatePost = () => {
       const { data } = await createPostMutation({
         variables: { input },
       });
-
+      
       if (!data || data.createPost.code !== 0) {
-        Toast.show({
-          icon: 'fail',
-          content: data?.createPost.msg || 'Create post failed.',
-        });
-        throw new Error(data?.createPost.msg || 'Create post failed.');
+        throw new Error(data?.createPost.msg);
       }
 
       return data.createPost.data;

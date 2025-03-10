@@ -2,17 +2,18 @@ import ImageUpload from "@/components/ImageUpload/ImageUpload";
 import LoginCard from "@/components/LoginCard/LoginCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
-import { useAddPostMutation } from "@/services/postApi";
+// import { useAddPostMutation } from "@/services/postApi";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "antd-mobile";
-import type { Post as PostType, PostImages, PostPrice } from "@/types/post";
+import type { PostImages, PostPrice, CreatePostInput } from "@/types/post";
 import { useFileUpload } from "@/hooks/useFileUpload";
-
+import { useCreatePost } from "@/services/postService";
 const Post: React.FC = () => {
   const { isAuthenticated,loginUser } = useAuth();
   const { uploadBase64Image } = useFileUpload();
   // console.log("Post isAuthenticated:", isAuthenticated);
-  const [addPost, { isLoading: isLoadingPost }] = useAddPostMutation();
+  // const [addPost, { isLoading: isLoadingPost }] = useAddPostMutation();
+  const { createPost, isLoading: isLoadingPost } = useCreatePost();
   const navigate = useNavigate();
   const [showStepTwoTitleError, setShowStepTwoTitleError] = useState(false);
   const [showStepTwoDescriptionError, setShowStepTwoDescriptionError] =
@@ -21,7 +22,7 @@ const Post: React.FC = () => {
 
   const [showStepFivePriceError, setShowStepFivePriceError] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreatePostInput>({
     category: "Living Room Furniture",
     title: "",
     description: "",
@@ -38,7 +39,6 @@ const Post: React.FC = () => {
       isNegotiable: false,
     } as PostPrice,
     deliveryType: "Home Delivery",
-    status: "active",
   });
 
   const steps = [1, 2, 3, 4, 5, 6];
@@ -176,12 +176,12 @@ const Post: React.FC = () => {
           price: {
             ...formData.price,
             // 如果是免费，确保金额为 "0"
-            amount: formData.price.isFree ? "0" : formData.price.amount,
+            amount: formData.price.isFree ? 0 : formData.price.amount,
           },
         };
 
-        const post=await addPost(processedFormData as PostType).unwrap();
-        console.log("post",post);
+        await createPost(processedFormData as CreatePostInput);
+        // console.log("post", post);
         // 发布成功后跳转到详情页
         void navigate("/search",{replace:true});
         void Toast.show({
@@ -194,7 +194,7 @@ const Post: React.FC = () => {
         // 可以添加错误提示，比如使用 toast
         void Toast.show({
           icon: "fail",
-          content: "Failed to create post",
+          content: (error as Error).message,
           duration: 2000,
         });
       }
