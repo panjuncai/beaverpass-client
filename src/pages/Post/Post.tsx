@@ -77,6 +77,7 @@ const Post: React.FC = () => {
     try {
       // 调用 S3 上传工具上传 base64 图片
       const fileName = `post_${loginUser?.id}_${viewType}.jpg`;
+      
       const imageUrl = await uploadBase64Image(base64String, fileName);
       
       // 更新表单数据，存储实际的图片 URL 而不是 base64

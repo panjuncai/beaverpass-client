@@ -1,17 +1,17 @@
-import { PresignedUrlResponse } from "@/types/upload";
+import { PresignedUrlRsp, UploadReq } from "@/types/upload";
 import { useMutation } from "@apollo/client";
-import { GET_PRESIGNED_URL_MUTATION } from "@/api/uploadOperations";
+import { GET_PRESIGNED_URL } from "@/api/uploadOperations";
 import { Toast } from "antd-mobile";
 
 export const useUpload = () => {
     const [upLoadMutation, { loading }] = useMutation<
-      { upLoad: PresignedUrlResponse},
-      { input: {fileName: string, fileType: string, fileSize: number} }
-    >(GET_PRESIGNED_URL_MUTATION);
+      { getPresignedUrl: PresignedUrlRsp},
+      { input: UploadReq }
+    >(GET_PRESIGNED_URL);
   
-    const upload = async (input: {fileName: string, fileType: string, fileSize: number}) => {
+    const upload = async (input: UploadReq) => {
       try {
-        const { data,errors} = await upLoadMutation({
+        const { data, errors } = await upLoadMutation({
           variables: { input },
         });
 
@@ -19,7 +19,7 @@ export const useUpload = () => {
             throw new Error(errors[0].message || 'upload failed.');   
         }
   
-        if (!data || !data.upLoad.fileUrl||!data.upLoad.url) {
+        if (!data || !data.getPresignedUrl.fileUrl||!data.getPresignedUrl.url) {
           Toast.show({
             icon: 'fail',
             content: 'upload failed.',
@@ -28,8 +28,8 @@ export const useUpload = () => {
         }
   
         return {
-            url: data.upLoad.url,
-            fileUrl: data.upLoad.fileUrl,
+            url: data.getPresignedUrl.url,
+            fileUrl: data.getPresignedUrl.fileUrl,
         };
       } catch (error) {
         console.error('upload failed:', error);

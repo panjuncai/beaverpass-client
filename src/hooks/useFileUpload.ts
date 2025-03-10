@@ -16,8 +16,6 @@ export const useFileUpload = () => {
         fileType: file.type,
         fileSize: file.size
       });
-      // 打印变量值以便调试
-      console.log('Uploading file with params:', { fileName: file.name, fileType: file.type, fileSize: file.size });
       // 使用预签名 URL 上传文件
       const uploadResponse = await fetch(url, {
         method: 'PUT',
