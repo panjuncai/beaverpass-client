@@ -22,12 +22,12 @@ export interface PaymentInfo {
 }
 
 export interface Order {
-  _id: string;
+  id: string;
   buyerId: {
-    _id: string;
+    id: string;
   };
   sellerId: {
-    _id: string;
+    id: string;
   };
   postSnapshot: PostSnapshot;
   amount: number;
@@ -43,4 +43,4 @@ export interface Order {
   updatedAt: string;
 }
 
-export type CreateOrderRequest = Omit<Order, '_id' | 'createdAt' | 'updatedAt' | 'status' | 'paymentInfo'>;
+export type CreateOrderRequest = Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'paymentInfo'>;
