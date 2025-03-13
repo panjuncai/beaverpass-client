@@ -9,7 +9,6 @@ const Register = lazy(() => import("@/pages/Register/Register"));
 const VerifyEmail = lazy(() => import("@/pages/VerifyEmail/VerifyEmail"));
 const Login = lazy(() => import("@/pages/Login/Login"));
 const NotFound = lazy(() => import("@/components/NotFound/NotFound"));
-const Order = lazy(() => import("@/pages/Order/Order"));
 const Post= lazy(() => import("@/pages/Post/Post"));
 const Search= lazy(() => import("@/pages/Search/Search"));
 const Inbox= lazy(() => import("@/pages/Inbox/Inbox"));
@@ -21,12 +20,18 @@ const OrderView= lazy(() => import("@/pages/OrderView/OrderView"));
 const Chat= lazy(() => import("@/pages/Chat/Chat"));
 const EditProfile= lazy(() => import("@/pages/Profile/EditProfile"));
 const PaymentSuccess = lazy(() => import("@/components/PaymentSuccess/PaymentSuccess"));
+const AuthCallback = lazy(() => import("@/pages/Auth/AuthCallback"));
 
 export const routes: RouteConfig[] = [
   {
     path: "/",
     element: React.createElement(Navigate,{to:"/search",replace:true}),
     meta: { requiresAuth: false, title: "Search" },
+  },
+  {
+    path: "/auth/callback",
+    element: React.createElement(AuthCallback),
+    meta: { requiresAuth: false, title: "Authentication Callback" },
   },
   {
     path: "/payment-success",
@@ -116,17 +121,6 @@ export const routes: RouteConfig[] = [
     path: "*",
     element: React.createElement(NotFound),
     meta: { requiresAuth: false, title: "404" },
-  },
-  {
-    path: "/",
-    element: React.createElement(AppLayout),
-    children: [
-      {
-        path: "order",
-        element: React.createElement(Order),
-        meta: { requiresAuth: true, title: "Order" },
-      },
-    ],
   },
   {
     path: "/",

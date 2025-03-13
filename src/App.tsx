@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import {Routes, Route } from "react-router-dom";
 import { routes } from "@/routes";
 import { RouteConfig } from "@/types/routes";
@@ -18,7 +18,7 @@ const App: React.FC = () => {
           path={path}
           element={
             meta?.requiresAuth ? (
-              <ProtectedRoute isAuthenticated={isAuthenticated || false}>
+              <ProtectedRoute isAuthenticated={ isAuthenticated || false}>
                 <Suspense fallback={<CenteredLoading />}>{element}</Suspense>
               </ProtectedRoute>
             ) : (

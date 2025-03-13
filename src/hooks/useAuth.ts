@@ -1,64 +1,119 @@
-import type { LoginRequest } from '@/types/user';
-import { useNavigate } from 'react-router-dom';
-import { useCheckSession, useLogin, useLogout } from '@/services/authService';
-import { useApolloClient } from '@apollo/client';
+// import type { LoginRequest } from '@/types/user';
+// import { useNavigate } from 'react-router-dom';
+// import { useCheckSession, useLogin, useLogout } from '@/services/authService';
+// import { useApolloClient } from '@apollo/client';
+import { useState, useEffect } from 'react';
+import { createClient, Session, User } from '@supabase/supabase-js';
+import { LoginRequest, RegisterRequest } from '@/types/user';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
  * useAuth 自定义 Hook
- * 使用 GraphQL 管理认证状态
+ * 使用 Supabase 管理认证状态
  */
 export const useAuth = () => {
-  const navigate = useNavigate();
-  const apolloClient = useApolloClient();
-  
-  // 使用 GraphQL 查询检查会话状态
-  const { data: authState, isLoading: isSessionLoading, refetch } = useCheckSession();
-  
-  // 使用 GraphQL 变更进行登录和登出
-  const { login: loginMutation, isLoading: isLoginLoading } = useLogin();
-  const { logout: logoutMutation, isLoading: isLogoutLoading } = useLogout();
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 封装登录操作
-  const loginHandler = async (data: LoginRequest) => {
+  useEffect(() => {
+    // 获取初始会话状态
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsLoading(false);
+    });
+
+    // 监听认证状态变化
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // const navigate = useNavigate();
+  // const apolloClient = useApolloClient();
+  
+  // // 使用 GraphQL 查询检查会话状态
+  // const { data: authState, isLoading: isSessionLoading, refetch } = useCheckSession();
+  
+  // // 使用 GraphQL 变更进行登录和登出
+  // const { login: loginMutation, isLoading: isLoginLoading } = useLogin();
+  // const { logout: logoutMutation, isLoading: isLogoutLoading } = useLogout();
+
+  // 登录处理
+  const loginHandler = async (input: LoginRequest) => {
+    setIsLoading(true);
     try {
-      const result = await loginMutation(data);
-      // 登录成功后刷新会话状态
-      await refetch();
-      return result;
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: input.email,
+        password: input.password,
+      });
+      
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // 封装登出操作
-  const logoutHandler = async () => {
+  // 注册处理
+  const registerHandler = async (input: RegisterRequest) => {
+    setIsLoading(true);
     try {
-      const result = await logoutMutation();
+      const { data, error } = await supabase.auth.signUp({
+        email: input.email,
+        password: input.password,
+        options: {
+          data: {
+            firstName: input.firstName,
+            lastName: input.lastName,
+          }
+        }
+      });
       
-      // 重置 Apollo 缓存
-      await apolloClient.resetStore();
-      
-      // 导航到搜索页面
-      void navigate("/search", { replace: true });
-      return result;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 登出处理
+  const logoutHandler = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (error) {
       console.error('Logout failed:', error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // 手动验证会话
-  const verifySession = async () => {
-    return await refetch();
-  };
+  // // 手动验证会话
+  // const verifySession = async () => {
+  //   return await refetch();
+  // };
 
   return {
-    isAuthenticated: authState.isAuthenticated,
-    loginUser: authState.user,
-    isLoading: isSessionLoading || isLoginLoading || isLogoutLoading,
+    isAuthenticated: !!session,
+    user: session?.user ?? null,
+    session,
+    isLoading,
     login: loginHandler,
+    register: registerHandler,
     logout: logoutHandler,
-    verifySession,
   };
 };

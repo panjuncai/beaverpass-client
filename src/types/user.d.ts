@@ -1,21 +1,26 @@
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  avatar?: string;
-  address?: string;
-  phone?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  user_metadata?: {
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+    phone?: string;
+    address?: string;
+  };
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface RegisterRequest {
-  email: string;
+export interface Session {
+  user: User;
+  access_token: string;
+  refresh_token: string;
+}
+
+export interface RegisterRequest extends LoginRequest {
   firstName: string;
   lastName: string;
-  password: string;
-  confirmPassword: string;
 }
 
 export interface LoginRequest {
@@ -23,8 +28,8 @@ export interface LoginRequest {
   password: string;
 }
 
-
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
+  session: Session | null;
 }
