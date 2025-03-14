@@ -86,7 +86,7 @@ const CustomNavBar: React.FC<CustomNavBarProps> = ({
               <>
                 <li>
                   <Link to="/profile/edit">
-                    {(loginUser?.firstName ?? '') + (loginUser?.lastName ?? '')} Profile Settings
+                    {loginUser?.email} Profile Settings
                   </Link>
                 </li>
                 <li>

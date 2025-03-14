@@ -7,26 +7,28 @@ import { useNavigate } from "react-router-dom";
 import AddressModal from "@/components/AddressModal/AddressModal";
 import { useAuth } from "@/hooks/useAuth";
 
-const activeFilter:PostFilterInput={
-  status:PostStatus.active
-}
+// const activeFilter:PostFilterInput={
+//   status:PostStatus.active
+// }
 
 const Search: React.FC = () => {
   const { loginUser, isLoading: isLoadingAuth, isAuthenticated } = useAuth();
-  const {posts:activePosts,isLoading}=useGetPostsByFilter(activeFilter);
+  console.log(`loginUser:${loginUser?.email}`);
+  // const {posts:activePosts,isLoading}=useGetPostsByFilter(activeFilter);
   const [search, setSearch] = useState<string>("");
   const [address, setAddress] = useState("");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const navigate = useNavigate();
-
-  const filteredPosts=useMemo(()=>{
-    if(search){
-      return activePosts.filter((post)=>post.title.toLowerCase().includes(search.toLowerCase()));
-    }else{
-      return activePosts;
-    }
-  },[search,activePosts]);
+  const filteredPosts=[];
+  const isLoading=false;
+  // const filteredPosts=useMemo(()=>{
+  //   if(search){
+  //     return activePosts.filter((post)=>post.title.toLowerCase().includes(search.toLowerCase()));
+  //   }else{
+  //     return activePosts;
+  //   }
+  // },[search,activePosts]);
 
   // useEffect(() => {
   //   if (!activePosts) return;
@@ -49,11 +51,11 @@ const Search: React.FC = () => {
   //   setFilteredPosts(filtered);
   // }, [search, activePosts, selectedCategory]);
 
-  useEffect(() => {
-    if (loginUser) {
-      setAddress(loginUser.address ?? "Please select your address");
-    }
-  }, [loginUser]);
+  // useEffect(() => {
+  //   if (loginUser) {
+  //     setAddress(loginUser.address ?? "Please select your address");
+  //   }
+  // }, [loginUser]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);

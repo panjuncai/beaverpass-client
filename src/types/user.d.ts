@@ -1,19 +1,20 @@
 export interface User {
   id: string;
   email: string;
-  user_metadata?: {
-    firstName?: string;
-    lastName?: string;
-    avatar?: string;
-    phone?: string;
-    address?: string;
-  };
+  first_name: string;
+  last_name: string;
+  avatar: string;
+  address?: string;
+  phone?: string;
   created_at?: string;
   updated_at?: string;
 }
 
 export interface Session {
-  user: User;
+  user: {
+    id: string;
+    email: string;
+  };
   access_token: string;
   refresh_token: string;
 }
