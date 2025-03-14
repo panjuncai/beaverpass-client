@@ -1,9 +1,5 @@
-// import type { LoginRequest } from '@/types/user';
-// import { useNavigate } from 'react-router-dom';
-// import { useCheckSession, useLogin, useLogout } from '@/services/authService';
-// import { useApolloClient } from '@apollo/client';
 import { useState, useEffect } from 'react';
-import { createClient, Session, User } from '@supabase/supabase-js';
+import { createClient, Session } from '@supabase/supabase-js';
 import { LoginRequest, RegisterRequest } from '@/types/user';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
@@ -33,16 +29,6 @@ export const useAuth = () => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // const navigate = useNavigate();
-  // const apolloClient = useApolloClient();
-  
-  // // 使用 GraphQL 查询检查会话状态
-  // const { data: authState, isLoading: isSessionLoading, refetch } = useCheckSession();
-  
-  // // 使用 GraphQL 变更进行登录和登出
-  // const { login: loginMutation, isLoading: isLoginLoading } = useLogin();
-  // const { logout: logoutMutation, isLoading: isLogoutLoading } = useLogout();
 
   // 登录处理
   const loginHandler = async (input: LoginRequest) => {
@@ -101,11 +87,6 @@ export const useAuth = () => {
       setIsLoading(false);
     }
   };
-
-  // // 手动验证会话
-  // const verifySession = async () => {
-  //   return await refetch();
-  // };
 
   return {
     isAuthenticated: !!session,

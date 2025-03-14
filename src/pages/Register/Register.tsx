@@ -1,160 +1,204 @@
-import { Input, Space, Form, Toast } from "antd-mobile";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
+import CenteredLoading from "@/components/CenterLoading";
 import Logo from "@/components/Logo/Logo";
-import { useRegister } from "@/services/authService";
-import { RegisterRequest } from "@/types/user";
-import { useNavigate } from "react-router-dom";
-import CenterLoading from "@/components/CenterLoading";
-import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
-import { Link } from "react-router-dom";
 
-const styles: { innerContainer: React.CSSProperties } = {
-  innerContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100vh",
-  },
-};
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const Register: React.FC = () => {
-  const [form] = Form.useForm();
-  const { register, isLoading } = useRegister();
-
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 表单状态
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const validateForm = () => {
+    // 重置错误
+    setError(null);
+
+    // 验证所有字段都已填写
+    if (
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
+      setError("All fields are required");
+      return false;
+    }
+
+    // 验证邮箱格式
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Invalid email format");
+      return false;
+    }
+
+    // 验证密码匹配
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return false;
+    }
+
+    // 验证密码长度
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return false;
+    }
+
+    return true;
+  };
 
   const handleRegister = async () => {
-    const values = await form.validateFields() as {
-      firstName: string;
-      lastName: string;
-      email: string;
-      password: string;
-      confirmPassword: string;
-    };
+    if (!validateForm()) return;
 
-    if (values.password !== values.confirmPassword) {
-      Toast.show({ icon: "fail", content: "Passwords not match" });
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-      Toast.show({ icon: "fail", content: "Invalid email format" });
-      return;
-    }
-
-    const data: RegisterRequest = {
-      email: values.email,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      password: values.password,
-      confirmPassword: values.confirmPassword,
-    };
+    setIsLoading(true);
 
     try {
-      await register(data);
-      Toast.show({
-        icon: "success",
-        content: "Please verify your email",
-        duration: 2000,
+      // 使用 Supabase 注册
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            firstName,
+            lastName,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
+
+      if (error) {
+        console.error("注册失败:", error.message);
+      } else {
+        console.log("注册成功:");
+      }
+      if (error) throw error;
+
+      // 注册成功
+      alert("Please check your email to verify your account");
       void navigate("/login", { replace: true });
-    } catch (error) {
-      console.error('Registration failed:', error);
+    } catch (err) {
+      console.error("Registration failed:", err);
+      setError(err instanceof Error ? err.message : "Registration failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const footer = (
-    <div className="flex flex-col items-center justify-center">
-        {/* 主按钮区域 */}
-        <button
-          className="btn btn-primary btn-xl w-full text-white rounded-full shadow-md"
-          onClick={() => void handleRegister()}
-        >
-          Sign up
-        </button>
-        {/* 提示文字与链接 */}
-        <div className="mt-4 text-center">
-          <span className="text-gray-600 mr-1">Already have an account?</span>
-          <Link to="/login" className="text-green-600">
-            Sign in 
-          </Link>
-        </div>
-      </div>
-  );
-
   if (isLoading) {
-    return <CenterLoading />
+    return <CenteredLoading />;
   }
 
   return (
     <>
-      <CustomNavBar title="Register" showBack={true}/>
-      <div style={styles.innerContainer}>
-        <Space align="center" direction="vertical">
-          <Logo height={80} width={300}/>
-          <Form layout="horizontal" footer={footer} form={form}>
-            <Form.Item
-              label="First name"
-              name="firstName"
-              rules={[{ required: true, message: "First name is required" }]}
-            >
-              <Input
-                placeholder="Please input first name"
-                type="text"
-              />
-            </Form.Item>
-            <Form.Item
-              label="Last name"
-              name="lastName"
-              rules={[{ required: true, message: "Last name is required" }]}
-            >
-              <Input
-                placeholder="Please input last name"
-                type="text"
-              />
-            </Form.Item>
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                { required: true, message: "Email is required" },
-                { type: "string", min: 6, message: "Must has 6 characters" },
-                {
-                  type: "email",
-                  warningOnly: true,
-                  message: "Email format incorrect",
-                },
-              ]}
-            >
-              <Input
-                placeholder="Please input email"
-                autoComplete="false"
-              />
-            </Form.Item>
-            <Form.Item
-              label="Password"
-              name="password"
-              rules={[{ required: true, message: "Password is required" }]}
-            >
-              <Input
-                placeholder="Please input password"
-                type="password"
-              />
-            </Form.Item>
-            <Form.Item
-              label="Confirm Password"
-              name="confirmPassword"
-              rules={[
-                { required: true, message: "Confirm password is required" },
-              ]}
-            >
-              <Input
-                placeholder="Please confirm password"
-                type="password"
-              />
-            </Form.Item>
-          </Form>
-        </Space>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md">
+          <div className="flex justify-center mb-4">
+            <Logo height={80} width={300} />
+          </div>
+
+          <div className="rounded-lg">
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <div className="w-1/2">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    className="input input-bordered w-full"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="First Name"
+                  />
+                </div>
+                <div className="w-1/2">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    className="input input-bordered w-full"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last Name"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  className="input input-bordered w-full"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className="input input-bordered w-full"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  className="input input-bordered w-full"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm Password"
+                />
+              </div>
+
+              <button
+                className="btn btn-primary w-full"
+                onClick={() => void handleRegister()}
+              >
+                Sign Up
+              </button>
+
+              <div className="text-center mt-4">
+                <span className="text-gray-600">Already have an account? </span>
+                <Link
+                  to="/login"
+                  className="text-primary font-medium hover:text-primary-focus"
+                >
+                  Sign in
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

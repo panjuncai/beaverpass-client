@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
+import CenteredLoading from '@/components/CenterLoading';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -16,21 +17,19 @@ const AuthCallback = () => {
       
       if (error) {
         console.error('Error during auth callback:', error.message);
-        navigate('/login');
+        void navigate('/login');
         return;
       }
 
       // 认证成功，重定向到首页
-      navigate('/');
+      void navigate('/');
     };
 
     void handleAuthCallback();
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
-    </div>
+    <CenteredLoading />
   );
 };
 

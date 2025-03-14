@@ -1,9 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { Auth } from '@supabase/auth-ui-react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import Logo from "@/components/Logo/Logo";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -22,11 +23,9 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            BeaverPass
-          </h2>
-        </div>
+          <div className="flex justify-center mb-4">
+            <Logo height={80} width={300} />
+          </div>
         <Auth
           supabaseClient={supabase}
           appearance={{
@@ -34,8 +33,8 @@ const Login = () => {
             variables: {
               default: {
                 colors: {
-                  brand: '#404040',
-                  brandAccent: '#52525b'
+                  brand: '#593719',
+                  brandAccent: '#593719'
                 }
               }
             },
@@ -51,22 +50,30 @@ const Login = () => {
           localization={{
             variables: {
               sign_in: {
-                email_label: 'Email',
-                password_label: 'Password',
-                button_label: 'Sign In',
-                loading_button_label: 'Signing In...',
-                link_text: 'Already have an account? Sign in'
+                email_label: "Email",
+                password_label: "Password",
+                button_label: "Sign In",
+                loading_button_label: "Signing In...",
+                link_text: "Already have an account? Sign in"
               },
               sign_up: {
-                email_label: 'Email',
-                password_label: 'Password',
-                button_label: 'Sign Up',
-                loading_button_label: 'Signing Up...',
-                link_text: 'Don\'t have an account? Sign up'
+                email_label: "Email",
+                password_label: "Password",
+                button_label: "Sign Up",
+                loading_button_label: "Signing Up...",
+                link_text: "Don&#39;t have an account? Sign up"
               }
             }
           }}
         />
+        
+        <div className="text-center mt-4">
+          <span className="text-gray-600">Don&#39;t have an account? </span>
+          <Link to="/register" className="text-primary font-medium hover:text-primary-focus">
+            Sign up
+          </Link>
+        </div>
+        
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
