@@ -1,62 +1,26 @@
 import CenteredLoading from "@/components/CenterLoading";
-import {useGetPostsByFilter} from "@/services/postService";
+import {useGetPostsByFilter} from "@/hooks/usePost";
 import { HeartOutline } from "antd-mobile-icons";
-import { useEffect, useState, useMemo } from "react";
-import { Post, PostFilterInput, PostStatus } from "@/types/post";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddressModal from "@/components/AddressModal/AddressModal";
-import { useAuth } from "@/hooks/useAuth";
+import {PostFilterInput, PostStatus } from "@/types/post";
 
-// const activeFilter:PostFilterInput={
-//   status:PostStatus.active
-// }
+const activeFilter:PostFilterInput={
+  status:PostStatus.ACTIVE
+}
 
 const Search: React.FC = () => {
-  const { loginUser, isLoading: isLoadingAuth, isAuthenticated } = useAuth();
-  console.log(`loginUser:${loginUser?.email}`);
-  // const {posts:activePosts,isLoading}=useGetPostsByFilter(activeFilter);
+  // const {isLoading: isLoadingAuth, isAuthenticated } = useAuth();
+  const {posts,loading}=useGetPostsByFilter(activeFilter);
   const [search, setSearch] = useState<string>("");
   const [address, setAddress] = useState("");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedCategory, setSelectedCategory] = useState<string>();
   const navigate = useNavigate();
-  const filteredPosts=[];
-  const isLoading=false;
-  // const filteredPosts=useMemo(()=>{
-  //   if(search){
-  //     return activePosts.filter((post)=>post.title.toLowerCase().includes(search.toLowerCase()));
-  //   }else{
-  //     return activePosts;
-  //   }
-  // },[search,activePosts]);
-
-  // useEffect(() => {
-  //   if (!activePosts) return;
-    
-  //   // 先按搜索词过滤
-  //   let filtered = search
-  //     ? activePosts.filter((post) =>
-  //         post.title.toLowerCase().includes(search.toLowerCase())
-  //       )
-  //     : activePosts;
-    
-  //   // 再按分类过滤
-  //   if (selectedCategory !== "All") {
-  //     filtered = filtered.filter((post) =>
-  //       post.title.toLowerCase().includes(selectedCategory.toLowerCase()) ||
-  //       (post.description && post.description.toLowerCase().includes(selectedCategory.toLowerCase()))
-  //     );
-  //   }
-    
-  //   setFilteredPosts(filtered);
-  // }, [search, activePosts, selectedCategory]);
-
-  // useEffect(() => {
-  //   if (loginUser) {
-  //     setAddress(loginUser.address ?? "Please select your address");
-  //   }
-  // }, [loginUser]);
-
+  useEffect(()=>{
+    console.log(search);
+  },[search]);
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
@@ -69,16 +33,10 @@ const Search: React.FC = () => {
     setSelectedCategory(category);
   };
 
-  if (isLoadingAuth) return <CenteredLoading />;
+  if (loading) return <CenteredLoading />;
 
   return (
-    <>
-      {isLoading ? (
-        <CenteredLoading />
-      ) : (
-        // 搜索框
         <div className="grid grid-cols-1 gap-0 p-2">
-          {isAuthenticated && (
             <div
               className="flex items-center justify-center p-2"
               onClick={() => setIsAddressModalOpen(true)}
@@ -110,7 +68,6 @@ const Search: React.FC = () => {
               </svg>
               <div className="flex-1 text-xm font-bold">{address}</div>
             </div>
-          )}
           <label className="input input-bordered input-lg flex items-center gap-2 ml-4 mr-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -186,7 +143,7 @@ const Search: React.FC = () => {
           </div>
           {/* 商品列表 */}
           <div className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-4">
-            {filteredPosts?.map((post) => (
+            {posts?.map((post) => (
               <div key={post.id} className="card bg-base-100 shadow-md">
                 <figure
                   onClick={() => {
@@ -195,7 +152,7 @@ const Search: React.FC = () => {
                 >
                   <img
                     className="h-44 w-full"
-                    src={post.images.FRONT || ""}
+                    src={post.images?.[0]?.imageUrl || ""}
                     alt={post.title}
                   />
                 </figure>
@@ -205,8 +162,8 @@ const Search: React.FC = () => {
                 >
                   <h2 className="card-title">{post.title}</h2>
                   <p>
-                    ${post.price.isFree ? "Free" : post.price.amount}{" "}
-                    <em>{post.price.isNegotiable ? "Negotiable" : ""}</em>
+                    ${post.amount===0? "Free" : post.amount}{" "}
+                    <em>{post.isNegotiable ? "Negotiable" : ""}</em>
                   </p>
                   <button className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center">
                     {/* {index % 2 === 0 ? (
@@ -229,8 +186,6 @@ const Search: React.FC = () => {
             isSave={true}
           />
         </div>
-      )}
-    </>
   );
 };
 

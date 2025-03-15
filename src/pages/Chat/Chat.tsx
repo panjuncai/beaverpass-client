@@ -17,7 +17,7 @@ import { TAGS } from "@/services/api";
 const TAG_TYPE = TAGS.Chat;
 
 const Chat: React.FC = () => {
-  const { loginUser } = useAuth();
+  const { session } = useAuth();
   const { state } = useLocation() as { state: { chatRoom: ChatRoom } };
   const { chatRoom } = state;
   const { 
@@ -37,7 +37,7 @@ const Chat: React.FC = () => {
   const [markAsRead] = useMarkAsReadMutation();
   const socket = useSocket();
   const currentUserUnreadCount =
-    chatRoom.participants.find((p) => p._id === loginUser?._id)?.unreadCount ||
+    chatRoom.participants.find((p) => p._id === session?.user?.id)?.unreadCount ||
     0;
   const dispatch = useDispatch();
 
@@ -86,12 +86,12 @@ const Chat: React.FC = () => {
   useEffect(() => {
     if (!socket) return;
 
-    if (!loginUser?._id) return;
+    if (!session?.user?.id) return;
 
     // 加入聊天室时发送更多信息
     socket.emit("join_room", {
       roomId: chatRoom._id,
-      userId: loginUser._id,
+      userId: session?.user?.id,
     });
 
     // 监听其他用户的在线状态
@@ -102,7 +102,7 @@ const Chat: React.FC = () => {
         roomId: string;
         status: "online" | "offline";
       }) => {
-        if (data.roomId === chatRoom._id && data.userId !== loginUser._id) {
+        if (data.roomId === chatRoom._id && data.userId !== session?.user?.id) {
           // console.log(`Other user is ${data.status}`);
 
           // 如果对方上线，可以自动标记我们发送的消息为已读
@@ -134,12 +134,12 @@ const Chat: React.FC = () => {
           setLocalMessages((prev) => [...prev, data.message]);
           
           // 如果我是接收者且在线，自动标记为已读
-          if (data.receiverId === loginUser._id) {
+          if (data.receiverId === session?.user?.id) {
             // 短暂延迟确保消息已显示
             setTimeout(() => {
               socket.emit("mark_read", {
                 roomId: chatRoom._id,
-                userId: loginUser._id,
+                userId: session?.user?.id,
               });
             }, 500);
           }
@@ -168,13 +168,13 @@ const Chat: React.FC = () => {
     return () => {
       socket.emit("leave_room", {
         roomId: chatRoom._id,
-        userId: loginUser?._id,
+        userId: session?.user?.id,
       });
       socket.off("new_message");
       socket.off("user_status");
       socket.off("messages_read");
     };
-  }, [socket, chatRoom._id, loginUser?._id]);
+  }, [socket, chatRoom._id, session?.user?.id]);
 
   // 在组件挂载时清除缓存
   useEffect(() => {
@@ -203,12 +203,12 @@ const Chat: React.FC = () => {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    if (!loginUser?._id) return;
+    if (!session?.user?.id) return;
 
     try {
       // 获取对方用户ID
       const otherParticipantId = chatRoom.participants.find(
-        (p) => p._id !== loginUser?._id
+        (p) => p._id !== session?.user?.id
       )?._id;
 
       // 如果 otherParticipantId 为空，直接返回
@@ -226,7 +226,7 @@ const Chat: React.FC = () => {
         socket?.emit("send_message", {
           roomId: chatRoom._id,
           message,
-          senderId: loginUser._id
+          senderId: session?.user?.id
         });
       }
 
@@ -247,7 +247,7 @@ const Chat: React.FC = () => {
           // 发送已读状态到 socket
           socket?.emit("mark_read", {
             roomId: chatRoom._id,
-            userId: loginUser?._id,
+            userId: session?.user?.id,
           });
         } catch (error) {
           console.error("Failed to mark messages as read:", error);
@@ -261,7 +261,7 @@ const Chat: React.FC = () => {
     currentUserUnreadCount,
     markAsRead,
     socket,
-    loginUser?._id,
+    session?.user?.id,
   ]);
 
   if (isLoading) return <CenteredLoading />;
@@ -274,7 +274,7 @@ const Chat: React.FC = () => {
           <ChatMessage
             key={message._id}
             message={message}
-            isSender={message.senderId._id === loginUser?._id}
+            isSender={message.senderId._id === session?.user?.id}
           />
         ))}
         <div ref={messagesEndRef} />

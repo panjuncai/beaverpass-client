@@ -6,7 +6,7 @@ import { useUpdateUserMutation } from "@/services/userApi";
 import AddressModal from "@/components/AddressModal/AddressModal";
 import { Toast } from "antd-mobile";
 const EditProfile: React.FC = () => {
-  const { loginUser, isAuthenticated, isLoading: isLoadingAuth } = useAuth();
+  const { session, isAuthenticated, isLoading: isLoadingAuth } = useAuth();
   const navigate = useNavigate();
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
   const [firstName, setFirstName] = useState("");
@@ -22,21 +22,21 @@ const EditProfile: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
-    if (loginUser) {
-      setFirstName(loginUser.firstName || "");
-      setLastName(loginUser.lastName || "");
-      setAddress(loginUser.address || "");
-      setPhone(loginUser.phone || "");
+    if (session?.user?.id) {
+      setFirstName(session?.user?.user_metadata.firstName || "");
+      setLastName(session?.user?.user_metadata.lastName || "");
+      setAddress(session?.user?.user_metadata.address || "");
+      setPhone(session?.user?.user_metadata.phone || "");
     }
-  }, [loginUser]);
+  }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginUser?._id) return;
+    if (!session?.user?.id) return;
 
     try {
       await updateUser({
-        userId: loginUser._id,
+        userId: session?.user?.id,
         firstName,
         lastName,
         address,

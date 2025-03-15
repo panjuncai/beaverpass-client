@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import CenteredLoading from "@/components/CenterLoading";
 import Logo from "@/components/Logo/Logo";
+import { Toast } from "antd-mobile";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -84,7 +85,11 @@ const Register: React.FC = () => {
       if (error) throw error;
 
       // 注册成功
-      alert("Please check your email to verify your account");
+      Toast.show({
+        content: "Check Email to Verify Account",
+        icon: "success",
+        duration: 2000,
+      });
       void navigate("/login", { replace: true });
     } catch (err) {
       console.error("Registration failed:", err);

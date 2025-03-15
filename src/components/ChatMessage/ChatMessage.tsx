@@ -1,5 +1,5 @@
 import { Message } from "@/types/chat";
-import { useGetPostQuery } from "@/services/postApi";
+import { useGetPostById } from "@/hooks/usePost";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 
@@ -12,10 +12,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   message, 
   isSender
 }) => {
-  const { data: post } = useGetPostQuery(message.postId ?? '', {
-    skip: message.messageType !== 'post'
-  });
-
+  const { post } = useGetPostById(message.postId);
   const renderMessageContent = () => {
     // console.log(`render message: ${JSON.stringify(message)}`);
     switch (message.messageType) {
@@ -24,13 +21,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           <div className="bg-base-100 rounded-lg p-2">
             <div className="flex items-center">
               <img
-                src={post?.images.FRONT ?? ''}
+                src={post?.images?.[0]?.imageUrl ?? ''}
                 alt={post?.title}
                 className="w-16 h-16 object-cover rounded"
               />
               <div className="ml-2">
                 <p className="font-medium">{post?.title}</p>
-                <p className="text-sm">${post?.price.amount}</p>
+                <p className="text-sm">${post?.amount}</p>
               </div>
             </div>
           </div>

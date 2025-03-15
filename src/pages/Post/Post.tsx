@@ -2,17 +2,46 @@ import ImageUpload from "@/components/ImageUpload/ImageUpload";
 import LoginCard from "@/components/LoginCard/LoginCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
-// import { useAddPostMutation } from "@/services/postApi";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "antd-mobile";
-import type { PostImages, PostPrice, CreatePostInput } from "@/types/post";
+import { 
+  PostCategory, 
+  PostCondition, 
+  DeliveryType, 
+  CreatePostInput,
+  PostImageInput
+} from "@/types/post";
 import { useFileUpload } from "@/hooks/useFileUpload";
-import { useCreatePost } from "@/services/postService";
+import { useCreatePost } from "@/hooks/usePost";
+
+// 枚举映射
+const CATEGORY_OPTIONS = [
+  { value: PostCategory.LIVING_ROOM_FURNITURE, label: "Living Room Furniture" },
+  { value: PostCategory.BEDROOM_FURNITURE, label: "Bedroom Furniture" },
+  { value: PostCategory.DINING_ROOM_FURNITURE, label: "Dining Room Furniture" },
+  { value: PostCategory.OFFICE_FURNITURE, label: "Office Furniture" },
+  { value: PostCategory.OUTDOOR_FURNITURE, label: "Outdoor Furniture" },
+  { value: PostCategory.STORAGE, label: "Storage" },
+  { value: PostCategory.OTHER, label: "Other" },
+];
+
+const CONDITION_OPTIONS = [
+  { value: PostCondition.LIKE_NEW, label: "Like New" },
+  { value: PostCondition.GENTLY_USED, label: "Gently Used" },
+  { value: PostCondition.MINOR_SCRATCHES, label: "Minor Scratches" },
+  { value: PostCondition.STAINS, label: "Stains" },
+  { value: PostCondition.NEEDS_REPAIR, label: "Needs Repair" },
+];
+
+const DELIVERY_OPTIONS = [
+  { value: DeliveryType.HOME_DELIVERY, label: "Home Delivery (via third-party service)" },
+  { value: DeliveryType.PICKUP, label: "Pickup by Buyer" },
+  { value: DeliveryType.BOTH, label: "Both Options" },
+];
+
 const Post: React.FC = () => {
-  const { isAuthenticated,loginUser } = useAuth();
+  const { isAuthenticated, session } = useAuth();
   const { uploadBase64Image } = useFileUpload();
-  // console.log("Post isAuthenticated:", isAuthenticated);
-  // const [addPost, { isLoading: isLoadingPost }] = useAddPostMutation();
   const { createPost, isLoading: isLoadingPost } = useCreatePost();
   const navigate = useNavigate();
   const [showStepTwoTitleError, setShowStepTwoTitleError] = useState(false);
@@ -22,23 +51,34 @@ const Post: React.FC = () => {
 
   const [showStepFivePriceError, setShowStepFivePriceError] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<CreatePostInput>({
-    category: "Living Room Furniture",
+  
+  // 创建一个图片状态对象，用于存储不同视图的图片
+  const [images, setImages] = useState<{
+    FRONT?: string;
+    SIDE?: string;
+    BACK?: string;
+    DAMAGE?: string;
+  }>({});
+  
+  // 创建表单数据状态
+  const [formData, setFormData] = useState<{
+    category: string;
+    title: string;
+    description: string;
+    condition: string;
+    amount: string;
+    isNegotiable: boolean;
+    deliveryType: string;
+    isFree: boolean;
+  }>({
+    category: PostCategory.LIVING_ROOM_FURNITURE,
     title: "",
     description: "",
-    condition: "Like New",
-    images: {
-      FRONT: "",
-      SIDE: "",
-      BACK: "",
-      DAMAGE: "",
-    } as PostImages,
-    price: {
-      amount: 0,
-      isFree: false,
-      isNegotiable: false,
-    } as PostPrice,
-    deliveryType: "Home Delivery",
+    condition: PostCondition.LIKE_NEW,
+    amount: "",
+    isNegotiable: false,
+    deliveryType: DeliveryType.HOME_DELIVERY,
+    isFree: false,
   });
 
   const steps = [1, 2, 3, 4, 5, 6];
@@ -76,17 +116,14 @@ const Post: React.FC = () => {
   const handleImageUpload = async (viewType: string, base64String: string) => {
     try {
       // 调用 S3 上传工具上传 base64 图片
-      const fileName = `post_${loginUser?.id}_${viewType}.jpg`;
+      const fileName = `post_${session?.user?.id}_${viewType}.jpg`;
       
       const imageUrl = await uploadBase64Image(base64String, fileName);
       
-      // 更新表单数据，存储实际的图片 URL 而不是 base64
-      setFormData((prev) => ({
+      // 更新图片状态
+      setImages(prev => ({
         ...prev,
-        images: {
-          ...prev.images,
-          [viewType]: imageUrl,
-        },
+        [viewType]: imageUrl
       }));
     } catch (error) {
       console.error("Error uploading image to S3:", error);
@@ -98,15 +135,14 @@ const Post: React.FC = () => {
   };
 
   const handleImageDelete = (viewType: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      images: {
-        ...prev.images,
-        [viewType]: null,
-      },
-    }));
+    setImages(prev => {
+      const newImages = { ...prev };
+      delete newImages[viewType as keyof typeof newImages];
+      return newImages;
+    });
   };
-  // to do
+  
+  // 格式化价格
   const formatPrice = (value: string) => {
     // 移除非数字和小数点
     let formattedValue = value.replace(/[^\d.]/g, "");
@@ -123,75 +159,107 @@ const Post: React.FC = () => {
     }
 
     // 限制小数位数为两位
-    if (parts[1]?.length > 2) {
+    if (parts.length > 1 && parts[1].length > 2) {
       formattedValue = parts[0] + "." + parts[1].slice(0, 2);
     }
 
     return formattedValue;
   };
 
-  // const handleImagesChange = (images: Record<string, string | null>) => {
-  //   setFormData((prev) => ({ ...prev, images }));
-  // };
-
-  const handlePriceChange = (updates: Partial<typeof formData.price>) => {
-    setFormData((prev) => ({
-      ...prev,
-      price: {
-        ...prev.price,
-        ...updates,
-        // If setting to free, clear the amount
-        amount: updates.isFree
-          ? 0
-          : updates.amount !== undefined
-          ? updates.amount
-          : prev.price.amount,
-        // If setting to free, set negotiable to false
-        isNegotiable: updates.isFree
-          ? false
-          : updates.isNegotiable !== undefined
-          ? updates.isNegotiable
-          : prev.price.isNegotiable,
-      },
-    }));
-
-    if (updates?.isFree) {
+  // 处理价格变更
+  const handlePriceChange = (updates: { 
+    amount?: string; 
+    isNegotiable?: boolean;
+    isFree?: boolean;
+  }) => {
+    const newState = { ...formData };
+    
+    // 处理免费选项
+    if (updates.isFree !== undefined) {
+      newState.isFree = updates.isFree;
+      
+      if (updates.isFree) {
+        // 如果设置为免费，金额为0，不可协商
+        newState.amount = "0";
+        newState.isNegotiable = false;
+      } else {
+        // 如果从免费切换到收费，清空金额
+        newState.amount = "";
+      }
+    }
+    
+    // 处理金额更新
+    if (updates.amount !== undefined) {
+      newState.amount = updates.amount;
+      // 如果输入了金额，自动设置为非免费
+      if (updates.amount !== "0" && updates.amount !== "") {
+        newState.isFree = false;
+      }
+    }
+    
+    // 处理可协商选项
+    if (updates.isNegotiable !== undefined) {
+      newState.isNegotiable = updates.isNegotiable;
+    }
+    
+    // 更新状态
+    setFormData(newState);
+    
+    // 清除价格错误提示
+    if (newState.amount !== "" || newState.isNegotiable) {
       setShowStepFivePriceError(false);
     }
   };
 
-  const handleDeliveryChange = (delivery: string) => {
-    setFormData((prev) => ({ ...prev, deliveryType: delivery }));
+  const handleDeliveryChange = (deliveryType: string) => {
+    setFormData((prev) => ({ ...prev, deliveryType }));
   };
 
   // Add form submission handler
   const handleSubmit = async () => {
     if (currentStep === 6) {
-      // console.log("Form data to submit:", formData);
-      // Add your API call here to save the data
       try {
-        // 处理价格格式
-        const processedFormData = {
-          ...formData,
-          price: {
-            ...formData.price,
-            // 如果是免费，确保金额为 "0"
-            amount: formData.price.isFree ? 0 : formData.price.amount,
-          },
+        // 将图片转换为 PostImageInput 数组
+        const imageInputs: PostImageInput[] = Object.entries(images).map(
+          ([viewType, url]) => ({
+            imageUrl: url,
+            imageType: viewType
+          })
+        );
+        
+        // 如果没有图片，添加错误提示
+        if (imageInputs.length === 0) {
+          Toast.show({
+            icon: 'fail',
+            content: 'Please upload at least one image',
+          });
+          setCurrentStep(4); // 返回到图片上传步骤
+          return;
+        }
+        
+        // 准备提交数据
+        const postInput: CreatePostInput = {
+          category: formData.category,
+          title: formData.title,
+          description: formData.description,
+          condition: formData.condition,
+          amount: formData.isFree ? 0 : Number(formData.amount) || 0,
+          isNegotiable: formData.isNegotiable,
+          deliveryType: formData.deliveryType,
+          images: imageInputs
         };
 
-        await createPost(processedFormData as CreatePostInput);
-        // console.log("post", post);
+        // 提交帖子
+        await createPost(postInput);
+        
         // 发布成功后跳转到详情页
-        void navigate("/search",{replace:true});
+        void navigate("/search", { replace: true });
         void Toast.show({
           icon: "success",
-          content: "Post created successfully",
           duration: 2000,
         });
       } catch (error) {
         console.error("Failed to create post:", error);
-        // 可以添加错误提示，比如使用 toast
         void Toast.show({
           icon: "fail",
           content: (error as Error).message,
@@ -232,7 +300,7 @@ const Post: React.FC = () => {
 
     // Step 4 validation
     if (currentStep === 4) {
-      if (!formData.images.FRONT) {
+      if (!images.FRONT) {
         setShowStepFourFrontError(true);
         return;
       }
@@ -240,61 +308,62 @@ const Post: React.FC = () => {
     }
 
     // Step 5 validation
-    // if (currentStep === 5) {
-    //   if (!formData.price.amount.trim() && !formData.price.isFree) {
-    //     setShowStepFivePriceError(true);
-    //     return;
-    //   }
-    // }
+    if (currentStep === 5) {
+      if (formData.amount === "0" && !formData.isNegotiable) {
+        setShowStepFivePriceError(true);
+        return;
+      }
+      setShowStepFivePriceError(false);
+    }
 
     if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
     }
   };
+  
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
 
-  const stepOne = () => {
+  // 通用选择组件
+  function CategorySelectionStep({ 
+    title, 
+    options, 
+    value, 
+    onChange, 
+    label 
+  }: { 
+    title: string;
+    options: typeof CATEGORY_OPTIONS;
+    value: string;
+    onChange: (value: string) => void;
+    label: string;
+  }) {
     return (
       <>
-        {/* 选择分类 */}
         <div className="flex justify-center mt-6 text-2xl text-primary font-bold">
-          Step 1: Choose a Category
+          {title}
         </div>
         <div className="flex justify-center mt-4">
           <div className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box w-64">
-            {/* 用 checkbox 让 collapse 可点击展开/收起 */}
             <input type="checkbox" defaultChecked />
-
-            {/* 标题区域 */}
             <div className="collapse-title text-xl font-semibold flex items-center justify-between text-gray-400">
-              Category
+              {label}
             </div>
-
-            {/* 内容区域：放一个 menu 列表 */}
             <div className="collapse-content p-0">
               <ul className="menu bg-base-100 w-full text-lg">
-                {[
-                  "Living Room Furniture",
-                  "Bedroom Furniture",
-                  "Dining Room Furniture",
-                  "Office Furniture",
-                  "Outdoor Furniture",
-                  "Storage",
-                  "Other",
-                ].map((cat) => (
+                {options.map((option) => (
                   <li
-                    key={cat}
-                    className={formData.category === cat ? "bg-[#7EAC2D]" : ""}
+                    key={option.value}
+                    className={value === option.value ? "bg-[#7EAC2D]" : ""}
                   >
                     <a
-                      className={formData.category === cat ? "text-white" : ""}
-                      onClick={() => handleCategoryChange(cat)}
+                      className={value === option.value ? "text-white" : ""}
+                      onClick={() => onChange(option.value)}
                     >
-                      {cat}
+                      {option.label}
                     </a>
                   </li>
                 ))}
@@ -302,12 +371,66 @@ const Post: React.FC = () => {
             </div>
           </div>
         </div>
-        {!formData.category && (
-          <div className="text-error text-sm mt-2">
-            Please select a category
-          </div>
-        )}
       </>
+    );
+  }
+
+  function ConditionSelectionStep({ 
+    title, 
+    options, 
+    value, 
+    onChange, 
+    label 
+  }: { 
+    title: string;
+    options: typeof CONDITION_OPTIONS;
+    value: string;
+    onChange: (value: string) => void;
+    label: string;
+  }) {
+    return (
+      <>
+        <div className="flex justify-center mt-6 text-2xl text-primary font-bold">
+          {title}
+        </div>
+        <div className="flex justify-center mt-4">
+          <div className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box w-64">
+            <input type="checkbox" defaultChecked />
+            <div className="collapse-title text-xl font-semibold flex items-center justify-between text-gray-400">
+              {label}
+            </div>
+            <div className="collapse-content p-0">
+              <ul className="menu bg-base-100 w-full text-lg">
+                {options.map((option) => (
+                  <li
+                    key={option.value}
+                    className={value === option.value ? "bg-[#7EAC2D]" : ""}
+                  >
+                    <a
+                      className={value === option.value ? "text-white" : ""}
+                      onClick={() => onChange(option.value)}
+                    >
+                      {option.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const stepOne = () => {
+    return (
+      <CategorySelectionStep
+        title="Step 1: Choose a Category"
+        options={CATEGORY_OPTIONS}
+        value={formData.category}
+        onChange={handleCategoryChange}
+        label="Category"
+      />
     );
   };
 
@@ -444,52 +567,13 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
 
   const stepThree = () => {
     return (
-      <>
-        {/* 选择分类 */}
-        <div className="flex justify-center mt-6 text-2xl text-primary font-bold">
-          Step 3: Select Condition
-        </div>
-        <div className="flex justify-center mt-4">
-          <div className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box w-64">
-            {/* 用 checkbox 让 collapse 可点击展开/收起 */}
-            <input type="checkbox" defaultChecked />
-
-            {/* 标题区域 */}
-            <div className="collapse-title text-xl font-semibold flex items-center justify-between text-gray-400">
-              Item Condition
-            </div>
-
-            {/* 内容区域：放一个 menu 列表 */}
-            <div className="collapse-content p-0">
-              <ul className="menu bg-base-100 w-full text-lg">
-                {[
-                  "Like New",
-                  "Gently Used",
-                  "Minor Scratches",
-                  "Stains",
-                  "Needs Repair",
-                ].map((condition) => (
-                  <li
-                    key={condition}
-                    className={
-                      formData.condition === condition ? "bg-[#7EAC2D]" : ""
-                    }
-                  >
-                    <a
-                      className={
-                        formData.condition === condition ? "text-white" : ""
-                      }
-                      onClick={() => handleConditionChange(condition)}
-                    >
-                      {condition}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </>
+      <ConditionSelectionStep
+        title="Step 3: Select Condition"
+        options={CONDITION_OPTIONS}
+        value={formData.condition}
+        onChange={handleConditionChange}
+        label="Item Condition"
+      />
     );
   };
 
@@ -504,26 +588,26 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
           <div className="pl-12 space-y-6 w-full">
             <ImageUpload
               viewType="FRONT"
-              imageUrl={formData.images.FRONT}
+              imageUrl={images.FRONT}
               onImageUpload={handleImageUpload}
               onImageDelete={handleImageDelete}
               showError={showStepFourFrontError}
             />
             <ImageUpload
               viewType="SIDE"
-              imageUrl={formData.images.SIDE}
+              imageUrl={images.SIDE}
               onImageUpload={handleImageUpload}
               onImageDelete={handleImageDelete}
             />
             <ImageUpload
               viewType="BACK"
-              imageUrl={formData.images.BACK}
+              imageUrl={images.BACK}
               onImageUpload={handleImageUpload}
               onImageDelete={handleImageDelete}
             />
             <ImageUpload
               viewType="DAMAGE"
-              imageUrl={formData.images.DAMAGE}
+              imageUrl={images.DAMAGE}
               onImageUpload={handleImageUpload}
               onImageDelete={handleImageDelete}
             />
@@ -547,7 +631,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                 type="radio"
                 name="radio-10"
                 className="radio checked:bg-primary"
-                checked={!formData.price.isFree}
+                checked={!formData.isFree}
                 onChange={() => handlePriceChange({ isFree: false })}
               />
               <div className="relative">
@@ -555,11 +639,12 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                   type="text"
                   placeholder="Price"
                   className="input input-bordered w-full max-w-xs"
-                  value={formData.price.amount}
-                  onChange={(e) =>
-                    handlePriceChange({ amount: Number(formatPrice(e.target.value)) })
-                  }
-                  disabled={formData.price.isFree}
+                  value={formData.isFree ? "0" : formData.amount}
+                  onChange={(e) => {
+                    const value = formatPrice(e.target.value);
+                    handlePriceChange({ amount: value });
+                  }}
+                  disabled={formData.isFree}
                 />
               </div>
             </label>
@@ -575,13 +660,8 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
                 type="radio"
                 name="radio-10"
                 className="radio checked:bg-primary"
-                checked={formData.price.isFree}
-                onChange={() => {
-                  handlePriceChange({
-                    isFree: true,
-                    amount: 0, // Clear price when selecting Free
-                  });
-                }}
+                checked={formData.isFree}
+                onChange={() => handlePriceChange({ isFree: true })}
               />
               <span className="label-text text-lg">Free</span>
             </label>
@@ -592,12 +672,12 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
               <input
                 type="checkbox"
                 className="checkbox"
-                checked={formData.price.isNegotiable}
+                checked={formData.isNegotiable}
                 onChange={(e) =>
                   handlePriceChange({ isNegotiable: e.target.checked })
                 }
-                // Optionally disable negotiable checkbox when item is free
-                disabled={formData.price.isFree}
+                // Disable negotiable checkbox when item is free
+                disabled={formData.isFree}
               />
               <span className="label-text text-lg">Price is negotiable</span>
             </label>
@@ -610,49 +690,24 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
   const stepSix = () => {
     return (
       <>
-        {/* 选择分类 */}
         <div className="flex justify-center mt-6 text-2xl text-primary font-bold">
           Step 6: Choose Delivery Options
         </div>
         <div className="flex flex-col justify-center mt-4 p-8">
-          <div className="form-control">
-            <label className="label cursor-pointer justify-start gap-6">
-              <input
-                type="radio"
-                name="radio-10"
-                className="radio checked:bg-primary"
-                checked={formData.deliveryType === "Home Delivery"}
-                onChange={() => handleDeliveryChange("Home Delivery")}
-              />
-              <span className="label-text text-lg">
-                Home Delivery (via third-party service)
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label cursor-pointer justify-start gap-6">
-              <input
-                type="radio"
-                name="radio-10"
-                className="radio checked:bg-primary"
-                checked={formData.deliveryType === "Pickup"}
-                onChange={() => handleDeliveryChange("Pickup")}
-              />
-              <span className="label-text text-lg">Pickup by Buyer</span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label cursor-pointer justify-start gap-6">
-              <input
-                type="radio"
-                name="radio-10"
-                className="radio checked:bg-primary"
-                checked={formData.deliveryType === "Both"}
-                onChange={() => handleDeliveryChange("Both")}
-              />
-              <span className="label-text text-lg">Both Options</span>
-            </label>
-          </div>
+          {DELIVERY_OPTIONS.map(option => (
+            <div className="form-control" key={option.value}>
+              <label className="label cursor-pointer justify-start gap-6">
+                <input
+                  type="radio"
+                  name="radio-10"
+                  className="radio checked:bg-primary"
+                  checked={formData.deliveryType === option.value}
+                  onChange={() => handleDeliveryChange(option.value)}
+                />
+                <span className="label-text text-lg">{option.label}</span>
+              </label>
+            </div>
+          ))}
           <div className="flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -790,7 +845,7 @@ E.g., Solid wood dining table with minor scratches on the top surface. Dimension
   };
   return (
     <div className="flex flex-col h-full">
-      {isAuthenticated ? stepsPost() : noLoginFunc()}
+      { isAuthenticated ? stepsPost() : noLoginFunc()}
     </div>
   );
 };

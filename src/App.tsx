@@ -4,20 +4,23 @@ import { routes } from "@/routes";
 import { RouteConfig } from "@/types/routes";
 import CenteredLoading from "@/components/CenterLoading";
 import { useAuth } from "@/hooks/useAuth";
-import { useGetCurrentUser } from "@/hooks/userUser";
+import { useGetCurrentUser } from "@/hooks/useUser";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 const App: React.FC = () => {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { refetch } = useGetCurrentUser();
+  const {isAuthenticated, isLoading: authLoading } = useAuth();
+  const { refetch, loading: userLoading } = useGetCurrentUser();
 
-  // 应用启动时刷新用户信息
+  // Refresh user information when the application starts
   useEffect(() => {
-    void refetch();
-  }, [refetch]);
+    if (isAuthenticated) {
+      console.log('App: User is authenticated, refreshing user information');
+      void refetch();
+    }
+  }, [refetch, isAuthenticated]);
 
-  // 如果认证状态正在加载，显示加载中
-  if (authLoading) {
+  // Show loading indicator while authentication state is being determined
+  if (authLoading || (isAuthenticated && userLoading)) {
     return <CenteredLoading />;
   }
 
@@ -30,7 +33,7 @@ const App: React.FC = () => {
           path={path}
           element={
             meta?.requiresAuth ? (
-              <ProtectedRoute isAuthenticated={isAuthenticated || false}>
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <Suspense fallback={<CenteredLoading />}>{element}</Suspense>
               </ProtectedRoute>
             ) : (

@@ -1,38 +1,33 @@
 import CenteredLoading from "@/components/CenterLoading";
 import CustomNavBar from "@/components/CustomNavBar/CustomNavBar";
 import StarRating from "@/components/StarRating/StarRating";
-import { useGetPostQuery } from "@/services/postApi";
-import { useGetUserQuery } from "@/services/userApi";
+import { useGetUserById } from "@/hooks/useUser"
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCreateChatRoomMutation, useSendMessageMutation, useGetRoomWithUserQuery } from "@/services/chatApi";
 import { useAuth } from "@/hooks/useAuth";
 import { Toast } from "antd-mobile";
-
+import { useGetPostById } from "@/hooks/usePost";
 // eslint-disable-next-line react/prop-types
 const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
-  const { loginUser } = useAuth();
+  const { session } = useAuth();
   const [createChatRoom] = useCreateChatRoomMutation();
   const [sendMessage] = useSendMessageMutation();
   const navigate = useNavigate();
-  const { data: post, isLoading: isLoadingPost } =
-    useGetPostQuery(postId);
-  const { data: seller, isLoading: isLoadingSeller } = useGetUserQuery(
-    post?.poster?._id ?? '',
-    {
-      skip: !post?.poster?._id,
-    }
+  const { post, isLoading: isLoadingPost } = useGetPostById(postId);
+  const { user: seller, loading: isLoadingSeller } = useGetUserById(
+    post?.poster?.id ?? '',
   );
-  const sellerId = post?.poster._id || '';
+  const sellerId = post?.poster?.id || '';
   const { data: existingRoom } = useGetRoomWithUserQuery(sellerId, {
-    skip: !sellerId  // 当没有 sellerId 时跳过查询
+    skip: !sellerId
   });
   useEffect(()=>{
     // console.log(post?.poster?._id);
   },[post?.poster]);
 
   const handleChatClick = async () => {
-    if (!loginUser) {
+    if (!session?.user?.id) {
       Toast.show({
         content: 'Please login first',
         icon: 'fail'
@@ -46,7 +41,7 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
         // 先发送商品
         await sendMessage({
           roomId: existingRoom._id,
-          postId: post?._id,
+          postId: post?.id,
           messageType: 'post'
         }).unwrap();
 
@@ -64,7 +59,7 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
 
         await sendMessage({
           roomId: room._id,
-          postId: post?._id,
+          postId: post?.id,
           messageType: 'post'
         }).unwrap();
         
@@ -98,7 +93,7 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
                 .filter(([, url]) => url !== null)
                 .map(([key, url]) => (
                   <div key={key} id={key} className="carousel-item w-full">
-                    <img src={url as string} className="w-full" alt={key} />
+                    <img src={url.imageUrl} className="w-full" alt={key} />
                   </div>
                 ))}
             </div>
@@ -115,7 +110,7 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
             <div className="shadow-sm p-2">
               <div className="flex justify-between">
                 <div className="text-2xl font-bold">
-                  {post?.price.isFree ?"Free":"$" + post?.price.amount} <em>{post?.price.isNegotiable ? "Negotiable":""}</em>
+                  {post?.amount===0 ?"Free":"$" + post?.amount} <em>{post?.isNegotiable ? "Negotiable":""}</em>
                 </div>
                 <div className="text-sm text-green-600 text-center">
                   <div>New $350</div>
@@ -180,7 +175,7 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
                   </div>
                   <button 
                     className="btn btn-sm btn-primary"
-                    disabled={loginUser?._id === sellerId}
+                    disabled={session?.user?.id === sellerId}
                     onClick={() => void handleChatClick()}
                   >
                     Chat
@@ -278,10 +273,10 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
           </div>
           <div className="fixed bottom-4 left-0 right-0 flex justify-center">
             <button 
-              disabled={loginUser?._id === sellerId}
+              disabled={session?.user?.id === sellerId}
               className="btn btn-primary btn-xl w-4/5 rounded-full shadow-md" 
               onClick={() => {
-                if (!loginUser) {
+                if (!session?.user?.id) {
                   Toast.show({
                     content: 'Please login first',
                     icon: 'fail'
@@ -291,7 +286,7 @@ const PostDetail: React.FC<{ postId: string }> = ({ postId }) => {
                 }
                 void navigate("/orderView", {
                   state: {
-                    productId: post?._id
+                    productId: post?.id
                   },
                   replace: true
                 });

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createClient, Session } from '@supabase/supabase-js';
 import { LoginRequest, RegisterRequest } from '@/types/user';
-import { useGetCurrentUser } from './userUser';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -14,7 +13,6 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user, refetch } = useGetCurrentUser();
 
   // 保存 token 到 localStorage
   const saveToken = (session: Session | null) => {
@@ -37,12 +35,6 @@ export const useAuth = () => {
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
         saveToken(session);
-        
-        // 如果有会话，刷新用户信息
-        if (session) {
-          await refetch();
-        }
-        
         setLoading(false);
       } catch (error) {
         console.error('Error getting initial session:', error);
@@ -53,7 +45,7 @@ export const useAuth = () => {
     void initSession();
 
     // 监听认证状态变化
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session?.user?.email);
       
       // 更新会话状态
@@ -67,14 +59,6 @@ export const useAuth = () => {
         console.log('Token refreshed, new token saved');
       } else if (event === 'SIGNED_IN') {
         console.log('User signed in');
-        // 登录成功后立即刷新用户信息
-        if (session) {
-          try {
-            await refetch();
-          } catch (error) {
-            console.error('Error fetching user after sign in:', error);
-          }
-        }
       } else if (event === 'SIGNED_OUT') {
         console.log('User signed out');
       }
@@ -83,7 +67,7 @@ export const useAuth = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [refetch]);
+  }, []);
 
   // 登录处理
   const loginHandler = async (input: LoginRequest) => {
@@ -104,38 +88,9 @@ export const useAuth = () => {
         setSession(data.session);
       }
       
-      // 添加短暂延迟，确保会话状态已更新
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // 尝试多次获取用户信息
-      let retryCount = 0;
-      let userData = null;
-      
-      while (!userData && retryCount < 3) {
-        try {
-          console.log(`尝试获取用户信息，第 ${retryCount + 1} 次`);
-          const result = await refetch();
-          userData = result.data?.me;
-          
-          if (userData) {
-            console.log('用户信息获取成功:', userData);
-            break;
-          }
-        } catch (fetchError) {
-          console.error(`获取用户信息失败，第 ${retryCount + 1} 次:`, fetchError);
-        }
-        
-        retryCount++;
-        
-        if (retryCount < 3) {
-          // 等待一段时间后重试
-          await new Promise(resolve => setTimeout(resolve, 300));
-        }
-      }
-      
       return data;
     } catch (error) {
-      console.error('登录失败:', error);
+      console.error('Login failed:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -221,7 +176,6 @@ export const useAuth = () => {
 
   return {
     isAuthenticated: !!session,
-    loginUser: user,
     session,
     isLoading: loading,
     login: loginHandler,

@@ -6,7 +6,6 @@ import Logo  from "@/components/Logo/Logo";
 
 // 页面组件懒加载
 const Register = lazy(() => import("@/pages/Register/Register"));
-const VerifyEmail = lazy(() => import("@/pages/VerifyEmail/VerifyEmail"));
 const Login = lazy(() => import("@/pages/Login/Login"));
 const NotFound = lazy(() => import("@/components/NotFound/NotFound"));
 const Post= lazy(() => import("@/pages/Post/Post"));
@@ -106,11 +105,6 @@ export const routes: RouteConfig[] = [
     path: "/register",
     element: React.createElement(Register),
     meta: { requiresAuth: false, title: "register" },
-  },
-  {
-    path: "/verifyEmail",
-    element: React.createElement(VerifyEmail),
-    meta: { requiresAuth: false, title: "Verify Email" },
   },
   {
     path: "/login",

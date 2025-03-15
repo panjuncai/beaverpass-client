@@ -16,7 +16,7 @@ const httpLink = createHttpLink({
 });
 
 // 添加认证头链接
-const authLink = setContext((_, { headers }) => {
+const authLink = setContext((_, { headers }: { headers?: Record<string, string> }) => {
   // 从 localStorage 获取 token
   const token = localStorage.getItem('supabase_token');
   

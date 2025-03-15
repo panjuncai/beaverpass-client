@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useUpload } from '@/services/uploadService'; // 你现有的 GraphQL 上传 Hook
+import { useUpload } from '@/hooks/useUpload'; // 你现有的 GraphQL 上传 Hook
 
 export const useFileUpload = () => {
   const [isUploading, setIsUploading] = useState(false);

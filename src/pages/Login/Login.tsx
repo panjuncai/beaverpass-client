@@ -1,43 +1,23 @@
-import { createClient } from "@supabase/supabase-js";
-import { useNavigate, Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useGetCurrentUser } from '@/hooks/userUser';
 import Logo from "@/components/Logo/Logo";
 import CenteredLoading from "@/components/CenterLoading";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
 const Login = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loginUser, socialLogin, login } = useAuth();
-  const { refetch, hasSession } = useGetCurrentUser();
+  const { isAuthenticated, socialLogin, login } = useAuth();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Refresh user info when component loads
+  // Monitor authentication state and redirect when authenticated
   useEffect(() => {
-    console.log('Login component loaded, refreshing user info');
-    void refetch();
-  }, [refetch]);
-
-  // Check if redirection is needed when auth state or user info changes
-  useEffect(() => {
-    console.log('Auth state changed:', { isAuthenticated, loginUser, hasSession });
+    console.log('Auth state changed:', { isAuthenticated});
     
     if (isAuthenticated) {
-      // If authenticated but no user info, try to fetch again
-      if (!loginUser) {
-        console.log('Authenticated but no user info, trying to fetch again');
-        void refetch();
-        return;
-      }
-      
       // Prevent multiple redirects
       if (!isRedirecting) {
         setIsRedirecting(true);
@@ -47,39 +27,26 @@ const Login = () => {
     } else {
       setIsRedirecting(false);
     }
-  }, [isAuthenticated, loginUser, navigate, refetch, isRedirecting, hasSession]);
-
-  // Listen for Supabase auth state changes
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      console.log('Supabase auth event:', event);
-      
-      if (event === 'SIGNED_IN') {
-        // Login successful, refresh user info
-        console.log('Sign in successful, refreshing user info');
-        void refetch();
-      }
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [refetch]);
+  }, [isAuthenticated, navigate, isRedirecting]);
 
   // Handle email login
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
     
-    try {
-      console.log('Starting email login...');
-      await login({ email, password });
-      console.log('Email login successful');
-    } catch (err) {
-      console.error('Email login failed:', err);
-      setError('Invalid email or password. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+    login({ email, password })
+      .then(() => {
+        console.log('Email login successful');
+        void navigate('/');
+      })
+      .catch((err) => {
+        console.error('Email login failed:', err);
+        setError('Invalid email or password. Please try again.');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   if (isLoading) {
@@ -162,8 +129,9 @@ const Login = () => {
                   type="button"
                   onClick={() => {
                     console.log('Starting Google login...');
-                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                    socialLogin('google');
+                    socialLogin('google').catch(err => {
+                      console.error('Google login failed:', err);
+                    });
                   }}
                   className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                 >
@@ -176,8 +144,9 @@ const Login = () => {
                   type="button"
                   onClick={() => {
                     console.log('Starting Apple login...');
-                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                    socialLogin('apple');
+                    socialLogin('apple').catch(err => {
+                      console.error('Apple login failed:', err);
+                    });
                   }}
                   className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                 >
@@ -190,8 +159,9 @@ const Login = () => {
                   type="button"
                   onClick={() => {
                     console.log('Starting Facebook login...');
-                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                    socialLogin('facebook');
+                    socialLogin('facebook').catch(err => {
+                      console.error('Facebook login failed:', err);
+                    });
                   }}
                   className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                 >

@@ -20,3 +20,12 @@ export const GET_CURRENT_USER = gql`
     }
     ${USER_FRAGMENT}
 `
+
+export const GET_USER_BY_ID = gql`
+    query GetUserById($id: String!) {
+        user(id: $id) {
+            ...UserFields
+        }
+    }
+    ${USER_FRAGMENT}
+`

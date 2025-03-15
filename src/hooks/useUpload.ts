@@ -1,4 +1,4 @@
-import { PresignedUrlRsp, UploadReq } from "@/types/upload";
+import { PresignedUrlRsp} from "@/types/upload";
 import { useMutation } from "@apollo/client";
 import { GET_PRESIGNED_URL } from "@/api/uploadOperations";
 import { Toast } from "antd-mobile";
@@ -6,10 +6,10 @@ import { Toast } from "antd-mobile";
 export const useUpload = () => {
     const [upLoadMutation, { loading }] = useMutation<
       { getPresignedUrl: PresignedUrlRsp},
-      { input: UploadReq }
+      { input: {fileName: string, fileType: string, fileSize: number} }
     >(GET_PRESIGNED_URL);
   
-    const upload = async (input: UploadReq) => {
+    const upload = async (input: {fileName: string, fileType: string, fileSize: number}) => {
       try {
         const { data, errors } = await upLoadMutation({
           variables: { input },

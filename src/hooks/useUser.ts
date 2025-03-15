@@ -3,6 +3,7 @@ import {createClient} from '@supabase/supabase-js';
 import {useEffect, useState} from 'react';
 import {
     GET_CURRENT_USER,
+    GET_USER_BY_ID,
 } from '@/api/userOperations';
 import {User} from '@/types/user';
 import { useLocation } from 'react-router-dom';
@@ -11,53 +12,53 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// 不需要显示认证错误的路径
+// Paths that don't need to show authentication errors
 const publicPaths = ['/login', '/register', '/auth/callback'];
 
 export const useGetCurrentUser = () => {
     const [hasSession, setHasSession] = useState(false);
     const location = useLocation();
     
-    // 检查当前路径是否是公共路径
+    // Check if current path is a public path
     const isPublicPath = publicPaths.includes(location.pathname);
 
-    // 检查 Supabase 会话状态
+    // Check Supabase session status
     useEffect(() => {
         const checkSession = async () => {
             try {
                 const {data} = await supabase.auth.getSession();
                 const hasActiveSession = !!data.session;
-                console.log('会话状态检查:', hasActiveSession ? '已登录' : '未登录');
+                console.log('Session status check:', hasActiveSession ? 'Logged in' : 'Not logged in');
                 setHasSession(hasActiveSession);
                 
-                // 检查 localStorage 中的 token
+                // Check for token in localStorage
                 const token = localStorage.getItem('supabase_token');
-                console.log('本地存储 token 状态:', token ? '存在' : '不存在');
+                console.log('Local storage token status:', token ? 'Exists' : 'Does not exist');
                 
-                // 如果本地有 token 但没有会话，尝试刷新会话
+                // If there's a token but no active session, try to refresh the session
                 if (token && !hasActiveSession) {
-                    console.log('检测到 token 但无活跃会话，尝试刷新会话');
+                    console.log('Token detected but no active session, attempting to refresh session');
                     const { data: refreshData } = await supabase.auth.refreshSession();
                     if (refreshData.session) {
-                        console.log('会话刷新成功');
+                        console.log('Session refresh successful');
                         setHasSession(true);
                     } else {
-                        console.log('会话刷新失败，可能需要重新登录');
-                        // token 无效，清除它
+                        console.log('Session refresh failed, may need to log in again');
+                        // Token is invalid, clear it
                         localStorage.removeItem('supabase_token');
                     }
                 }
             } catch (error) {
-                console.error('检查会话状态时出错:', error);
+                console.error('Error checking session status:', error);
             }
         };
         
         void checkSession();
         
-        // 监听认证状态变化
+        // Listen for authentication state changes
         const {data: {subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
             const newSessionState = !!session;
-            console.log('认证状态变化:', _event, newSessionState ? '已登录' : '未登录');
+            console.log('Auth state change:', _event, newSessionState ? 'Logged in' : 'Not logged in');
             setHasSession(newSessionState);
         });
         
@@ -67,31 +68,31 @@ export const useGetCurrentUser = () => {
     const {data, loading, error, refetch} = useQuery<{me: User}>(GET_CURRENT_USER, {
         variables: {},
         fetchPolicy: 'network-only',
-        // 只有在有会话时才执行查询
+        // Only execute the query if there's a session
         skip: !hasSession,
-        // 发生错误时不缓存结果
+        // Don't cache results on error
         errorPolicy: 'none',
-        // 禁用错误通知
+        // Disable error notifications
         onError: (error) => {
-            // 在公共路径上不显示错误
+            // Don't show errors on public paths
             if (isPublicPath) {
-                console.log('在公共路径上忽略用户数据获取错误');
+                console.log('Ignoring user data fetch error on public path');
                 return;
             }
             
-            // 只有在非公共路径上才记录错误
-            console.error('获取用户数据时出错:', error);
+            // Only log errors on non-public paths
+            console.error('Error fetching user data:', error);
         }
     });
     
-    // 添加日志，帮助调试
+    // Add logging to help with debugging
     useEffect(() => {
         if (data?.me) {
-            console.log('用户数据获取成功:', data.me);
+            console.log('User data fetched successfully:', data.me);
         } else if (loading) {
-            console.log('正在获取用户数据...');
+            console.log('Fetching user data...');
         } else if (!hasSession) {
-            console.log('跳过用户数据获取 (无会话)');
+            console.log('Skipping user data fetch (no session)');
         }
     }, [data, loading, hasSession]);
     
@@ -101,5 +102,19 @@ export const useGetCurrentUser = () => {
         error,
         refetch,
         hasSession,
+    };
+};
+
+export const useGetUserById = (id: string) => {
+    const {data, loading, error, refetch} = useQuery<{user: User}>(GET_USER_BY_ID, {
+        variables: {id},
+        fetchPolicy: 'network-only'
+    });
+    
+    return {
+        user: data?.user,
+        loading,
+        error,
+        refetch,
     };
 };

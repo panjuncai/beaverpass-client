@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
 import CenteredLoading from '@/components/CenterLoading';
-import { useGetCurrentUser } from '@/hooks/userUser';
+import { useGetCurrentUser } from '@/hooks/useUser';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -15,10 +15,10 @@ const AuthCallback = () => {
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    // 处理认证回调
+    // Handle authentication callback
     const handleAuthCallback = async () => {
       try {
-        // 获取会话信息
+        // Get session information
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -28,20 +28,27 @@ const AuthCallback = () => {
         }
 
         if (session) {
-          // 保存 token 到 localStorage
+          // Save token to localStorage
           if (session.access_token) {
             localStorage.setItem('supabase_token', session.access_token);
           }
           
-          // 刷新用户信息
-          await refetch();
+          // Refresh user information
+          try {
+            await refetch();
+            console.log('User information refreshed successfully');
+          } catch (refreshError) {
+            console.error('Error refreshing user information:', refreshError);
+            // Continue even if user info refresh fails
+            // The user info will be fetched again when needed
+          }
           
-          // 认证成功，重定向到首页
+          // Authentication successful, redirect to home page
           console.log('Auth callback successful, redirecting to home page');
           setIsProcessing(false);
           void navigate('/');
         } else {
-          // 如果没有会话，重定向到登录页面
+          // If no session, redirect to login page
           localStorage.removeItem('supabase_token');
           setIsProcessing(false);
           void navigate('/login');
@@ -57,7 +64,7 @@ const AuthCallback = () => {
     void handleAuthCallback();
   }, [navigate, refetch, retryCount]);
 
-  // 如果处理时间过长，尝试重试
+  // Retry if processing takes too long
   useEffect(() => {
     if (isProcessing) {
       const timer = setTimeout(() => {

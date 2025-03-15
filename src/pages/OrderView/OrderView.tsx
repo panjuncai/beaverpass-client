@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useGetPostQuery } from "@/services/postApi";
-import { useCreateOrderMutation } from "@/services/orderApi";
+import { useGetPostById } from "@/hooks/usePost";
+// import { useCreateOrderMutation } from "@/services/orderApi";
 import { useCreatePaymentIntentMutation } from "@/services/paymentApi";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -25,29 +25,30 @@ interface ShippingInfo {
 }
 
 const OrderView: React.FC = () => {
-  const { loginUser, isAuthenticated } = useAuth();
+  const {session, isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const productId = (location.state as LocationState)?.productId;
-  const { data: post, isLoading: isLoadingPost } = useGetPostQuery(productId, { skip: !productId });
-  const [createOrder, { isLoading: isCreatingOrder }] = useCreateOrderMutation();
+  const { post, isLoading: isLoadingPost } = useGetPostById(productId);
+  // const [createOrder, { isLoading: isCreatingOrder }] = useCreateOrderMutation();
+  const isCreatingOrder=false;
   const [createPaymentIntent] = useCreatePaymentIntentMutation();
   const [clientSecret, setClientSecret] = useState<string>("");
   
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     address: "",
-    receiver: `${loginUser?.firstName} ${loginUser?.lastName}`,
-    phone: "",
+    receiver: `${session?.user.user_metadata.firstName} ${session?.user.user_metadata.lastName}`,
+    phone: session?.user.user_metadata.phone,
   });
 
   useEffect(() => {
-    if (!loginUser?.id) return;
+    if (!session?.user?.id) return;
     setShippingInfo({
-      address: loginUser.address || "",
-      receiver: `${loginUser?.firstName} ${loginUser?.lastName}`,
-      phone: loginUser.phone || "",
+      address: session?.user.user_metadata.address || "",
+      receiver: `${session?.user.user_metadata.firstName} ${session?.user.user_metadata.lastName}`,
+      phone: session?.user.user_metadata.phone || "",
     });
-  }, [loginUser]);
+  }, [session]);
 
   if(!isAuthenticated) return <Navigate to="/login" replace />;
   if(!productId) return <Navigate to="/search" replace />;
@@ -56,9 +57,9 @@ const OrderView: React.FC = () => {
   }
 
   const calculateFees = () => {
-    const baseAmount = Number(post?.price?.amount || 0);
-    const deliveryFee = post?.deliveryType === DeliveryType.both ? 10 : 0;
-    const serviceFee = post?.price?.isFree ? 10 : 0;
+    const baseAmount = Number(post?.amount || 0);
+    const deliveryFee = post?.deliveryType === DeliveryType.BOTH ? 10 : 0;
+    const serviceFee = post?.isNegotiable ? 10 : 0;
     const tax = baseAmount * 0.13;
     const paymentFee = (baseAmount + deliveryFee + serviceFee + tax) * 0.029 + 0.30;
     const total = baseAmount + deliveryFee + serviceFee + tax + paymentFee;
@@ -74,34 +75,25 @@ const OrderView: React.FC = () => {
   };
 
   const handleCreateOrder = async () => {
-    if (!post || !loginUser) return;
+    if (!post || !session?.user?.id) return;
 
-    const fees = calculateFees();
+    // const fees = calculateFees();
    
     try {
-      const orderData = {
-        buyerId: { id: loginUser.id },
-        sellerId: { id: post.poster.id },
-        postSnapshot: {
-          postId: post.id,
-          title: post.title,
-          price: Number(post.price.amount),
-          images: {
-            FRONT: post.images.FRONT || '',
-            BACK: post.images.BACK || '',
-            LEFT: post.images.SIDE || '',
-            RIGHT: post.images.DAMAGE || ''
-          }
-        },
-        ...fees,
-        shippingInfo,
-      };
+      // const orderData = {
+      //   buyerId: { id: session?.user?.id },
+      //   sellerId: { id: post.poster?.id },
+      //   postId: post.id,
+      //   ...fees,
+      //   shippingInfo,
+      // };
 
-      const order = await createOrder(orderData).unwrap();
+      // const order = await createOrder(orderData);
+      const order={id:'123'}
       
       // 创建支付意向
       const { clientSecret } = await createPaymentIntent({
-        orderId: order._id
+        orderId: order.id
       }).unwrap();
       console.log('clientSecret', clientSecret);
       
@@ -144,7 +136,7 @@ const OrderView: React.FC = () => {
           <div className="card-body">
             <h2 className="card-title">{post?.title}</h2>
             <img 
-              src={post?.images.FRONT||''} 
+              src={post?.images?.[0]?.imageUrl||''} 
               alt={post?.title} 
               className="w-full h-36 object-cover rounded-lg"
             />

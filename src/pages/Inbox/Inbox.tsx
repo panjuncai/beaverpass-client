@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import CenteredLoading from "@/components/CenterLoading";
 import { useEffect } from "react";
 const Inbox: React.FC = () => {
-  const { isAuthenticated, loginUser } = useAuth();
+  const { isAuthenticated, session} = useAuth();
   const {
     data: chatRooms,
     isLoading,
@@ -17,22 +17,22 @@ const Inbox: React.FC = () => {
   });
   const navigate = useNavigate();
   useEffect(() => {
-    if (!loginUser?._id) void navigate("/login", { replace: true });
+    if (!session?.user?.id) void navigate("/login", { replace: true });
     const intervalId = setInterval(() => {
       void refetch();
     }, 6000); // 每6秒刷新一次
     return () => clearInterval(intervalId);
-  }, [refetch, loginUser?._id, navigate]);
+  }, [refetch, session?.user?.id, navigate]);
 
   const ChatRoomList = () => {
     return (
       <div className="flex-1 overflow-y-auto">
         {chatRooms?.map((room) => {
           const otherParticipant = room.participants.find(
-            (p) => p._id !== loginUser?._id
+            (p) => p._id !== session?.user?.id
           );
           const loginUserParticipant = room.participants.find(
-            (p) => p._id === loginUser?._id
+            (p) => p._id === session?.user?.id
           );
           if (!otherParticipant || !loginUserParticipant) return null;
           return (

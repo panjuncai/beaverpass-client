@@ -13,7 +13,7 @@ const CustomNavBar: React.FC<CustomNavBarProps> = ({
   showBack = true  // 默认显示返回按钮
 }) => {
   const navigate = useNavigate();
-  const { isAuthenticated, logout, loginUser } = useAuth();
+  const {logout, session} = useAuth();
   return (
     <div className="navbar">
       {/* 左侧返回按钮（根据showBack控制显示） */}
@@ -82,11 +82,11 @@ const CustomNavBar: React.FC<CustomNavBarProps> = ({
             tabIndex={0}
             className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
-            {isAuthenticated ? (
+            {session ? (
               <>
                 <li>
                   <Link to="/profile/edit">
-                    {loginUser?.email} Profile Settings
+                    {session?.user?.email} Profile Settings
                   </Link>
                 </li>
                 <li>

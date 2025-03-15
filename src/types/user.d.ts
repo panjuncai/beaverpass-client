@@ -1,13 +1,13 @@
 export interface User {
   id: string;
   email: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   avatar: string;
   address?: string;
   phone?: string;
-  created_at?: string;
-  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Session {
@@ -15,8 +15,8 @@ export interface Session {
     id: string;
     email: string;
   };
-  access_token: string;
-  refresh_token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface RegisterRequest extends LoginRequest {

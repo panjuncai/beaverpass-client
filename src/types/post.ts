@@ -1,56 +1,84 @@
 import { User } from './user';
-import { GraphQLBaseResponse } from './api';
 
-export enum DeliveryType {
-  homeDelivery = 'homeDelivery',
-  pickup = 'pickup',
-  both = 'both',
-}
+// 将枚举改为字符串常量
+export const PostCategory = {
+  LIVING_ROOM_FURNITURE: 'LIVING_ROOM_FURNITURE',
+  BEDROOM_FURNITURE: 'BEDROOM_FURNITURE',
+  DINING_ROOM_FURNITURE: 'DINING_ROOM_FURNITURE',
+  OFFICE_FURNITURE: 'OFFICE_FURNITURE',
+  OUTDOOR_FURNITURE: 'OUTDOOR_FURNITURE',
+  STORAGE: 'STORAGE',
+  OTHER: 'OTHER'
+} as const;
 
-export enum PostStatus {
-  active = 'active',
-  inactive = 'inactive',
-  sold = 'sold',
-  deleted = 'deleted'
-}
+export const PostCondition = {
+  LIKE_NEW: 'LIKE_NEW',
+  GENTLY_USED: 'GENTLY_USED',
+  MINOR_SCRATCHES: 'MINOR_SCRATCHES',
+  STAINS: 'STAINS',
+  NEEDS_REPAIR: 'NEEDS_REPAIR'
+} as const;
+
+export const DeliveryType = {
+  HOME_DELIVERY: 'HOME_DELIVERY',
+  PICKUP: 'PICKUP',
+  BOTH: 'BOTH'
+} as const;
+
+export const PostStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  SOLD: 'SOLD',
+  DELETED: 'DELETED'
+} as const;
+
+// 创建字符串字面量类型
+export type PostCategory = typeof PostCategory[keyof typeof PostCategory];
+export type PostCondition = typeof PostCondition[keyof typeof PostCondition];
+export type DeliveryType = typeof DeliveryType[keyof typeof DeliveryType];
+export type PostStatus = typeof PostStatus[keyof typeof PostStatus];
 
 // 帖子图片类型
-export interface PostImages {
-  FRONT: string;
-  SIDE?: string;
-  BACK?: string;
-  DAMAGE?: string;
-}
-
-// 帖子价格类型
-export interface PostPrice {
-  amount?: number;
-  isFree: boolean;
-  isNegotiable: boolean;
+export interface PostImage {
+  id: string;
+  postId: string;
+  imageUrl: string;
+  imageType?: string;
+  createdAt?: string;
 }
 
 // 帖子类型
 export interface Post {
   id: string;
-  category: string;
+  category: PostCategory;
   title: string;
   description: string;
-  condition: string;
-  images: PostImages;
-  price: PostPrice;
-  deliveryType: string;
-  poster: User;
-  status: PostStatus;
-  createdAt: string;
-  updatedAt: string;
+  condition: PostCondition;
+  amount: number;
+  isNegotiable?: boolean;
+  deliveryType: DeliveryType;
+  poster?: User;
+  posterId?: string;
+  status?: PostStatus;
+  createdAt?: string;
+  updatedAt?: string;
+  images?: PostImage[];
 }
 
 // 帖子过滤条件输入
 export interface PostFilterInput {
   category?: string;
   condition?: string;
-  priceRange?: string;
-  status?: PostStatus;
+  minPrice?: number;
+  maxPrice?: number;
+  status?: string;
+  search?:string;
+}
+
+// 帖子图片输入
+export interface PostImageInput {
+  imageUrl: string;
+  imageType?: string;
 }
 
 // 创建帖子输入
@@ -59,25 +87,33 @@ export interface CreatePostInput {
   title: string;
   description: string;
   condition: string;
-  images: PostImages;
-  price: PostPrice;
+  amount: number;
+  isNegotiable?: boolean;
   deliveryType: string;
+  images: PostImageInput[];
 }
 
 // 更新帖子输入
 export interface UpdatePostInput {
+  id: string;
   category?: string;
   title?: string;
   description?: string;
   condition?: string;
-  images?: PostImages;
-  price?: PostPrice;
+  amount?: number;
+  isNegotiable?: boolean;
   deliveryType?: string;
-  status?: PostStatus;
+  status?: string;
 }
 
-// 帖子响应类型
-export type PostResponse = GraphQLBaseResponse<Post>;
+// 添加图片输入
+export interface AddPostImageInput {
+  postId: string;
+  imageUrl: string;
+  imageType?: string;
+}
 
-// 帖子列表响应类型
-export type PostListResponse = GraphQLBaseResponse<Post[]>;
+// 删除图片输入
+export interface DeletePostImageInput {
+  id: string;
+}

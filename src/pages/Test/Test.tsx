@@ -4,7 +4,7 @@ import { useNavigate} from "react-router-dom";
 
 const Test:React.FC=()=>{
     const navigate=useNavigate();
-    const {loginUser}=useAuth()
+    const {session}=useAuth()
     return (
         <>
         <Button onClick={()=>navigate('/register')}>Sign up</Button> 
@@ -14,9 +14,8 @@ const Test:React.FC=()=>{
         <div style={{display:'flex',gap:'5px',flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
             <h3>Login User Info</h3>
             <ul>
-                <li>{loginUser?._id}</li>
-                <li>{loginUser?.email}</li>
-                <li>{String(loginUser?.isVerified)}</li>
+                <li>{session?.user?.id}</li>
+                <li>{session?.user?.email}</li>
             </ul>
         </div>
         </>

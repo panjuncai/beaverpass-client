@@ -20,7 +20,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
   initialAddress = "",
   isSave=false
 }) => {
-  const {loginUser,isLoading:isLoadingAuth,isAuthenticated} = useAuth()
+  const {session,isLoading:isLoadingAuth,isAuthenticated} = useAuth()
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
   const [address, setAddress] = useState(initialAddress);
   const [searchRange, setSearchRange] = useState(5);
@@ -381,7 +381,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
               onClick={() => {
                 if (isSave) {
                   void updateUser({
-                    userId: loginUser?._id??'',
+                    userId: session?.user?.id??'',
                     address: address
                   });
                 }

@@ -6,21 +6,18 @@ import { useGetOrdersQuery } from "@/services/orderApi";
 import { useState } from "react";
 import CenteredLoading from "@/components/CenterLoading";
 import { Order } from "@/types/order";
-import { useGetUserPostsQuery, useUpdatePostMutation } from "@/services/postApi";
-import { Post } from "@/types/post";
+// import { useGetUserPostsQuery, useUpdatePostMutation } from "@/services/postApi";
+import {useGetMyPosts,useUpdatePost } from "@/hooks/usePost";
+import { Post, PostStatus } from "@/types/post";
 import { Toast } from "antd-mobile";
 
 type TabType = "buy" | "sell";
-type PostStatus = "active" | "inactive" | "sold" | "deleted";
 
 const Deals: React.FC = () => {
-  const { isAuthenticated, loginUser } = useAuth();
+  const { isAuthenticated, session} = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("buy");
   const { data: orders, isLoading } = useGetOrdersQuery();
-  const { data: posts, isLoading: isPostLoading } = useGetUserPostsQuery(undefined, {
-    skip: !loginUser?._id,
-    refetchOnMountOrArgChange: true
-  });
+  const { posts, isLoading: isPostLoading } = useGetMyPosts();
   const [buyTabState, setBuyTabState] = useState<'active' | 'history'>('active');
   const [sellTabState, setSellTabState] = useState<'active' | 'inactive' |'sold' |'deleted'>('active');
 
@@ -28,9 +25,9 @@ const Deals: React.FC = () => {
     if (!orders) return [];
     switch (type) {
       case "buy":
-        return orders.filter((order) => order.buyerId._id === loginUser?._id);
+          return orders.filter((order) => order.buyerId.id === session?.user?.id);
       case "sell":
-        return orders.filter((order) => order.sellerId._id === loginUser?._id);
+        return orders.filter((order) => order.sellerId.id === session?.user?.id);
       default:
         return [];
     }
@@ -39,14 +36,14 @@ const Deals: React.FC = () => {
   const getFilteredPosts = (type: PostStatus): Post[] => {
     if (!posts) return [];
     switch (type) {
-      case "active":
-        return posts.filter((post) => post.status === 'active');
-      case "inactive":
-        return posts.filter((post) => post.status === 'inactive');
-      case "sold":
-        return posts.filter((post) => post.status === 'sold');
-      case "deleted":
-        return posts.filter((post) => post.status === 'deleted');
+      case PostStatus.ACTIVE:
+        return posts.filter((post:Post) => post.status === PostStatus.ACTIVE);
+      case PostStatus.INACTIVE:
+        return posts.filter((post:Post) => post.status === PostStatus.INACTIVE);
+      case PostStatus.SOLD:
+        return posts.filter((post:Post) => post.status === PostStatus.SOLD);
+      case PostStatus.DELETED:
+        return posts.filter((post:Post) => post.status === PostStatus.DELETED);
       default:
         return [];
     }
@@ -83,12 +80,12 @@ const Deals: React.FC = () => {
           </span>
           <span
             className={
-              order.buyerId._id === loginUser?._id
+              order.buyerId.id === session?.user?.id
                 ? "text-primary"
                 : "text-success"
             }
           >
-            {order.buyerId._id === loginUser?._id ? "Buying" : "Selling"}
+            {order.buyerId.id === session?.user?.id ? "Buying" : "Selling"}
           </span>
         </div>
       </div>
@@ -96,11 +93,11 @@ const Deals: React.FC = () => {
   );
 
   const PostCard: React.FC<{ post: Post }> = ({ post }) => {
-    const [updatePost] = useUpdatePostMutation();
+    const {updatePost} = useUpdatePost();
 
     const handleStatusChange = async (newStatus: string) => {
       try {
-        await updatePost({ postId: post._id, status: newStatus }).unwrap();
+        await updatePost({ id: post.id, status: newStatus });
         Toast.show({
           icon: 'success',
           content: 'Post status updated'
@@ -119,7 +116,7 @@ const Deals: React.FC = () => {
         <div className="card-body">
           <div className="flex items-center gap-4">
             <img
-              src={post.images.FRONT || ''}
+              src={post.images?.[0]?.imageUrl || ''}
               alt={post.title}
               className="w-24 h-24 object-cover rounded-lg"
             />
@@ -127,8 +124,8 @@ const Deals: React.FC = () => {
               <h3 className="card-title">{post.title}</h3>
               <div className="badge badge-outline">{post.status}</div>
               <p className="text-xl font-bold mt-2">
-                ${post.price.isFree ? 'Free' : post.price.amount}
-                {post.price.isNegotiable && <span className="text-sm ml-2">Negotiable</span>}
+                ${post.amount===0 ? 'Free' : post.amount}
+                {post.isNegotiable && <span className="text-sm ml-2">Negotiable</span>}
               </p>
             </div>
           </div>
@@ -136,7 +133,7 @@ const Deals: React.FC = () => {
           <div className="flex justify-between items-center text-sm">
             <span>Posted: {new Date(post.createdAt || '').toLocaleDateString()}</span>
             <div className="flex gap-2">
-              {post.status === 'active' ? (
+              {post.status === PostStatus.ACTIVE ? (
                 <>
                   <button 
                     className="btn btn-sm btn-warning"
@@ -151,7 +148,7 @@ const Deals: React.FC = () => {
                     Delete
                   </button>
                 </>
-              ) : post.status === 'inactive' ? (
+              ) : post.status === PostStatus.INACTIVE ? (
                 <>
                   <button 
                     className="btn btn-sm btn-success"
@@ -181,7 +178,7 @@ const Deals: React.FC = () => {
     const activeOrders = filteredOrders.filter(order => isActiveOrder(order.status));
     const historyOrders = filteredOrders.filter(order => isHistoryOrder(order.status));
 
-    const filteredPosts = getFilteredPosts(sellTabState);
+    const filteredPosts = getFilteredPosts(sellTabState as PostStatus);
 
     return (
       <div className="flex-1">
@@ -216,7 +213,7 @@ const Deals: React.FC = () => {
                   </div>
                 ) : (
                   activeOrders.map((order) => (
-                    <OrderCard key={order._id} order={order} />
+                    <OrderCard key={order.id} order={order} />
                   ))
                 )}
               </div>
@@ -240,7 +237,7 @@ const Deals: React.FC = () => {
                   </div>
                 ) : (
                   historyOrders.map((order) => (
-                    <OrderCard key={order._id} order={order} />
+                    <OrderCard key={order.id} order={order} />
                   ))
                 )}
               </div>
@@ -276,7 +273,7 @@ const Deals: React.FC = () => {
                   </div>
                 ) : (
                   filteredPosts.map((post) => (
-                    <PostCard key={post._id} post={post} />
+                    <PostCard key={post.id} post={post} />
                   ))
                 )}
               </div>
@@ -300,7 +297,7 @@ const Deals: React.FC = () => {
                   </div>
                 ) : (
                   filteredPosts.map((post) => (
-                    <PostCard key={post._id} post={post} />
+                    <PostCard key={post.id} post={post} />
                   ))
                 )}
               </div>
@@ -323,7 +320,7 @@ const Deals: React.FC = () => {
                   </div>
                 ) : (
                   filteredPosts.map((post) => (
-                    <PostCard key={post._id} post={post} />
+                    <PostCard key={post.id} post={post} />
                   ))
                 )}
               </div>

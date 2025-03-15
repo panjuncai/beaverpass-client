@@ -3,18 +3,18 @@ import { io, Socket } from 'socket.io-client';
 import { useAuth } from './useAuth';
 
 export const useSocket = () => {
-  const { loginUser } = useAuth();
+  const { session } = useAuth();
   const socketRef = useRef<Socket>();
 
   useEffect(() => {
     // 确保用户已登录
-    if (!loginUser?._id) return;
+    if (!session?.user?.id) return;
     const SOCKET_API_URI = import.meta.env.VITE_SOCKET_API_URI as string;
     // console.log(API_URI);
     // 创建 socket 连接
     const socket = io(SOCKET_API_URI, {
       auth: {
-        userId: loginUser._id
+        userId: session?.user?.id
       }
     });
 
@@ -38,7 +38,7 @@ export const useSocket = () => {
     return () => {
       socket.disconnect();
     };
-  }, [loginUser?._id]);
+  }, [session?.user?.id]);
 
   return socketRef.current;
 }; 

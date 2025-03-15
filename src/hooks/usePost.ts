@@ -1,7 +1,9 @@
 import { useMutation, useQuery } from '@apollo/client';
 import {
+  ADD_POST_IMAGE,
   CREATE_POST,
   DELETE_POST,
+  DELETE_POST_IMAGE,
   GET_MY_POSTS,
   GET_POST_BY_ID,
   GET_POSTS_BY_FILTER,
@@ -10,18 +12,18 @@ import {
   UPDATE_POST_STATUS
 } from '@/api/postOperations';
 import {
+  AddPostImageInput,
   CreatePostInput,
+  DeletePostImageInput,
+  Post,
   PostFilterInput,
-  PostListResponse,
-  PostResponse,
-  PostStatus,
   UpdatePostInput
 } from '@/types/post';
 import { Toast } from 'antd-mobile';
 
 // 获取帖子列表（支持过滤）
 export const useGetPostsByFilter = (filter?: PostFilterInput) => {
-  const { data, loading, error, refetch } = useQuery<{ getPostsByFilter: PostListResponse }>(
+  const { data, loading, error, refetch } = useQuery<{ getPostsByFilter: Post[] }>(
     GET_POSTS_BY_FILTER,
     {
       variables: { filter: filter || {} },
@@ -30,25 +32,26 @@ export const useGetPostsByFilter = (filter?: PostFilterInput) => {
   );
 
   return {
-    posts: data?.getPostsByFilter?.data || [],
-    isLoading: loading,
+    posts: data?.getPostsByFilter || [],
+    loading,
     error,
     refetch,
   };
 };
 
 // 获取单个帖子
-export const useGetPostById = (id: string) => {
-  const { data, loading, error, refetch } = useQuery<{ getPostById: PostResponse }>(
+export const useGetPostById = (id: string|undefined) => {
+  const { data, loading, error, refetch } = useQuery<{ getPostById: Post }>(
     GET_POST_BY_ID,
     {
       variables: { id },
       fetchPolicy: 'network-only',
+      skip: !id
     }
   );
 
   return {
-    post: data?.getPostById?.data,
+    post: data?.getPostById,
     isLoading: loading,
     error,
     refetch,
@@ -57,7 +60,7 @@ export const useGetPostById = (id: string) => {
 
 // 获取用户的帖子
 export const useGetPostsByPosterId = (posterId: string) => {
-  const { data, loading, error, refetch } = useQuery<{ getPostsByPosterId: PostListResponse }>(
+  const { data, loading, error, refetch } = useQuery<{ getPostsByPosterId: Post[] }>(
     GET_POSTS_BY_POSTER_ID,
     {
       variables: { posterId },
@@ -66,7 +69,7 @@ export const useGetPostsByPosterId = (posterId: string) => {
   );
 
   return {
-    posts: data?.getPostsByPosterId?.data || [],
+    posts: data?.getPostsByPosterId || [],
     isLoading: loading,
     error,
     refetch,
@@ -75,7 +78,7 @@ export const useGetPostsByPosterId = (posterId: string) => {
 
 // 获取当前用户的帖子
 export const useGetMyPosts = () => {
-  const { data, loading, error, refetch } = useQuery<{ getMyPosts: PostListResponse }>(
+  const { data, loading, error, refetch } = useQuery<{ getMyPosts: Post[] }>(
     GET_MY_POSTS,
     {
       fetchPolicy: 'network-only',
@@ -83,7 +86,7 @@ export const useGetMyPosts = () => {
   );
 
   return {
-    posts: data?.getMyPosts?.data || [],
+    posts: data?.getMyPosts || [],
     isLoading: loading,
     error,
     refetch,
@@ -93,7 +96,7 @@ export const useGetMyPosts = () => {
 // 创建帖子
 export const useCreatePost = () => {
   const [createPostMutation, { loading }] = useMutation<
-    { createPost: PostResponse },
+    { createPost: Post },
     { input: CreatePostInput }
   >(CREATE_POST);
 
@@ -103,11 +106,11 @@ export const useCreatePost = () => {
         variables: { input },
       });
       
-      if (!data || data.createPost.code !== 0) {
-        throw new Error(data?.createPost.msg);
+      if (!data?.createPost) {
+        throw new Error('创建帖子失败');
       }
 
-      return data.createPost.data;
+      return data.createPost;
     } catch (error) {
       console.error('Create post failed:', error);
       throw error;
@@ -123,25 +126,25 @@ export const useCreatePost = () => {
 // 更新帖子
 export const useUpdatePost = () => {
   const [updatePostMutation, { loading }] = useMutation<
-    { updatePost: PostResponse },
-    { id: string; input: UpdatePostInput }
+    { updatePost: Post },
+    { input: UpdatePostInput }
   >(UPDATE_POST);
 
-  const updatePost = async (id: string, input: UpdatePostInput) => {
+  const updatePost = async (input: UpdatePostInput) => {
     try {
       const { data } = await updatePostMutation({
-        variables: { id, input },
+        variables: { input },
       });
 
-      if (!data || data.updatePost.code !== 0) {
+      if (!data?.updatePost) {
         Toast.show({
           icon: 'fail',
-          content: data?.updatePost.msg || 'Update post failed.',
+          content: '更新帖子失败',
         });
-        throw new Error(data?.updatePost.msg || 'Update post failed.');
+        throw new Error('更新帖子失败');
       }
 
-      return data.updatePost.data;
+      return data.updatePost;
     } catch (error) {
       console.error('Update post failed:', error);
       throw error;
@@ -157,25 +160,25 @@ export const useUpdatePost = () => {
 // 更新帖子状态
 export const useUpdatePostStatus = () => {
   const [updatePostStatusMutation, { loading }] = useMutation<
-    { updatePostStatus: PostResponse },
-    { id: string; status: PostStatus }
+    { updatePostStatus: Post },
+    { id: string; status: string }
   >(UPDATE_POST_STATUS);
 
-  const updatePostStatus = async (id: string, status: PostStatus) => {
+  const updatePostStatus = async (id: string, status: string) => {
     try {
       const { data } = await updatePostStatusMutation({
         variables: { id, status },
       });
 
-      if (!data || data.updatePostStatus.code !== 0) {
+      if (!data?.updatePostStatus) {
         Toast.show({
           icon: 'fail',
-          content: data?.updatePostStatus.msg || 'Update post status failed.',
+          content: '更新帖子状态失败',
         });
-        throw new Error(data?.updatePostStatus.msg || 'Update post status failed.');
+        throw new Error('更新帖子状态失败');
       }
 
-      return data.updatePostStatus.data;
+      return data.updatePostStatus;
     } catch (error) {
       console.error('更新帖子状态失败:', error);
       throw error;
@@ -191,7 +194,7 @@ export const useUpdatePostStatus = () => {
 // 删除帖子
 export const useDeletePost = () => {
   const [deletePostMutation, { loading }] = useMutation<
-    { deletePost: PostResponse },
+    { deletePost: Post },
     { id: string }
   >(DELETE_POST);
 
@@ -201,15 +204,15 @@ export const useDeletePost = () => {
         variables: { id },
       });
 
-      if (!data || data.deletePost.code !== 0) {
+      if (!data?.deletePost) {
         Toast.show({
           icon: 'fail',
-          content: data?.deletePost.msg || 'Delete post failed.',
+          content: '删除帖子失败',
         });
-        throw new Error(data?.deletePost.msg || 'Delete post failed.');
+        throw new Error('删除帖子失败');
       }
 
-      return data.deletePost.data;
+      return data.deletePost;
     } catch (error) {
       console.error('删除帖子失败:', error);
       throw error;
@@ -218,6 +221,74 @@ export const useDeletePost = () => {
 
   return {
     deletePost,
+    isLoading: loading,
+  };
+};
+
+// 添加帖子图片
+export const useAddPostImage = () => {
+  const [addPostImageMutation, { loading }] = useMutation<
+    { addPostImage: Post },
+    { input: AddPostImageInput }
+  >(ADD_POST_IMAGE);
+
+  const addPostImage = async (input: AddPostImageInput) => {
+    try {
+      const { data } = await addPostImageMutation({
+        variables: { input },
+      });
+
+      if (!data?.addPostImage) {
+        Toast.show({
+          icon: 'fail',
+          content: '添加帖子图片失败',
+        });
+        throw new Error('添加帖子图片失败');
+      }
+
+      return data.addPostImage;
+    } catch (error) {
+      console.error('添加帖子图片失败:', error);
+      throw error;
+    }
+  };
+
+  return {
+    addPostImage,
+    isLoading: loading,
+  };
+};
+
+// 删除帖子图片
+export const useDeletePostImage = () => {
+  const [deletePostImageMutation, { loading }] = useMutation<
+    { deletePostImage: Post },
+    { input: DeletePostImageInput }
+  >(DELETE_POST_IMAGE);
+
+  const deletePostImage = async (input: DeletePostImageInput) => {
+    try {
+      const { data } = await deletePostImageMutation({
+        variables: { input },
+      });
+
+      if (!data?.deletePostImage) {
+        Toast.show({
+          icon: 'fail',
+          content: '删除帖子图片失败',
+        });
+        throw new Error('删除帖子图片失败');
+      }
+
+      return data.deletePostImage;
+    } catch (error) {
+      console.error('删除帖子图片失败:', error);
+      throw error;
+    }
+  };
+
+  return {
+    deletePostImage,
     isLoading: loading,
   };
 }; 
